@@ -1,0 +1,450 @@
+{
+  "inventory_date": "2025-11-19",
+  "project_root": "/Users/patrickoliver/Music Inxite/Office/Tech/Local Development/Active Projects/Music Tools/Music Tools Dev",
+  "total_documentation_files": 57,
+  "total_source_files": 161,
+  "documentation_files": {
+    "root_level": {
+      "count": 26,
+      "files": [
+        {
+          "name": "README.md",
+          "type": "Project Overview",
+          "lines": 429,
+          "quality_score": 92,
+          "last_updated": "2025-11-15",
+          "status": "Excellent"
+        },
+        {
+          "name": "DOCUMENTATION_INDEX.md",
+          "type": "Documentation Map",
+          "lines": 283,
+          "quality_score": 85,
+          "status": "Good"
+        },
+        {
+          "name": "QUICK_START_GUIDE.md",
+          "type": "User Guide",
+          "status": "Good"
+        },
+        {
+          "name": "WORKSPACE.md",
+          "type": "Reference",
+          "status": "Good"
+        },
+        {
+          "name": "CONTRIBUTING.md",
+          "type": "Development Guide",
+          "status": "Good"
+        },
+        {
+          "name": "CHANGELOG.md",
+          "type": "Version History",
+          "status": "Good"
+        },
+        {
+          "name": "ALL_FIXES_COMPLETE.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "BUG_FIXES_APPLIED.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "CLI_REPLACEMENT_VERIFICATION.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "CODE_AUDIT_REPORT.md",
+          "type": "Audit Report",
+          "status": "Keep"
+        },
+        {
+          "name": "DOCUMENTATION_SUMMARY.md",
+          "type": "Summary",
+          "status": "Good"
+        },
+        {
+          "name": "DUPLICATE_DETECTION_ANALYSIS.md",
+          "type": "Analysis",
+          "status": "Keep"
+        },
+        {
+          "name": "DUPLICATE_DETECTION_COMPLETE.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "DUPLICATE_DETECTION_IMPLEMENTATION.md",
+          "type": "Implementation",
+          "status": "Keep"
+        },
+        {
+          "name": "FIXES_APPLIED.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "FIXES_SUMMARY.md",
+          "type": "Summary",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "FIX_EVERYTHING_SUMMARY.md",
+          "type": "Summary",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "IMPLEMENTATION_COMPLETE.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "IMPROVEMENT_ROADMAP.md",
+          "type": "Planning",
+          "status": "Keep"
+        },
+        {
+          "name": "PHASE1_VERIFICATION_SUCCESS.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "PHASE2_REFACTORING_COMPLETE.md",
+          "type": "Historical",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "PHASE2_REFACTORING_PLAN.md",
+          "type": "Planning",
+          "status": "Archive candidate"
+        },
+        {
+          "name": "REFACTORING_ANALYSIS.md",
+          "type": "Analysis",
+          "status": "Keep"
+        },
+        {
+          "name": "TEST_IMPLEMENTATION_GAPS.md",
+          "type": "Analysis",
+          "status": "Keep"
+        }
+      ],
+      "archive_candidates": 10
+    },
+    "docs_directory": {
+      "count": 26,
+      "structure": {
+        "guides": {
+          "count": 5,
+          "files": [
+            {
+              "name": "HOW_TO_RUN.md",
+              "quality_score": 90,
+              "status": "Excellent"
+            },
+            {
+              "name": "SECURITY.md",
+              "quality_score": 95,
+              "status": "Excellent"
+            },
+            {
+              "name": "DOCUMENTATION.md",
+              "quality_score": 80,
+              "status": "Good"
+            },
+            {
+              "name": "DEVELOPMENT.md",
+              "quality_score": 85,
+              "status": "Good"
+            },
+            {
+              "name": "DEPLOYMENT.md",
+              "quality_score": 82,
+              "status": "Good"
+            }
+          ]
+        },
+        "architecture": {
+          "count": 6,
+          "files": [
+            {
+              "name": "MONOREPO.md",
+              "quality_score": 88,
+              "status": "Excellent"
+            },
+            {
+              "name": "UNIFIED_APPLICATION_COMPLETE.md",
+              "status": "Historical"
+            },
+            {
+              "name": "MONOREPO_MIGRATION_COMPLETE.md",
+              "status": "Historical"
+            },
+            {
+              "name": "REORGANIZATION_COMPLETE.md",
+              "status": "Historical"
+            },
+            {
+              "name": "UPGRADES_COMPLETE.md",
+              "status": "Historical"
+            },
+            {
+              "name": "decisions/001-monorepo-structure.md",
+              "quality_score": 85,
+              "status": "Good"
+            }
+          ]
+        },
+        "reviews": {
+          "count": 11,
+          "files": [
+            {
+              "name": "SPOTIFY_INTEGRATION_REVIEW.md",
+              "type": "Technical Review",
+              "status": "Excellent"
+            },
+            {
+              "name": "SPOTIFY_REVIEW_SUMMARY.md",
+              "type": "Summary",
+              "status": "Good"
+            },
+            {
+              "name": "UX_REVIEW_README.md",
+              "type": "UX Review",
+              "status": "Good"
+            },
+            {
+              "name": "UX_REVIEW_EXECUTIVE_SUMMARY.md",
+              "type": "Summary",
+              "status": "Good"
+            },
+            {
+              "name": "UX_ACTION_PLAN.md",
+              "type": "Planning",
+              "status": "Good"
+            },
+            {
+              "name": "UX_QUICK_REFERENCE.md",
+              "type": "Reference",
+              "status": "Good"
+            },
+            {
+              "name": "UX_IMPROVEMENT_PROPOSAL.md",
+              "type": "Proposal",
+              "status": "Good"
+            },
+            {
+              "name": "UX_VISUAL_EXAMPLES.md",
+              "type": "Examples",
+              "status": "Good"
+            },
+            {
+              "name": "ARCHITECTURE_INDEX.md",
+              "type": "Index",
+              "status": "Good"
+            },
+            {
+              "name": "ARCHITECTURE_SUMMARY.md",
+              "type": "Summary",
+              "status": "Good"
+            },
+            {
+              "name": "ARCHITECTURE_REVIEW.md",
+              "type": "Review",
+              "status": "Good"
+            }
+          ]
+        },
+        "other": {
+          "count": 4,
+          "files": [
+            "README.md",
+            "UNIFIED_APP_ARCHITECTURE.txt",
+            "CONFIG_MODULE_SUMMARY.txt"
+          ]
+        }
+      }
+    },
+    "application_docs": {
+      "apps/music-tools": {
+        "count": 5,
+        "files": [
+          {
+            "name": "README.md",
+            "quality_score": 80,
+            "status": "Good"
+          },
+          {
+            "name": "QUICK_START_GUIDE.md",
+            "status": "Good"
+          },
+          {
+            "name": "PRODUCTION_READY_REPORT.md",
+            "status": "Good"
+          },
+          {
+            "name": "TESTING_VERIFICATION_REPORT.md",
+            "status": "Good"
+          },
+          {
+            "name": "FINAL_ALL_BUGS_FIXED.md",
+            "status": "Historical"
+          }
+        ]
+      },
+      "packages/common": {
+        "count": 1,
+        "files": [
+          {
+            "name": "README.md",
+            "quality_score": 82,
+            "has_examples": true,
+            "status": "Good"
+          }
+        ]
+      }
+    }
+  },
+  "source_code_files": {
+    "by_location": {
+      "packages/common": {
+        "total_files": 51,
+        "python_files": 51,
+        "modules": {
+          "config": 4,
+          "database": 4,
+          "auth": 3,
+          "cli": 9,
+          "utils": 7,
+          "api": 3,
+          "metadata": 3,
+          "tests": 12,
+          "examples": 4,
+          "other": 2
+        }
+      },
+      "apps/music-tools": {
+        "total_files": 85,
+        "python_files": 85,
+        "categories": {
+          "src": 45,
+          "tests": 17,
+          "legacy": 18,
+          "other": 5
+        }
+      },
+      "other_locations": {
+        "total_files": 25,
+        "description": "Utility scripts, configuration files, etc."
+      }
+    },
+    "by_file_type": {
+      "python_files": 161,
+      "test_files": 17,
+      "example_files": 8,
+      "configuration_files": 12
+    }
+  },
+  "code_examples": {
+    "locations": [
+      {
+        "path": "packages/common/examples/",
+        "count": 4,
+        "files": [
+          "basic_usage.py",
+          "environment_variables.py",
+          "cli_app_example.py",
+          "interactive_setup.py"
+        ],
+        "level": "Basic"
+      },
+      {
+        "path": "packages/common/music_tools_common/cli/examples/",
+        "count": 3,
+        "files": [
+          "basic_menu.py",
+          "complete_app.py",
+          "progress_demo.py"
+        ],
+        "level": "Basic to Intermediate"
+      }
+    ],
+    "total_example_files": 7,
+    "examples_in_docstrings": 78,
+    "interactive_examples": 0
+  },
+  "configuration_files": {
+    "count": 2,
+    "files": [
+      {
+        "name": ".env.example",
+        "locations": [
+          "apps/music-tools/.env.example",
+          "packages/common/examples/.env.example"
+        ],
+        "purpose": "Environment variable templates"
+      }
+    ]
+  },
+  "missing_documentation": {
+    "api_reference": {
+      "missing": true,
+      "recommendation": "Generate with Sphinx or MkDocs"
+    },
+    "module_readmes": {
+      "missing_count": 6,
+      "modules_without_readme": [
+        "packages/common/music_tools_common/database/",
+        "packages/common/music_tools_common/auth/",
+        "packages/common/music_tools_common/cli/",
+        "packages/common/music_tools_common/api/",
+        "packages/common/music_tools_common/metadata/",
+        "packages/common/music_tools_common/utils/"
+      ]
+    },
+    "advanced_examples": {
+      "missing": true,
+      "needed_topics": [
+        "Custom CLI tools",
+        "Advanced database queries",
+        "API client customization",
+        "Performance optimization"
+      ]
+    },
+    "diagrams": {
+      "missing_count": 5,
+      "needed_diagrams": [
+        "System architecture",
+        "Database schema",
+        "Authentication flow",
+        "Module dependencies",
+        "API interactions"
+      ]
+    }
+  },
+  "archive_recommendations": {
+    "candidates": 15,
+    "suggested_archive_directory": "docs/archive/",
+    "files_to_archive": [
+      "ALL_FIXES_COMPLETE.md",
+      "BUG_FIXES_APPLIED.md",
+      "CLI_REPLACEMENT_VERIFICATION.md",
+      "DUPLICATE_DETECTION_COMPLETE.md",
+      "FIXES_APPLIED.md",
+      "FIXES_SUMMARY.md",
+      "FIX_EVERYTHING_SUMMARY.md",
+      "IMPLEMENTATION_COMPLETE.md",
+      "PHASE1_VERIFICATION_SUCCESS.md",
+      "PHASE2_REFACTORING_COMPLETE.md",
+      "PHASE2_REFACTORING_PLAN.md",
+      "docs/architecture/UNIFIED_APPLICATION_COMPLETE.md",
+      "docs/architecture/MONOREPO_MIGRATION_COMPLETE.md",
+      "docs/architecture/REORGANIZATION_COMPLETE.md",
+      "docs/architecture/UPGRADES_COMPLETE.md"
+    ]
+  }
+}

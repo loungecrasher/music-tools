@@ -1,0 +1,157 @@
+{
+  "critical_gaps": [
+    {
+      "gap_id": "GAP-001",
+      "severity": "HIGH",
+      "category": "API Documentation",
+      "title": "Missing API Documentation",
+      "description": "No generated API reference documentation (Sphinx, MkDocs, etc.)",
+      "impact": "Developers cannot easily discover and use package APIs",
+      "affected_modules": [
+        "packages/common/api/",
+        "packages/common/metadata/",
+        "apps/music-tools/src/"
+      ],
+      "recommendation": "Implement Sphinx documentation with autodoc",
+      "estimated_effort_hours": 12,
+      "priority": 1
+    },
+    {
+      "gap_id": "GAP-002",
+      "severity": "HIGH",
+      "category": "Inline Documentation",
+      "title": "Incomplete Function/Method Docstrings",
+      "description": "Approximately 132 functions lack docstrings",
+      "impact": "Code maintainability reduced, IDE autocomplete support limited",
+      "undocumented_functions_count": 132,
+      "affected_modules": [
+        "packages/common/api/base.py (8 functions)",
+        "packages/common/metadata/reader.py (6 functions)",
+        "packages/common/metadata/writer.py (6 functions)",
+        "packages/common/cli/menu.py (5 functions)",
+        "apps/music-tools/src/ (45+ functions)"
+      ],
+      "recommendation": "Add comprehensive docstrings following Google style",
+      "estimated_effort_hours": 8,
+      "priority": 2
+    },
+    {
+      "gap_id": "GAP-003",
+      "severity": "MEDIUM",
+      "category": "Type Hints",
+      "title": "Missing Parameter Type Hints",
+      "description": "Approximately 25 files (15%) missing type hints",
+      "impact": "Reduced IDE support, harder to maintain",
+      "affected_modules": [
+        "packages/common/api/base.py",
+        "packages/common/metadata/reader.py",
+        "packages/common/metadata/writer.py",
+        "packages/common/cli/menu.py"
+      ],
+      "recommendation": "Add type hints to all public APIs, validate with mypy",
+      "estimated_effort_hours": 8,
+      "priority": 3
+    }
+  ],
+  "important_gaps": [
+    {
+      "gap_id": "GAP-004",
+      "severity": "MEDIUM",
+      "category": "Examples",
+      "title": "Limited Usage Examples",
+      "description": "Only basic examples exist, no intermediate or advanced tutorials",
+      "impact": "Steeper learning curve for new developers",
+      "missing_examples": [
+        "Advanced database queries",
+        "Custom authentication flows",
+        "CLI framework usage for new tools",
+        "API client customization",
+        "Error handling patterns",
+        "Testing utilities usage"
+      ],
+      "current_examples_count": 4,
+      "target_examples_count": 15,
+      "recommendation": "Create comprehensive examples directory with basic, intermediate, and advanced tutorials",
+      "estimated_effort_hours": 16,
+      "priority": 4
+    },
+    {
+      "gap_id": "GAP-005",
+      "severity": "MEDIUM",
+      "category": "Documentation Accuracy",
+      "title": "Outdated Documentation References",
+      "description": "Path references in documentation point to old project structure",
+      "impact": "Confusion for users, broken documentation links",
+      "issues": [
+        "Path references use 'Music Tools/README.md' (space in path)",
+        "References to 'Tag Country Origin Editor' (old name)",
+        "References to 'music_tools_common/README.md' instead of packages/common/README.md"
+      ],
+      "affected_files": [
+        "README.md (lines 164, 166, 402)",
+        "DOCUMENTATION_INDEX.md",
+        "Various architecture docs"
+      ],
+      "recommendation": "Update all path references to current monorepo structure",
+      "estimated_effort_hours": 2,
+      "priority": 5
+    },
+    {
+      "gap_id": "GAP-006",
+      "severity": "MEDIUM",
+      "category": "Visual Documentation",
+      "title": "No Architecture Diagrams",
+      "description": "Missing visual diagrams for system architecture and flows",
+      "impact": "Harder to understand system design",
+      "missing_diagrams": [
+        "System architecture overview",
+        "Database schema diagram",
+        "Authentication flow diagram",
+        "Module dependency graph",
+        "API interaction diagrams"
+      ],
+      "recommendation": "Add diagrams using Mermaid (GitHub markdown support)",
+      "estimated_effort_hours": 6,
+      "priority": 6
+    }
+  ],
+  "minor_gaps": [
+    {
+      "gap_id": "GAP-007",
+      "severity": "LOW",
+      "category": "Code Comments",
+      "title": "Missing Inline Comments for Complex Logic",
+      "description": "Some complex algorithms lack explanatory comments",
+      "impact": "Harder to understand complex algorithms",
+      "examples": [
+        "Retry backoff calculation logic",
+        "OAuth token refresh logic",
+        "Database migration logic",
+        "Duplicate detection algorithm"
+      ],
+      "files_affected_count": 8,
+      "recommendation": "Add explanatory comments for complex logic sections",
+      "estimated_effort_hours": 4,
+      "priority": 7
+    },
+    {
+      "gap_id": "GAP-008",
+      "severity": "LOW",
+      "category": "Change Documentation",
+      "title": "No Changelog for API Changes",
+      "description": "CHANGELOG.md exists but lacks API version tracking and deprecation notices",
+      "impact": "Breaking changes not well documented",
+      "recommendation": "Add API changelog section with breaking changes, deprecations, and new features",
+      "estimated_effort_hours": 2,
+      "priority": 8
+    }
+  ],
+  "gap_summary": {
+    "total_gaps_identified": 8,
+    "critical_gaps": 3,
+    "important_gaps": 3,
+    "minor_gaps": 2,
+    "total_estimated_effort_hours": 58,
+    "recommended_completion_timeline": "3 months"
+  }
+}

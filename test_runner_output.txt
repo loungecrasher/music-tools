@@ -1,0 +1,44 @@
+Scrape Results for https://example.com
+Date: 2025-11-25 10:41:24
+Settings: standard, 2 items found
+==================================================
+
+Title: Test Post 1
+URL: https://example.com/post1
+Genres: house, techno
+Matching Genres: house
+Date: 2025-11-25
+Download Links:
+  - https://nfile.cc/link1
+  - https://novafile.org/link2
+------------------------------
+Title: Test Post 2
+URL: https://example.com/post2
+Genres: trance
+Matching Genres: trance
+Date: 2025-11-24
+Download Links:
+  - https://nfile.cc/link3
+------------------------------
+
+
+================================================================================
+ALL UNIQUE DOWNLOAD LINKS (EXTRACTED)
+================================================================================
+
+EXTRACTION STATISTICS
+--------------------
+Total posts processed: 2
+Total unique links: 3
+
+Quality breakdown:
+  FLAC/Lossless: 0
+  MP3 320kbps: 0
+  Other: 3
+
+================================================================================
+
+=== GROUP 1 of 1 ===
+https://nfile.cc/link1
+https://nfile.cc/link3
+https://novafile.org/link2

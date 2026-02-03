@@ -1,0 +1,163 @@
+{
+  "audit_metadata": {
+    "audit_date": "2025-11-19",
+    "auditor": "Documentation Auditor Agent",
+    "project_version": "1.0.0",
+    "total_files_analyzed": 161
+  },
+  "overall_metrics": {
+    "documentation_score": 78,
+    "coverage_percentage": 73,
+    "total_markdown_files": 57,
+    "total_python_files": 161,
+    "test_files": 17,
+    "files_with_docstrings": 118
+  },
+  "module_coverage": {
+    "packages/common/music_tools_common/config": {
+      "coverage_percentage": 95,
+      "quality_grade": "A",
+      "files_analyzed": 4,
+      "documented_functions": 28,
+      "undocumented_functions": 1,
+      "has_examples": true,
+      "has_readme": true
+    },
+    "packages/common/music_tools_common/database": {
+      "coverage_percentage": 90,
+      "quality_grade": "A",
+      "files_analyzed": 4,
+      "documented_functions": 45,
+      "undocumented_functions": 3,
+      "has_examples": true,
+      "has_readme": false
+    },
+    "packages/common/music_tools_common/auth": {
+      "coverage_percentage": 75,
+      "quality_grade": "B",
+      "files_analyzed": 3,
+      "documented_functions": 12,
+      "undocumented_functions": 4,
+      "has_examples": true,
+      "has_readme": false
+    },
+    "packages/common/music_tools_common/cli": {
+      "coverage_percentage": 70,
+      "quality_grade": "B-",
+      "files_analyzed": 9,
+      "documented_functions": 32,
+      "undocumented_functions": 14,
+      "has_examples": true,
+      "has_readme": false
+    },
+    "packages/common/music_tools_common/utils": {
+      "coverage_percentage": 88,
+      "quality_grade": "A-",
+      "files_analyzed": 7,
+      "documented_functions": 42,
+      "undocumented_functions": 5,
+      "has_examples": true,
+      "has_readme": false
+    },
+    "packages/common/music_tools_common/api": {
+      "coverage_percentage": 65,
+      "quality_grade": "C",
+      "files_analyzed": 3,
+      "documented_functions": 18,
+      "undocumented_functions": 10,
+      "has_examples": false,
+      "has_readme": false
+    },
+    "packages/common/music_tools_common/metadata": {
+      "coverage_percentage": 60,
+      "quality_grade": "C-",
+      "files_analyzed": 3,
+      "documented_functions": 14,
+      "undocumented_functions": 9,
+      "has_examples": false,
+      "has_readme": false
+    },
+    "apps/music-tools/src": {
+      "coverage_percentage": 60,
+      "quality_grade": "C",
+      "files_analyzed": 25,
+      "documented_functions": 65,
+      "undocumented_functions": 45,
+      "has_examples": true,
+      "has_readme": true
+    }
+  },
+  "documentation_types": {
+    "readme_files": {
+      "count": 4,
+      "quality_scores": {
+        "root_readme": 92,
+        "packages_common_readme": 82,
+        "apps_music_tools_readme": 80,
+        "docs_readme": 85
+      }
+    },
+    "user_guides": {
+      "count": 5,
+      "files": [
+        "docs/guides/HOW_TO_RUN.md",
+        "docs/guides/SECURITY.md",
+        "docs/guides/DOCUMENTATION.md",
+        "docs/guides/DEVELOPMENT.md",
+        "docs/guides/DEPLOYMENT.md"
+      ],
+      "average_quality_score": 86
+    },
+    "architecture_docs": {
+      "count": 6,
+      "files": [
+        "docs/architecture/MONOREPO.md",
+        "docs/architecture/UNIFIED_APPLICATION_COMPLETE.md",
+        "docs/architecture/MONOREPO_MIGRATION_COMPLETE.md",
+        "docs/architecture/REORGANIZATION_COMPLETE.md",
+        "docs/architecture/UPGRADES_COMPLETE.md",
+        "docs/architecture/decisions/001-monorepo-structure.md"
+      ],
+      "average_quality_score": 85
+    },
+    "api_documentation": {
+      "generated_docs_exist": false,
+      "sphinx_configured": false,
+      "mkdocs_configured": false,
+      "inline_api_docs_coverage": 45
+    },
+    "code_examples": {
+      "count": 4,
+      "locations": [
+        "packages/common/examples/",
+        "packages/common/music_tools_common/cli/examples/"
+      ],
+      "coverage_level": "basic",
+      "has_advanced_examples": false
+    }
+  },
+  "docstring_analysis": {
+    "total_functions": 512,
+    "documented_functions": 380,
+    "undocumented_functions": 132,
+    "functions_with_examples": 78,
+    "functions_with_type_hints": 308,
+    "functions_with_raises_section": 205,
+    "average_docstring_length_lines": 4.2
+  },
+  "quality_by_category": {
+    "readme_quality": 92,
+    "inline_documentation": 73,
+    "api_documentation": 45,
+    "code_examples": 65,
+    "architecture_docs": 85,
+    "setup_deployment": 88,
+    "security_docs": 95
+  },
+  "freshness_metrics": {
+    "last_major_update": "2025-11-16",
+    "outdated_documents_count": 5,
+    "broken_links_found": "unknown",
+    "todo_comments_count": 1
+  }
+}

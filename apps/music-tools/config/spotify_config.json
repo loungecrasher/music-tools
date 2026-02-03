@@ -1,0 +1,4 @@
+{
+  "redirect_uri": "http://127.0.0.1:8888/callback",
+  "_comment": "API keys should be stored in .env file, not here! See .env.example for setup instructions."
+}

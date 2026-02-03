@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "music-tools-suite"
+version = "1.0.0"
+description = "A comprehensive suite of Python-based music management and processing tools"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Music Tools Team"}
+]
+keywords = ["music", "spotify", "deezer", "tagging", "scraper"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+# Core dependencies
+dependencies = [
+    "rich>=13.0.0",
+    "requests>=2.28.0",
+    "python-dotenv>=0.19.0",
+    "spotipy>=2.22.0",
+    "beautifulsoup4>=4.11.0",
+    "lxml>=4.9.0",
+    "mutagen>=1.46.0",
+    "anthropic>=0.3.0",
+]
+
+# Optional dependencies
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "flake8>=6.0.0",
+]
+
+# Package configuration
+[tool.setuptools]
+package-dir = {"" = "packages/common"}
+
+[tool.setuptools.packages.find]
+where = ["packages/common"]
+include = ["music_tools_common*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+music_tools_common = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["apps", "packages"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "apps.*"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = "packages.*"
+ignore_errors = false

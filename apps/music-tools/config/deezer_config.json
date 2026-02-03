@@ -1,0 +1,3 @@
+{
+  "_comment": "Deezer email should be stored in .env file as DEEZER_EMAIL. See .env.example for setup instructions."
+}

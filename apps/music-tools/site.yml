@@ -1,0 +1,48 @@
+---
+- name: Configure Music Tools Environment
+  hosts: localhost
+  connection: local
+  vars:
+    tools_dir: "/Users/patrickoliver/Music Inxite/Office/Tech/Local Development/Music Tools"
+    
+  tasks:
+    - name: Create tool directories
+      ansible.builtin.file:
+        path: "{{ tools_dir }}/{{ item }}"
+        state: directory
+      loop:
+        - roles/common/tasks
+        - roles/deezer/tasks
+        - roles/soundiz/tasks 
+        - roles/spotify/tasks
+        - handlers
+
+    - name: Install base dependencies
+      ansible.builtin.pip:
+        name:
+          - requests
+          - spotipy
+          - pandas
+          - python-dotenv
+
+    - name: Deploy unified menu system
+      ansible.builtin.template:
+        src: menu.py.j2
+        dest: "{{ tools_dir }}/menu.py"
+        mode: '0755'
+
+    - name: Configure tool symlinks
+      ansible.builtin.file:
+        src: "{{ tools_dir }}/{{ item.src }}"
+        dest: "{{ tools_dir }}/{{ item.dest }}"
+        state: link
+      loop:
+        - { src: "Deezer-Playlist-Fixer/deezer_playlist_checker.py", dest: "roles/deezer/main.py" }
+        - { src: "Soundiz File Maker/process_music.py", dest: "roles/soundiz/main.py" }
+        - { src: "Spotify Script/V2/main.py", dest: "roles/spotify/main.py" }
+
+    - name: Install systemd service (optional)
+      ansible.builtin.template:
+        src: music-tools.service.j2
+        dest: /etc/systemd/system/music-tools.service
+      when: ansible_facts['system'] == 'Linux'

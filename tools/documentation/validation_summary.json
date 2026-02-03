@@ -1,0 +1,11 @@
+{
+  "total_files": 100,
+  "total_links": 445,
+  "internal_links_working": 233,
+  "internal_links_broken": 92,
+  "external_links": 48,
+  "code_refs_valid": 169,
+  "code_refs_invalid": 275,
+  "todos_found": 12,
+  "coming_soon": 73
+}

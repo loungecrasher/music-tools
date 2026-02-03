@@ -1,0 +1,33 @@
+# Music Tools Dependencies
+# Updated: 2025-11-15
+# Uses unified requirements from root directory
+
+# Import core dependencies from root
+-r ../requirements-core.txt
+
+# Music Tools Common Library (shared functionality)
+# Install from local path in development, or from package in production
+music-tools-common @ file://../../packages/common
+
+# Music Tools specific dependencies
+# (All core dependencies are covered in requirements-core.txt)
+
+# ============================================================================
+# NOTES:
+# ============================================================================
+# - All dependencies have been aligned with the unified requirements
+# - Pydantic has been upgraded to v2.x (BREAKING CHANGE - see migration guide)
+# - For development dependencies, use: pip install -r ../requirements-dev.txt
+# - For optional dependencies, use: pip install -r ../requirements-optional.txt
+#
+# Migration Notes:
+# - Updated from pydantic v1.10 to v2.12+ (requires code changes)
+# - Updated typer from 0.9.0 to 0.12.0+
+# - Updated pandas from 1.5.0 to 2.2.0+
+# - Updated lxml from 4.9.0 to 5.3.0+
+# - Updated aiohttp from 3.8.0 to 3.13.0+
+# - Updated rich from 13.0.0 to 14.2.0+
+# - Updated click from 8.1.0 to 8.3.0+
+# - Updated spotipy from 2.23.0 to 2.25.0+
+#
+# See docs/DEPENDENCY_AUDIT_REPORT.md for full migration guide
