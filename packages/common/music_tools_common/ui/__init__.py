@@ -8,15 +8,7 @@ Provides unified UI components for the Music Tools suite:
 - Error/success/warning message formatting
 """
 
-from .menu import (
-    THEME,
-    Menu,
-    MenuOption,
-    get_themed_style,
-    show_error,
-    show_success,
-    show_warning,
-)
+from .menu import THEME, Menu, MenuOption, get_themed_style, show_error, show_success, show_warning
 from .progress import (
     StatusBar,
     create_progress_bar,

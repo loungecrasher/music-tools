@@ -8,12 +8,7 @@ import os
 from pathlib import Path
 
 from music_tools_common import setup_logger
-from music_tools_common.cli import (
-    clear_screen,
-    pause,
-    print_error,
-    show_panel,
-)
+from music_tools_common.cli import clear_screen, pause, print_error, show_panel
 from music_tools_common.config import config_manager
 from rich.console import Console
 from rich.panel import Panel

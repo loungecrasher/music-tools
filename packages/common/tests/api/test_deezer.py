@@ -5,11 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from music_tools_common.api.deezer import DeezerClient
-from requests.exceptions import (
-    ConnectionError,
-    HTTPError,
-    Timeout,
-)
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 
 class TestDeezerClientInitialization:

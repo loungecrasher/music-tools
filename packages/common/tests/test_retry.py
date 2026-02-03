@@ -3,11 +3,7 @@
 import time
 
 import pytest
-from music_tools_common.utils.retry import (
-    RetryError,
-    exponential_backoff,
-    retry,
-)
+from music_tools_common.utils.retry import RetryError, exponential_backoff, retry
 
 
 class TestRetryDecorator:

@@ -3,11 +3,7 @@
 Re-exports all handler functions for use in menu.py.
 """
 
-from .external_handlers import (
-    run_edm_blog_scraper,
-    run_music_country_tagger,
-    run_tool,
-)
+from .external_handlers import run_edm_blog_scraper, run_music_country_tagger, run_tool
 from .library_handlers import (
     run_candidate_history_add,
     run_candidate_history_check,
@@ -17,11 +13,7 @@ from .library_handlers import (
     run_process_new_music,
     run_smart_cleanup_menu,
 )
-from .serato_handlers import (
-    run_serato_build_index,
-    run_serato_csv_to_crate,
-    run_serato_list_crates,
-)
+from .serato_handlers import run_serato_build_index, run_serato_csv_to_crate, run_serato_list_crates
 from .spotify_handlers import (
     run_recent_tracks_aggregator,
     run_spotify_collect_from_folder,

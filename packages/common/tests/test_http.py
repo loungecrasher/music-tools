@@ -5,11 +5,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import requests
-from music_tools_common.utils.http import (
-    RateLimiter,
-    safe_request,
-    setup_session,
-)
+from music_tools_common.utils.http import RateLimiter, safe_request, setup_session
 from requests.exceptions import ConnectionError, HTTPError, RequestException, Timeout
 
 

@@ -27,10 +27,7 @@ from .decorators import validate_args
 from .file import safe_read_json, safe_write_json
 
 # Fuzzy matching
-from .fuzzy import (
-    find_best_match,
-    similarity_score,
-)
+from .fuzzy import find_best_match, similarity_score
 
 # HTTP utilities
 from .http import RateLimiter  # Legacy compatibility
@@ -63,10 +60,7 @@ from .security import (
 )
 from .security import validate_batch_size as security_validate_batch_size
 from .security import validate_file_path as security_validate_file_path
-from .security import (
-    validate_port,
-    validate_timeout,
-)
+from .security import validate_port, validate_timeout
 
 # Validation utilities
 from .validation import validate_email, validate_url
