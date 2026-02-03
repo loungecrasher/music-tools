@@ -2,6 +2,7 @@
 Unified authentication module for Music Tools.
 Supports authentication for multiple music services.
 """
+
 import json
 import os
 from typing import Any, Dict, Optional
@@ -22,7 +23,7 @@ class AuthManager:
         """
         if config_dir is None:
             # Default to config directory in the project root
-            self.config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config')
+            self.config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
         else:
             self.config_dir = config_dir
 
@@ -42,14 +43,14 @@ class AuthManager:
         Returns:
             Dict containing configuration values
         """
-        config_path = os.path.join(self.config_dir, f'{service}_config.json')
+        config_path = os.path.join(self.config_dir, f"{service}_config.json")
 
         if not os.path.exists(config_path):
             print(f"Warning: Configuration file for {service} not found at {config_path}")
             return {}
 
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError:
             print(f"Error: Invalid JSON in {service} configuration file")
@@ -68,10 +69,10 @@ class AuthManager:
         Returns:
             True if successful, False otherwise
         """
-        config_path = os.path.join(self.config_dir, f'{service}_config.json')
+        config_path = os.path.join(self.config_dir, f"{service}_config.json")
 
         try:
-            with open(config_path, 'w') as f:
+            with open(config_path, "w") as f:
                 json.dump(config, f, indent=2)
 
             # Set secure permissions
@@ -89,7 +90,9 @@ class SpotifyAuth(AuthManager):
         """Initialize the Spotify authentication manager."""
         super().__init__(config_dir)
         self.client = None
-        self.scope = "playlist-read-private playlist-modify-private playlist-modify-public user-library-read"
+        self.scope = (
+            "playlist-read-private playlist-modify-private playlist-modify-public user-library-read"
+        )
 
     def get_client(self) -> Optional[spotipy.Spotify]:
         """Get an authenticated Spotify client.
@@ -108,15 +111,15 @@ class SpotifyAuth(AuthManager):
         Returns:
             Authenticated Spotify client or None if authentication fails
         """
-        config = self.load_config('spotify')
+        config = self.load_config("spotify")
 
         if not config:
             print("Error: Spotify configuration not found")
             return None
 
-        client_id = config.get('client_id')
-        client_secret = config.get('client_secret')
-        redirect_uri = config.get('redirect_uri', 'http://localhost:8888/callback')
+        client_id = config.get("client_id")
+        client_secret = config.get("client_secret")
+        redirect_uri = config.get("redirect_uri", "http://localhost:8888/callback")
 
         if not all([client_id, client_secret]):
             print("Error: Missing required Spotify credentials")
@@ -136,7 +139,7 @@ class SpotifyAuth(AuthManager):
                 redirect_uri=redirect_uri,
                 scope=self.scope,
                 open_browser=True,
-                show_dialog=True
+                show_dialog=True,
             )
 
             # Initialize client
@@ -206,13 +209,13 @@ class DeezerAuth(AuthManager):
         Returns:
             Authenticated requests.Session or None if authentication fails
         """
-        config = self.load_config('deezer')
+        config = self.load_config("deezer")
 
         if not config:
             print("Error: Deezer configuration not found")
             return None
 
-        email = config.get('email')
+        email = config.get("email")
 
         if not email:
             print("Error: Missing required Deezer credentials")
@@ -224,16 +227,18 @@ class DeezerAuth(AuthManager):
 
             # Set up session with headers
             session = requests.Session()
-            session.headers.update({
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Accept': 'application/json'
-            })
+            session.headers.update(
+                {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                    "Accept": "application/json",
+                }
+            )
 
             # Store email in session for later use
             session.email = email
 
             # Test the connection with a simple API call
-            response = session.get('https://api.deezer.com/infos')
+            response = session.get("https://api.deezer.com/infos")
             if response.status_code == 200:
                 print("✓ Successfully connected to Deezer API")
                 self.client = session

@@ -1,12 +1,13 @@
 """
 Metadata writer for music files.
 """
+
 import logging
 from typing import Any, Dict
 
 from mutagen import File
 
-logger = logging.getLogger('music_tools_common.metadata')
+logger = logging.getLogger("music_tools_common.metadata")
 
 
 class MetadataWriter:

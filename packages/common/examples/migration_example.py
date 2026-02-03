@@ -34,8 +34,8 @@ def new_way_unified():
     print("config = manager.load_config('spotify')")
 
     # Actually demonstrate
-    manager = ConfigManager(app_name='music_tools')
-    config = manager.load_config('spotify')
+    manager = ConfigManager(app_name="music_tools")
+    config = manager.load_config("spotify")
     print(f"\nLoaded config: {list(config.keys())}")
 
 
@@ -63,8 +63,8 @@ def new_way_tag_editor():
     print("# Returns: Dict with service config")
 
     # Actually demonstrate
-    manager = ConfigManager(app_name='music_tagger')
-    config = manager.load_config('anthropic')
+    manager = ConfigManager(app_name="music_tagger")
+    config = manager.load_config("anthropic")
     print(f"\nLoaded config: {list(config.keys())}")
 
 
@@ -129,5 +129,5 @@ def main():
     print("=" * 60 + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

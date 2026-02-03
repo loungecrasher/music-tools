@@ -10,7 +10,7 @@ from .link_extractor import LinkExtractor
 from .music_scraper import MusicBlogScraper
 
 __all__ = [
-    'cli_main',
-    'MusicBlogScraper',
-    'LinkExtractor',
+    "cli_main",
+    "MusicBlogScraper",
+    "LinkExtractor",
 ]

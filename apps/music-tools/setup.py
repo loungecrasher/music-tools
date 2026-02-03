@@ -3,6 +3,7 @@
 Setup script for Music Tools.
 Helps users set up the project for the first time.
 """
+
 import argparse
 import json
 import os
@@ -63,10 +64,7 @@ def create_directories() -> bool:
         True if successful, False otherwise
     """
     try:
-        directories = [
-            "config",
-            "data"
-        ]
+        directories = ["config", "data"]
 
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
@@ -89,11 +87,9 @@ def create_config_files() -> bool:
             "config/spotify_config.json": {
                 "client_id": "",
                 "client_secret": "",
-                "redirect_uri": "http://localhost:8888/callback"
+                "redirect_uri": "http://localhost:8888/callback",
             },
-            "config/deezer_config.json": {
-                "email": ""
-            }
+            "config/deezer_config.json": {"email": ""},
         }
 
         for file_path, content in config_files.items():
@@ -106,7 +102,7 @@ def create_config_files() -> bool:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
             # Write file
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 json.dump(content, f, indent=2)
 
             # Set secure permissions
@@ -133,8 +129,11 @@ def run_tests() -> bool:
         try:
             sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
             # Add packages directory to path (music_tools_common is a symlink to packages/common)
-            sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'packages'))
+            sys.path.insert(
+                0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "packages")
+            )
             from music_tools_common import get_database
+
             get_database()
             print("Core modules imported successfully")
         except ImportError as e:

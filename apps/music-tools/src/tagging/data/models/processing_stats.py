@@ -36,28 +36,28 @@ class ProcessingLogEntry:
     def to_dict(self) -> dict:
         """Convert to dictionary for database storage."""
         return {
-            'file_path': self.file_path,
-            'artist_name': self.artist_name,
-            'status': self.status.value,
-            'processed_at': self.processed_at.isoformat() if self.processed_at else None,
-            'country': self.country,
-            'error_message': self.error_message
+            "file_path": self.file_path,
+            "artist_name": self.artist_name,
+            "status": self.status.value,
+            "processed_at": self.processed_at.isoformat() if self.processed_at else None,
+            "country": self.country,
+            "error_message": self.error_message,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'ProcessingLogEntry':
+    def from_dict(cls, data: dict) -> "ProcessingLogEntry":
         """Create instance from dictionary."""
         processed_at = None
-        if data.get('processed_at'):
-            processed_at = datetime.fromisoformat(data['processed_at'])
+        if data.get("processed_at"):
+            processed_at = datetime.fromisoformat(data["processed_at"])
 
         return cls(
-            file_path=data['file_path'],
-            artist_name=data['artist_name'],
-            status=ProcessingStatus(data['status']),
+            file_path=data["file_path"],
+            artist_name=data["artist_name"],
+            status=ProcessingStatus(data["status"]),
             processed_at=processed_at,
-            country=data.get('country'),
-            error_message=data.get('error_message')
+            country=data.get("country"),
+            error_message=data.get("error_message"),
         )
 
 
@@ -97,50 +97,50 @@ class Statistics:
     def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""
         return {
-            'cache_hits': self.cache_hits,
-            'cache_misses': self.cache_misses,
-            'cache_entries': self.cache_entries,
-            'files_processed': self.files_processed,
-            'files_skipped': self.files_skipped,
-            'files_with_errors': self.files_with_errors,
-            'artists_researched': self.artists_researched,
-            'read_errors': self.read_errors,
-            'write_errors': self.write_errors,
-            'metadata_updates': self.metadata_updates,
-            'api_calls': self.api_calls,
-            'api_errors': self.api_errors,
-            'batch_calls': self.batch_calls,
-            'total_processing_time': self.total_processing_time,
-            'average_file_time': self.average_file_time,
-            'last_updated': self.last_updated.isoformat() if self.last_updated else None,
-            'metadata': self.metadata
+            "cache_hits": self.cache_hits,
+            "cache_misses": self.cache_misses,
+            "cache_entries": self.cache_entries,
+            "files_processed": self.files_processed,
+            "files_skipped": self.files_skipped,
+            "files_with_errors": self.files_with_errors,
+            "artists_researched": self.artists_researched,
+            "read_errors": self.read_errors,
+            "write_errors": self.write_errors,
+            "metadata_updates": self.metadata_updates,
+            "api_calls": self.api_calls,
+            "api_errors": self.api_errors,
+            "batch_calls": self.batch_calls,
+            "total_processing_time": self.total_processing_time,
+            "average_file_time": self.average_file_time,
+            "last_updated": self.last_updated.isoformat() if self.last_updated else None,
+            "metadata": self.metadata,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Statistics':
+    def from_dict(cls, data: dict) -> "Statistics":
         """Create instance from dictionary."""
         last_updated = None
-        if data.get('last_updated'):
-            last_updated = datetime.fromisoformat(data['last_updated'])
+        if data.get("last_updated"):
+            last_updated = datetime.fromisoformat(data["last_updated"])
 
         return cls(
-            cache_hits=data.get('cache_hits', 0),
-            cache_misses=data.get('cache_misses', 0),
-            cache_entries=data.get('cache_entries', 0),
-            files_processed=data.get('files_processed', 0),
-            files_skipped=data.get('files_skipped', 0),
-            files_with_errors=data.get('files_with_errors', 0),
-            artists_researched=data.get('artists_researched', 0),
-            read_errors=data.get('read_errors', 0),
-            write_errors=data.get('write_errors', 0),
-            metadata_updates=data.get('metadata_updates', 0),
-            api_calls=data.get('api_calls', 0),
-            api_errors=data.get('api_errors', 0),
-            batch_calls=data.get('batch_calls', 0),
-            total_processing_time=data.get('total_processing_time', 0.0),
-            average_file_time=data.get('average_file_time', 0.0),
+            cache_hits=data.get("cache_hits", 0),
+            cache_misses=data.get("cache_misses", 0),
+            cache_entries=data.get("cache_entries", 0),
+            files_processed=data.get("files_processed", 0),
+            files_skipped=data.get("files_skipped", 0),
+            files_with_errors=data.get("files_with_errors", 0),
+            artists_researched=data.get("artists_researched", 0),
+            read_errors=data.get("read_errors", 0),
+            write_errors=data.get("write_errors", 0),
+            metadata_updates=data.get("metadata_updates", 0),
+            api_calls=data.get("api_calls", 0),
+            api_errors=data.get("api_errors", 0),
+            batch_calls=data.get("batch_calls", 0),
+            total_processing_time=data.get("total_processing_time", 0.0),
+            average_file_time=data.get("average_file_time", 0.0),
             last_updated=last_updated,
-            metadata=data.get('metadata', {})
+            metadata=data.get("metadata", {}),
         )
 
     def get_cache_hit_rate(self) -> float:

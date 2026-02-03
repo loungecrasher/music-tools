@@ -48,8 +48,8 @@ def write_metadata(file_path: str, metadata: Dict[str, Any]) -> bool:
 
 
 __all__ = [
-    'MetadataReader',
-    'MetadataWriter',
-    'read_metadata',
-    'write_metadata',
+    "MetadataReader",
+    "MetadataWriter",
+    "read_metadata",
+    "write_metadata",
 ]

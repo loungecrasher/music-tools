@@ -38,7 +38,7 @@ from .config import (
 logger = logging.getLogger(__name__)
 
 # Type variable for generic return types
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ScrapingError(Exception):
@@ -64,7 +64,9 @@ class ValidationError(ScrapingError):
 class ThreadSafeRateLimiter:
     """Thread-safe rate limiter for managing request delays."""
 
-    def __init__(self, min_delay: float = RATE_LIMIT_MIN_DELAY, max_delay: float = RATE_LIMIT_MAX_DELAY):
+    def __init__(
+        self, min_delay: float = RATE_LIMIT_MIN_DELAY, max_delay: float = RATE_LIMIT_MAX_DELAY
+    ):
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.last_request_time: Dict[str, float] = {}
@@ -89,7 +91,9 @@ class ThreadSafeRateLimiter:
 class AsyncRateLimiter:
     """Async rate limiter for managing request delays."""
 
-    def __init__(self, min_delay: float = RATE_LIMIT_MIN_DELAY, max_delay: float = RATE_LIMIT_MAX_DELAY):
+    def __init__(
+        self, min_delay: float = RATE_LIMIT_MIN_DELAY, max_delay: float = RATE_LIMIT_MAX_DELAY
+    ):
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.last_request_time: Dict[str, float] = {}
@@ -117,7 +121,7 @@ def exponential_backoff(
     base_delay: float = 1.0,
     max_delay: float = MAX_DELAY,
     exponential_base: float = BACKOFF_FACTOR,
-    jitter: bool = True
+    jitter: bool = True,
 ) -> Callable[..., Optional[T]]:
     """
     Decorator for exponential backoff retry logic.
@@ -133,6 +137,7 @@ def exponential_backoff(
     Returns:
         Wrapped function with retry logic
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs) -> Optional[T]:
         pass
@@ -142,9 +147,9 @@ def exponential_backoff(
                 return func(*args, **kwargs)
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
                 if attempt < max_retries - 1:
-                    delay = min(base_delay * (exponential_base ** attempt), max_delay)
+                    delay = min(base_delay * (exponential_base**attempt), max_delay)
                     if jitter:
-                        delay *= (0.5 + random.random())
+                        delay *= 0.5 + random.random()
                     logger.warning(
                         f"Attempt {attempt + 1}/{max_retries} failed for {func.__name__}: {e}. "
                         f"Retrying in {delay:.1f} seconds..."
@@ -173,7 +178,7 @@ def rate_limit_handler(response: requests.Response) -> Optional[float]:
     """
     if response.status_code == 429:
         # Check for Retry-After header
-        retry_after = response.headers.get('Retry-After')
+        retry_after = response.headers.get("Retry-After")
         if retry_after:
             try:
                 # Could be seconds or HTTP date
@@ -182,6 +187,7 @@ def rate_limit_handler(response: requests.Response) -> Optional[float]:
                 # Parse HTTP date format
                 from datetime import datetime
                 from email.utils import parsedate_to_datetime
+
                 try:
                     retry_date = parsedate_to_datetime(retry_after)
                     delay = (retry_date - datetime.now()).total_seconds()
@@ -226,7 +232,7 @@ def create_resilient_session(
     backoff_factor: float = BACKOFF_FACTOR,
     status_forcelist: Optional[list] = None,
     pool_connections: int = 10,
-    pool_maxsize: int = 10
+    pool_maxsize: int = 10,
 ) -> requests.Session:
     """
     Create a requests session with retry logic and connection pooling.
@@ -252,14 +258,12 @@ def create_resilient_session(
         backoff_factor=backoff_factor,
         status_forcelist=status_forcelist,
         allowed_methods=["HEAD", "GET", "OPTIONS"],
-        raise_on_status=False
+        raise_on_status=False,
     )
 
     # Create adapter with retry strategy and connection pooling
     adapter = HTTPAdapter(
-        max_retries=retry_strategy,
-        pool_connections=pool_connections,
-        pool_maxsize=pool_maxsize
+        max_retries=retry_strategy, pool_connections=pool_connections, pool_maxsize=pool_maxsize
     )
 
     # Mount adapter for both HTTP and HTTPS
@@ -267,14 +271,16 @@ def create_resilient_session(
     session.mount("https://", adapter)
 
     # Set default headers
-    session.headers.update({
-        'User-Agent': get_random_user_agent(),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-    })
+    session.headers.update(
+        {
+            "User-Agent": get_random_user_agent(),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+        }
+    )
 
     return session
 
@@ -306,7 +312,7 @@ def validate_url(url: str) -> bool:
         logger.warning(f"URL too long: {len(url)} characters")
         return False
 
-    if not url.startswith(('http://', 'https://')):
+    if not url.startswith(("http://", "https://")):
         return False
 
     # Basic URL structure check
@@ -317,8 +323,15 @@ def validate_url(url: str) -> bool:
 
         # Check for suspicious patterns
         suspicious_patterns = [
-            r'javascript:', r'data:', r'file:', r'ftp:', r'mailto:',
-            r'<script', r'<iframe', r'<object', r'<embed'
+            r"javascript:",
+            r"data:",
+            r"file:",
+            r"ftp:",
+            r"mailto:",
+            r"<script",
+            r"<iframe",
+            r"<object",
+            r"<embed",
         ]
 
         for pattern in suspicious_patterns:
@@ -354,10 +367,7 @@ def validate_host(host: str) -> bool:
 
 
 def safe_request(
-    session: requests.Session,
-    url: str,
-    method: str = 'GET',
-    **kwargs
+    session: requests.Session, url: str, method: str = "GET", **kwargs
 ) -> Optional[requests.Response]:
     """
     Make a safe HTTP request with error handling.
@@ -391,14 +401,14 @@ def safe_request(
         return response
 
     except requests.exceptions.HTTPError as e:
-        status_code = e.response.status_code if e.response else 'unknown'
+        status_code = e.response.status_code if e.response else "unknown"
 
         if status_code == 404:
             logger.debug(f"Page not found (404): {url}")
         elif status_code == 403:
             logger.warning(f"Access forbidden (403): {url}")
             # Try with different user agent
-            session.headers['User-Agent'] = get_random_user_agent()
+            session.headers["User-Agent"] = get_random_user_agent()
         else:
             logger.error(f"HTTP error {status_code} for {url}: {e}")
 
@@ -414,8 +424,7 @@ def safe_request(
 
 
 def handle_connection_error(
-    session: requests.Session,
-    error: Union[requests.exceptions.ConnectionError, Exception]
+    session: requests.Session, error: Union[requests.exceptions.ConnectionError, Exception]
 ) -> requests.Session:
     """
     Handle connection errors by recreating the session.
@@ -439,10 +448,7 @@ def handle_connection_error(
     return create_resilient_session()
 
 
-def parse_content_safely(
-    response: requests.Response,
-    parser: str = 'html.parser'
-) -> Optional[Any]:
+def parse_content_safely(response: requests.Response, parser: str = "html.parser") -> Optional[Any]:
     """
     Safely parse response content.
 
@@ -458,13 +464,14 @@ def parse_content_safely(
         return None
 
     # Check content type
-    content_type = response.headers.get('content-type', '').lower()
-    if 'text/html' not in content_type and 'application/xhtml' not in content_type:
+    content_type = response.headers.get("content-type", "").lower()
+    if "text/html" not in content_type and "application/xhtml" not in content_type:
         logger.warning(f"Non-HTML content type: {content_type}")
         return None
 
     try:
         from bs4 import BeautifulSoup
+
         return BeautifulSoup(response.content, parser)
     except Exception as e:
         logger.error(f"Error parsing content: {e}")
@@ -499,25 +506,25 @@ def sanitize_filename(filename: str, max_length: int = 255) -> str:
     import unicodedata
 
     # Normalize unicode characters
-    filename = unicodedata.normalize('NFKD', filename)
-    filename = filename.encode('ascii', 'ignore').decode('ascii')
+    filename = unicodedata.normalize("NFKD", filename)
+    filename = filename.encode("ascii", "ignore").decode("ascii")
 
     # Remove invalid characters
-    filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    filename = re.sub(r'[<>:"/\\|?*]', "_", filename)
 
     # Remove control characters
-    filename = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', filename)
+    filename = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", filename)
 
     # Limit length
     if len(filename) > max_length:
         name, ext = os.path.splitext(filename)
-        name = name[:max_length - len(ext) - 1]
+        name = name[: max_length - len(ext) - 1]
         filename = name + ext
 
     return filename.strip()
 
 
-def safe_file_read(file_path: str, encoding: str = 'utf-8') -> Optional[str]:
+def safe_file_read(file_path: str, encoding: str = "utf-8") -> Optional[str]:
     """
     Safely read a file with error handling.
 
@@ -538,7 +545,7 @@ def safe_file_read(file_path: str, encoding: str = 'utf-8') -> Optional[str]:
         # Read file in chunks for large files
         if file_size > CHUNK_SIZE * 10:
             content = ""
-            with open(file_path, 'r', encoding=encoding, errors='ignore') as f:
+            with open(file_path, "r", encoding=encoding, errors="ignore") as f:
                 while True:
                     chunk = f.read(CHUNK_SIZE)
                     if not chunk:
@@ -546,7 +553,7 @@ def safe_file_read(file_path: str, encoding: str = 'utf-8') -> Optional[str]:
                     content += chunk
             return content
         else:
-            with open(file_path, 'r', encoding=encoding, errors='ignore') as f:
+            with open(file_path, "r", encoding=encoding, errors="ignore") as f:
                 return f.read()
 
     except FileNotFoundError:
@@ -577,13 +584,11 @@ def validate_file_path(file_path: str) -> bool:
         return False
 
     # Allow temporary files (common in testing)
-    if '/tmp/' in file_path or '/var/folders/' in file_path or 'tmp_' in file_path:
+    if "/tmp/" in file_path or "/var/folders/" in file_path or "tmp_" in file_path:
         return True
 
     # Check for path traversal attempts
-    suspicious_patterns = [
-        r'\.\./', r'\.\.\\', r'//', r'\\', r'~', r'%', r'&', r'`', r'\$'
-    ]
+    suspicious_patterns = [r"\.\./", r"\.\.\\", r"//", r"\\", r"~", r"%", r"&", r"`", r"\$"]
 
     for pattern in suspicious_patterns:
         if re.search(pattern, file_path):

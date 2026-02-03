@@ -70,7 +70,7 @@ class JSONConfigRepository(ConfigRepositoryInterface):
             return {}
 
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, "r", encoding="utf-8") as f:
                 config = json.load(f)
 
             # Validate the configuration
@@ -110,11 +110,11 @@ class JSONConfigRepository(ConfigRepositoryInterface):
         try:
             # Create backup before saving
             if self.config_path.exists():
-                backup_path = self.config_path.with_suffix('.json.backup')
-                backup_path.write_text(self.config_path.read_text(encoding='utf-8'))
+                backup_path = self.config_path.with_suffix(".json.backup")
+                backup_path.write_text(self.config_path.read_text(encoding="utf-8"))
 
             # Write new configuration
-            with open(self.config_path, 'w', encoding='utf-8') as f:
+            with open(self.config_path, "w", encoding="utf-8") as f:
                 json.dump(config, f, indent=2, ensure_ascii=False)
 
             self._config_cache = config.copy()
@@ -133,7 +133,7 @@ class JSONConfigRepository(ConfigRepositoryInterface):
             return default
 
         # Support dot notation for nested keys
-        keys = key.split('.')
+        keys = key.split(".")
         value = self._config_cache
 
         for k in keys:
@@ -154,7 +154,7 @@ class JSONConfigRepository(ConfigRepositoryInterface):
             self._config_cache = {}
 
         # Support dot notation for nested keys
-        keys = key.split('.')
+        keys = key.split(".")
         current = self._config_cache
 
         # Navigate to the parent of the target key
@@ -186,7 +186,7 @@ class JSONConfigRepository(ConfigRepositoryInterface):
             return False
 
         # Support dot notation for nested keys
-        keys = key.split('.')
+        keys = key.split(".")
         current = self._config_cache
 
         # Navigate to the parent of the target key
@@ -210,14 +210,11 @@ class JSONConfigRepository(ConfigRepositoryInterface):
             return False
 
         if backup_path is None:
-            timestamp = Path().ctime().replace(':', '-').replace(' ', '_')
-            backup_path = self.config_path.with_suffix(f'.backup_{timestamp}.json')
+            timestamp = Path().ctime().replace(":", "-").replace(" ", "_")
+            backup_path = self.config_path.with_suffix(f".backup_{timestamp}.json")
 
         try:
-            backup_path.write_text(
-                self.config_path.read_text(encoding='utf-8'),
-                encoding='utf-8'
-            )
+            backup_path.write_text(self.config_path.read_text(encoding="utf-8"), encoding="utf-8")
             logger.info(f"Configuration backed up to {backup_path}")
             return True
 
@@ -234,23 +231,23 @@ class JSONConfigRepository(ConfigRepositoryInterface):
     def reset_to_defaults(self) -> bool:
         """Reset configuration to default values."""
         default_config = {
-            'music_directory': '',
-            'anthropic_api_key': '',
-            'batch_size': 50,
-            'recursive_scan': True,
-            'update_genre': True,
-            'update_grouping': True,
-            'update_year': True,
-            'dry_run': False,
-            'verbose': False,
-            'cache_enabled': True,
-            'max_cache_age_days': 30,
-            'supported_formats': ['.mp3', '.flac', '.m4a', '.wav'],
-            'ui_settings': {
-                'theme': 'default',
-                'show_progress': True,
-                'confirmation_prompts': True
-            }
+            "music_directory": "",
+            "anthropic_api_key": "",
+            "batch_size": 50,
+            "recursive_scan": True,
+            "update_genre": True,
+            "update_grouping": True,
+            "update_year": True,
+            "dry_run": False,
+            "verbose": False,
+            "cache_enabled": True,
+            "max_cache_age_days": 30,
+            "supported_formats": [".mp3", ".flac", ".m4a", ".wav"],
+            "ui_settings": {
+                "theme": "default",
+                "show_progress": True,
+                "confirmation_prompts": True,
+            },
         }
 
         return self.save_config(default_config)

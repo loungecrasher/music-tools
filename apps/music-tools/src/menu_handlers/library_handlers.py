@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
-logger = setup_logger('music_tools.menu.library')
+logger = setup_logger("music_tools.menu.library")
 console = Console()
 
 
@@ -38,16 +38,18 @@ def run_process_new_music() -> None:
 
     clear_screen()
 
-    console.print(Panel(
-        "[bold green]Process New Music Folder[/bold green]\n\n"
-        "This unified workflow will:\n"
-        "  1. Check files against your library index (find duplicates)\n"
-        "  2. Check files against listening history (find reviewed)\n"
-        "  3. Show you only the truly NEW songs that need attention\n\n"
-        "Make sure you've indexed your library first!",
-        title="[bold]New Music Processor[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Process New Music Folder[/bold green]\n\n"
+            "This unified workflow will:\n"
+            "  1. Check files against your library index (find duplicates)\n"
+            "  2. Check files against listening history (find reviewed)\n"
+            "  3. Show you only the truly NEW songs that need attention\n\n"
+            "Make sure you've indexed your library first!",
+            title="[bold]New Music Processor[/bold]",
+            border_style="green",
+        )
+    )
 
     # Get folder path
     folder_path = Prompt.ask("\nEnter path to new music folder")
@@ -108,14 +110,16 @@ def run_library_index() -> None:
     """Run Library Indexer."""
     from src.library.indexer import LibraryIndexer
 
-    console.print(Panel(
-        "[bold green]Index Your Music Library[/bold green]\n\n"
-        "This will scan your main music library and create a searchable database "
-        "for fast duplicate detection when vetting new imports.\n\n"
-        "Supports: MP3, FLAC, M4A, WAV, OGG, OPUS, AIFF",
-        title="[bold]Library Indexer[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Index Your Music Library[/bold green]\n\n"
+            "This will scan your main music library and create a searchable database "
+            "for fast duplicate detection when vetting new imports.\n\n"
+            "Supports: MP3, FLAC, M4A, WAV, OGG, OPUS, AIFF",
+            title="[bold]Library Indexer[/bold]",
+            border_style="green",
+        )
+    )
 
     library_path = Prompt.ask("\nEnter path to your main music library")
     library_path = library_path.strip("'\"")
@@ -137,10 +141,7 @@ def run_library_index() -> None:
     try:
         indexer = LibraryIndexer(str(db_path), console=console)
         indexer.index_library(
-            str(library_path),
-            rescan=rescan,
-            incremental=not rescan,
-            show_progress=True
+            str(library_path), rescan=rescan, incremental=not rescan, show_progress=True
         )
 
         console.print("\n[bold green]✓ Indexing complete![/bold green]")
@@ -156,14 +157,16 @@ def run_library_vet() -> None:
     from src.library.database import LibraryDatabase
     from src.library.vetter import ImportVetter
 
-    console.print(Panel(
-        "[bold green]Vet Import Folder Against Library[/bold green]\n\n"
-        "This will check all music files in an import folder against your indexed library "
-        "to identify duplicates and new songs.\n\n"
-        "Make sure you've indexed your main library first!",
-        title="[bold]Library Vetter[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Vet Import Folder Against Library[/bold green]\n\n"
+            "This will check all music files in an import folder against your indexed library "
+            "to identify duplicates and new songs.\n\n"
+            "Make sure you've indexed your main library first!",
+            title="[bold]Library Vetter[/bold]",
+            border_style="green",
+        )
+    )
 
     import_folder = Prompt.ask("\nEnter path to import folder")
     import_folder = import_folder.strip("'\"")
@@ -202,16 +205,14 @@ def run_library_vet() -> None:
         vetter = ImportVetter(db, console=console)
 
         report = vetter.vet_folder(
-            import_folder=str(import_folder),
-            threshold=threshold_float,
-            show_progress=True
+            import_folder=str(import_folder), threshold=threshold_float, show_progress=True
         )
 
         # Display the report
         vetter.display_report(report)
 
         # Export new songs
-        new_songs_file = str(Path(import_folder) / 'new_songs.txt')
+        new_songs_file = str(Path(import_folder) / "new_songs.txt")
         vetter.export_new_songs(report, new_songs_file)
 
         console.print("\n[bold green]✓ Vetting complete![/bold green]")
@@ -223,7 +224,7 @@ def run_library_vet() -> None:
             delete_choice = Prompt.ask(
                 f"\n[bold]Delete {report.duplicate_count} duplicate files?[/bold]",
                 choices=["yes", "no", "dry-run"],
-                default="no"
+                default="no",
             )
 
             if delete_choice == "yes":
@@ -235,7 +236,9 @@ def run_library_vet() -> None:
             elif delete_choice == "dry-run":
                 vetter.delete_duplicates(report, confirm=False, dry_run=True)
             else:
-                console.print("\n[yellow]Skipped deletion. Duplicates remain in import folder.[/yellow]")
+                console.print(
+                    "\n[yellow]Skipped deletion. Duplicates remain in import folder.[/yellow]"
+                )
 
     except Exception as e:
         console.print(f"[bold red]Error during vetting:[/bold red] {str(e)}")
@@ -260,17 +263,23 @@ def run_library_stats() -> None:
         stats = db.get_statistics()
 
         # Format last index time
-        last_index = stats.last_index_time.strftime('%Y-%m-%d %H:%M:%S') if stats.last_index_time else 'Never'
+        last_index = (
+            stats.last_index_time.strftime("%Y-%m-%d %H:%M:%S")
+            if stats.last_index_time
+            else "Never"
+        )
 
-        console.print(Panel(
-            f"[bold]Total Files:[/bold] {stats.total_files:,}\n"
-            f"[bold]Total Size:[/bold] {stats.total_size_gb:.2f} GB\n"
-            f"[bold]Unique Artists:[/bold] {stats.artists_count:,}\n"
-            f"[bold]Unique Albums:[/bold] {stats.albums_count:,}\n"
-            f"[bold]Last Indexed:[/bold] {last_index}",
-            title="[bold]Library Statistics[/bold]",
-            border_style="cyan"
-        ))
+        console.print(
+            Panel(
+                f"[bold]Total Files:[/bold] {stats.total_files:,}\n"
+                f"[bold]Total Size:[/bold] {stats.total_size_gb:.2f} GB\n"
+                f"[bold]Unique Artists:[/bold] {stats.artists_count:,}\n"
+                f"[bold]Unique Albums:[/bold] {stats.albums_count:,}\n"
+                f"[bold]Last Indexed:[/bold] {last_index}",
+                title="[bold]Library Statistics[/bold]",
+                border_style="cyan",
+            )
+        )
 
     except Exception as e:
         console.print(f"[bold red]Error retrieving stats:[/bold red] {str(e)}")
@@ -291,19 +300,21 @@ def run_smart_cleanup_menu() -> None:
 
     try:
         # Get library path from config or prompt
-        library_config = _get_config('library')
+        library_config = _get_config("library")
         library_path = None
 
-        if library_config and library_config.get('path'):
-            library_path = library_config.get('path')
+        if library_config and library_config.get("path"):
+            library_path = library_config.get("path")
             console.print(f"[cyan]Using library path:[/cyan] {library_path}")
         else:
-            console.print(Panel(
-                "[yellow]Library path not configured.[/yellow]\n\n"
-                "Please enter the path to your music library.",
-                title="Configuration Required",
-                border_style="yellow"
-            ))
+            console.print(
+                Panel(
+                    "[yellow]Library path not configured.[/yellow]\n\n"
+                    "Please enter the path to your music library.",
+                    title="Configuration Required",
+                    border_style="yellow",
+                )
+            )
             library_path = Prompt.ask("\nEnter library path")
 
         if not library_path:
@@ -320,19 +331,21 @@ def run_smart_cleanup_menu() -> None:
             return
 
         # Initialize library database
-        db_path = os.path.join(library_path, '.library.db')
+        db_path = os.path.join(library_path, ".library.db")
         library_db = LibraryDatabase(db_path)
 
         # Check if database exists and has files
         with library_db:
             stats = library_db.get_statistics()
             if stats.total_files == 0:
-                console.print(Panel(
-                    "[yellow]Library database is empty.[/yellow]\n\n"
-                    "Please run 'Index Library' first to scan your music files.",
-                    title="Database Empty",
-                    border_style="yellow"
-                ))
+                console.print(
+                    Panel(
+                        "[yellow]Library database is empty.[/yellow]\n\n"
+                        "Please run 'Index Library' first to scan your music files.",
+                        title="Database Empty",
+                        border_style="yellow",
+                    )
+                )
 
                 if Confirm.ask("\nReturn to Library Management menu?", default=True):
                     return
@@ -342,16 +355,16 @@ def run_smart_cleanup_menu() -> None:
 
         # Run Smart Cleanup workflow
         workflow = SmartCleanupWorkflow(
-            library_db=library_db,
-            library_path=library_path,
-            console=console
+            library_db=library_db, library_path=library_path, console=console
         )
 
         stats = workflow.run()
 
         # Show final summary
         if stats.files_deleted > 0:
-            console.print(f"\n[bold green]Successfully deleted {stats.files_deleted} duplicate files![/bold green]")
+            console.print(
+                f"\n[bold green]Successfully deleted {stats.files_deleted} duplicate files![/bold green]"
+            )
             console.print(f"[green]Space freed: {stats.space_freed_mb:.2f} MB[/green]")
 
     except KeyboardInterrupt:
@@ -359,7 +372,9 @@ def run_smart_cleanup_menu() -> None:
     except ImportError as e:
         console.print("\n[bold red]Smart Cleanup not available:[/bold red]")
         console.print(f"[yellow]{str(e)}[/yellow]")
-        console.print("\n[dim]This feature requires the library module to be properly configured.[/dim]")
+        console.print(
+            "\n[dim]This feature requires the library module to be properly configured.[/dim]"
+        )
     except Exception as e:
         logger.error(f"Error in Smart Cleanup: {e}", exc_info=True)
         console.print("\n[bold red]Error running Smart Cleanup:[/bold red]")
@@ -373,7 +388,11 @@ def run_candidate_history_add() -> None:
     from src.library.candidate_manager import CandidateManager
 
     clear_screen()
-    show_panel("Add files from a folder to your listening history", title="Add Folder to History", border_style="blue")
+    show_panel(
+        "Add files from a folder to your listening history",
+        title="Add Folder to History",
+        border_style="blue",
+    )
 
     folder_path = Prompt.ask("Enter the full path to the folder you want to add to history")
 
@@ -408,7 +427,11 @@ def run_candidate_history_check() -> None:
     from src.library.candidate_manager import CandidateManager
 
     clear_screen()
-    show_panel("Check if files in a folder have been listened to before", title="Check Folder against History", border_style="blue")
+    show_panel(
+        "Check if files in a folder have been listened to before",
+        title="Check Folder against History",
+        border_style="blue",
+    )
 
     folder_path = Prompt.ask("Enter the full path to the folder you want to check")
 

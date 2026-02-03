@@ -2,6 +2,7 @@
 """
 Example CLI application using music_tools_common.
 """
+
 import time
 
 from music_tools_common.cli import BaseCLI, InteractiveMenu, ProgressTracker
@@ -37,12 +38,12 @@ class MusicToolsApp(BaseCLI):
         print("-" * 40)
 
         # Load Spotify config
-        spotify_config = config_manager.load_config('spotify')
+        spotify_config = config_manager.load_config("spotify")
         print(f"Spotify Client ID: {spotify_config.get('client_id', 'Not set')[:10]}...")
         print(f"Redirect URI: {spotify_config.get('redirect_uri', 'Not set')}")
 
         # Validate
-        errors = config_manager.validate_config('spotify')
+        errors = config_manager.validate_config("spotify")
         if errors:
             print(f"\n⚠ Configuration errors: {errors}")
         else:
@@ -83,6 +84,7 @@ class MusicToolsApp(BaseCLI):
         @retry(max_attempts=3, delay=0.5)
         def flaky_operation():
             import random
+
             if random.random() < 0.5:
                 raise Exception("Simulated failure")
             return "Success!"
@@ -100,5 +102,5 @@ def main():
     return app.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())

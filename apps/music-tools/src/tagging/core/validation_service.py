@@ -32,7 +32,7 @@ class ValidationService:
     """Service for common validation operations."""
 
     # Audio file extensions that are supported
-    SUPPORTED_AUDIO_EXTENSIONS = {'.mp3', '.flac', '.m4a', '.wav', '.ogg'}
+    SUPPORTED_AUDIO_EXTENSIONS = {".mp3", ".flac", ".m4a", ".wav", ".ogg"}
 
     # Maximum reasonable values for metadata
     MAX_ARTIST_NAME_LENGTH = 500
@@ -42,11 +42,11 @@ class ValidationService:
 
     # Regex patterns for validation
     PATTERNS = {
-        'email': re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
-        'api_key': re.compile(r'^sk-[a-zA-Z0-9_-]{40,}$'),  # Anthropic API key pattern
-        'safe_filename': re.compile(r'^[a-zA-Z0-9._-]+$'),
-        'year': re.compile(r'^(19|20)\d{2}$'),  # Years from 1900-2099
-        'confidence': re.compile(r'^[01](\.\d+)?$'),  # 0.0 to 1.0
+        "email": re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"),
+        "api_key": re.compile(r"^sk-[a-zA-Z0-9_-]{40,}$"),  # Anthropic API key pattern
+        "safe_filename": re.compile(r"^[a-zA-Z0-9._-]+$"),
+        "year": re.compile(r"^(19|20)\d{2}$"),  # Years from 1900-2099
+        "confidence": re.compile(r"^[01](\.\d+)?$"),  # 0.0 to 1.0
     }
 
     def __init__(self):
@@ -56,31 +56,23 @@ class ValidationService:
         """Validate a file path for audio processing."""
 
         if not file_path:
-            return ValidationResult(
-                is_valid=False,
-                error_message="File path cannot be empty"
-            )
+            return ValidationResult(is_valid=False, error_message="File path cannot be empty")
 
         try:
             path = Path(file_path)
         except Exception as e:
-            return ValidationResult(
-                is_valid=False,
-                error_message=f"Invalid path format: {e}"
-            )
+            return ValidationResult(is_valid=False, error_message=f"Invalid path format: {e}")
 
         # Check if file exists
         if not path.exists():
             return ValidationResult(
-                is_valid=False,
-                error_message=f"File does not exist: {file_path}"
+                is_valid=False, error_message=f"File does not exist: {file_path}"
             )
 
         # Check if it's a file (not directory)
         if not path.is_file():
             return ValidationResult(
-                is_valid=False,
-                error_message=f"Path is not a file: {file_path}"
+                is_valid=False, error_message=f"Path is not a file: {file_path}"
             )
 
         # Check file extension
@@ -89,7 +81,7 @@ class ValidationService:
             return ValidationResult(
                 is_valid=False,
                 error_message=f"Unsupported file type: {extension}. "
-                f"Supported types: {', '.join(sorted(self.SUPPORTED_AUDIO_EXTENSIONS))}"
+                f"Supported types: {', '.join(sorted(self.SUPPORTED_AUDIO_EXTENSIONS))}",
             )
 
         # Check file size (warn if very large)
@@ -99,100 +91,75 @@ class ValidationService:
             if file_size > 100 * 1024 * 1024:  # 100MB
                 warnings.append(f"Large file size: {file_size / (1024*1024):.1f}MB")
             elif file_size == 0:
-                return ValidationResult(
-                    is_valid=False,
-                    error_message="File is empty"
-                )
+                return ValidationResult(is_valid=False, error_message="File is empty")
         except OSError as e:
             warnings.append(f"Could not check file size: {e}")
 
         return ValidationResult(
-            is_valid=True,
-            warnings=warnings,
-            normalized_value=str(path.resolve())
+            is_valid=True, warnings=warnings, normalized_value=str(path.resolve())
         )
 
     def validate_directory_path(self, dir_path: str) -> ValidationResult:
         """Validate a directory path for scanning."""
 
         if not dir_path:
-            return ValidationResult(
-                is_valid=False,
-                error_message="Directory path cannot be empty"
-            )
+            return ValidationResult(is_valid=False, error_message="Directory path cannot be empty")
 
         try:
             path = Path(dir_path)
         except Exception as e:
-            return ValidationResult(
-                is_valid=False,
-                error_message=f"Invalid path format: {e}"
-            )
+            return ValidationResult(is_valid=False, error_message=f"Invalid path format: {e}")
 
         # Check if directory exists
         if not path.exists():
             return ValidationResult(
-                is_valid=False,
-                error_message=f"Directory does not exist: {dir_path}"
+                is_valid=False, error_message=f"Directory does not exist: {dir_path}"
             )
 
         # Check if it's a directory
         if not path.is_dir():
             return ValidationResult(
-                is_valid=False,
-                error_message=f"Path is not a directory: {dir_path}"
+                is_valid=False, error_message=f"Path is not a directory: {dir_path}"
             )
 
         # Check read permissions
         if not path.readable():
             return ValidationResult(
-                is_valid=False,
-                error_message=f"Directory is not readable: {dir_path}"
+                is_valid=False, error_message=f"Directory is not readable: {dir_path}"
             )
 
-        return ValidationResult(
-            is_valid=True,
-            normalized_value=str(path.resolve())
-        )
+        return ValidationResult(is_valid=True, normalized_value=str(path.resolve()))
 
     def validate_artist_name(self, artist_name: str) -> ValidationResult:
         """Validate an artist name."""
 
         if not artist_name:
-            return ValidationResult(
-                is_valid=False,
-                error_message="Artist name cannot be empty"
-            )
+            return ValidationResult(is_valid=False, error_message="Artist name cannot be empty")
 
         # Clean the input
         normalized = artist_name.strip()
 
         if not normalized:
             return ValidationResult(
-                is_valid=False,
-                error_message="Artist name cannot be only whitespace"
+                is_valid=False, error_message="Artist name cannot be only whitespace"
             )
 
         # Check length
         if len(normalized) > self.MAX_ARTIST_NAME_LENGTH:
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Artist name too long: {len(normalized)} > {self.MAX_ARTIST_NAME_LENGTH}"
+                error_message=f"Artist name too long: {len(normalized)} > {self.MAX_ARTIST_NAME_LENGTH}",
             )
 
         # Check for suspicious patterns
         warnings = []
-        if normalized.lower() in ['unknown', 'various', 'various artists', 'n/a', 'null']:
+        if normalized.lower() in ["unknown", "various", "various artists", "n/a", "null"]:
             warnings.append("Artist name appears to be a placeholder")
 
         if len(normalized) < 2:
             warnings.append("Very short artist name")
 
-        return ValidationResult(
-            is_valid=True,
-            warnings=warnings,
-            normalized_value=normalized
-        )
+        return ValidationResult(is_valid=True, warnings=warnings, normalized_value=normalized)
 
     def validate_confidence_score(self, confidence: Any) -> ValidationResult:
         """Validate a confidence score (0.0 to 1.0)."""
@@ -203,14 +170,14 @@ class ValidationService:
         except (ValueError, TypeError):
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Confidence must be a number, got: {type(confidence).__name__}"
+                error_message=f"Confidence must be a number, got: {type(confidence).__name__}",
             )
 
         # Check range
         if not (0.0 <= conf_float <= 1.0):
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Confidence must be between 0.0 and 1.0, got: {conf_float}"
+                error_message=f"Confidence must be between 0.0 and 1.0, got: {conf_float}",
             )
 
         # Warnings for edge cases
@@ -220,59 +187,42 @@ class ValidationService:
         elif conf_float < 0.1:
             warnings.append("Very low confidence score")
 
-        return ValidationResult(
-            is_valid=True,
-            warnings=warnings,
-            normalized_value=conf_float
-        )
+        return ValidationResult(is_valid=True, warnings=warnings, normalized_value=conf_float)
 
     def validate_api_key(self, api_key: str) -> ValidationResult:
         """Validate an Anthropic API key format."""
 
         if not api_key:
-            return ValidationResult(
-                is_valid=False,
-                error_message="API key cannot be empty"
-            )
+            return ValidationResult(is_valid=False, error_message="API key cannot be empty")
 
         # Clean the input
         normalized = api_key.strip()
 
         # Check basic format
-        if not self.PATTERNS['api_key'].match(normalized):
+        if not self.PATTERNS["api_key"].match(normalized):
             return ValidationResult(
-                is_valid=False,
-                error_message="Invalid API key format. Expected format: sk-..."
+                is_valid=False, error_message="Invalid API key format. Expected format: sk-..."
             )
 
-        return ValidationResult(
-            is_valid=True,
-            normalized_value=normalized
-        )
+        return ValidationResult(is_valid=True, normalized_value=normalized)
 
     def validate_year(self, year: Any) -> ValidationResult:
         """Validate a year value."""
 
         if year is None:
-            return ValidationResult(
-                is_valid=True,
-                normalized_value=None
-            )
+            return ValidationResult(is_valid=True, normalized_value=None)
 
         # Try to convert to string for pattern matching
         year_str = str(year).strip()
 
         if not year_str:
-            return ValidationResult(
-                is_valid=True,
-                normalized_value=None
-            )
+            return ValidationResult(is_valid=True, normalized_value=None)
 
         # Check format
-        if not self.PATTERNS['year'].match(year_str):
+        if not self.PATTERNS["year"].match(year_str):
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Invalid year format: {year_str}. Expected 4-digit year (1900-2099)"
+                error_message=f"Invalid year format: {year_str}. Expected 4-digit year (1900-2099)",
             )
 
         year_int = int(year_str)
@@ -286,11 +236,7 @@ class ValidationService:
         if year_int < 1900:
             warnings.append(f"Very old year: {year_int}")
 
-        return ValidationResult(
-            is_valid=True,
-            warnings=warnings,
-            normalized_value=year_int
-        )
+        return ValidationResult(is_valid=True, warnings=warnings, normalized_value=year_int)
 
     def validate_metadata_dict(self, metadata: Dict[str, Any]) -> ValidationResult:
         """Validate a metadata dictionary."""
@@ -298,7 +244,7 @@ class ValidationService:
         if not isinstance(metadata, dict):
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Metadata must be a dictionary, got: {type(metadata).__name__}"
+                error_message=f"Metadata must be a dictionary, got: {type(metadata).__name__}",
             )
 
         warnings = []
@@ -306,20 +252,19 @@ class ValidationService:
 
         # Validate individual fields
         for field, value in metadata.items():
-            if field in ['artist', 'albumartist']:
+            if field in ["artist", "albumartist"]:
                 if value:
                     result = self.validate_artist_name(str(value))
                     if not result.is_valid:
                         return ValidationResult(
-                            is_valid=False,
-                            error_message=f"Invalid {field}: {result.error_message}"
+                            is_valid=False, error_message=f"Invalid {field}: {result.error_message}"
                         )
                     warnings.extend(result.warnings)
                     normalized[field] = result.normalized_value
                 else:
                     normalized[field] = None
 
-            elif field in ['album', 'title']:
+            elif field in ["album", "title"]:
                 if value:
                     value_str = str(value).strip()
                     if len(value_str) > self.MAX_ALBUM_NAME_LENGTH:
@@ -328,7 +273,7 @@ class ValidationService:
                 else:
                     normalized[field] = None
 
-            elif field == 'date':
+            elif field == "date":
                 if value:
                     result = self.validate_year(value)
                     if not result.is_valid:
@@ -344,11 +289,7 @@ class ValidationService:
                 # Pass through other fields
                 normalized[field] = value
 
-        return ValidationResult(
-            is_valid=True,
-            warnings=warnings,
-            normalized_value=normalized
-        )
+        return ValidationResult(is_valid=True, warnings=warnings, normalized_value=normalized)
 
     def validate_batch_size(self, batch_size: Any) -> ValidationResult:
         """Validate a batch size parameter."""
@@ -358,13 +299,12 @@ class ValidationService:
         except (ValueError, TypeError):
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Batch size must be an integer, got: {type(batch_size).__name__}"
+                error_message=f"Batch size must be an integer, got: {type(batch_size).__name__}",
             )
 
         if size_int <= 0:
             return ValidationResult(
-                is_valid=False,
-                error_message=f"Batch size must be positive, got: {size_int}"
+                is_valid=False, error_message=f"Batch size must be positive, got: {size_int}"
             )
 
         warnings = []
@@ -373,11 +313,7 @@ class ValidationService:
         elif size_int == 1:
             warnings.append("Batch size of 1 may be inefficient")
 
-        return ValidationResult(
-            is_valid=True,
-            warnings=warnings,
-            normalized_value=size_int
-        )
+        return ValidationResult(is_valid=True, warnings=warnings, normalized_value=size_int)
 
     def validate_config_dict(self, config: Dict[str, Any]) -> ValidationResult:
         """Validate a configuration dictionary."""
@@ -385,31 +321,31 @@ class ValidationService:
         if not isinstance(config, dict):
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Configuration must be a dictionary, got: {type(config).__name__}"
+                error_message=f"Configuration must be a dictionary, got: {type(config).__name__}",
             )
 
         warnings = []
         errors = []
 
         # Check required fields
-        required_fields = ['music_directory']
+        required_fields = ["music_directory"]
         for field in required_fields:
             if field not in config:
                 errors.append(f"Missing required field: {field}")
 
         # Validate specific fields
-        if 'music_directory' in config:
-            result = self.validate_directory_path(config['music_directory'])
+        if "music_directory" in config:
+            result = self.validate_directory_path(config["music_directory"])
             if not result.is_valid:
                 errors.append(f"Invalid music_directory: {result.error_message}")
 
-        if 'anthropic_api_key' in config and config['anthropic_api_key']:
-            result = self.validate_api_key(config['anthropic_api_key'])
+        if "anthropic_api_key" in config and config["anthropic_api_key"]:
+            result = self.validate_api_key(config["anthropic_api_key"])
             if not result.is_valid:
                 errors.append(f"Invalid API key: {result.error_message}")
 
-        if 'batch_size' in config:
-            result = self.validate_batch_size(config['batch_size'])
+        if "batch_size" in config:
+            result = self.validate_batch_size(config["batch_size"])
             if not result.is_valid:
                 errors.append(f"Invalid batch_size: {result.error_message}")
             else:
@@ -417,15 +353,10 @@ class ValidationService:
 
         if errors:
             return ValidationResult(
-                is_valid=False,
-                error_message="; ".join(errors),
-                warnings=warnings
+                is_valid=False, error_message="; ".join(errors), warnings=warnings
             )
 
-        return ValidationResult(
-            is_valid=True,
-            warnings=warnings
-        )
+        return ValidationResult(is_valid=True, warnings=warnings)
 
 
 # Global validation service instance

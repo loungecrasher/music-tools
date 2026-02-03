@@ -4,6 +4,9 @@ from .models import ArtistCacheEntry, ProcessingLogEntry, Statistics
 from .repositories import CacheRepository, ConfigRepository
 
 __all__ = [
-    'ArtistCacheEntry', 'ProcessingLogEntry', 'Statistics',
-    'CacheRepository', 'ConfigRepository'
+    "ArtistCacheEntry",
+    "ProcessingLogEntry",
+    "Statistics",
+    "CacheRepository",
+    "ConfigRepository",
 ]

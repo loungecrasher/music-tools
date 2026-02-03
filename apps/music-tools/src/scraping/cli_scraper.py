@@ -17,15 +17,16 @@ from .runner import ScraperRunner
 
 class Colors:
     """ANSI color codes for terminal output."""
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 class EDMScraperCLI:
@@ -81,8 +82,8 @@ class EDMScraperCLI:
                 print(f"{Colors.RED}URL cannot be empty.{Colors.ENDC}")
                 continue
 
-            if not url.startswith(('http://', 'https://')):
-                url = 'https://' + url
+            if not url.startswith(("http://", "https://")):
+                url = "https://" + url
 
             if ScraperConfig.validate_url(url):
                 return url
@@ -150,11 +151,13 @@ class EDMScraperCLI:
     def _get_date_input(self, prompt: str) -> Optional[date]:
         """Helper to get date input."""
         while True:
-            date_str = input(f"{Colors.YELLOW}{prompt} (YYYY-MM-DD, Enter to skip): {Colors.ENDC}").strip()
+            date_str = input(
+                f"{Colors.YELLOW}{prompt} (YYYY-MM-DD, Enter to skip): {Colors.ENDC}"
+            ).strip()
             if not date_str:
                 return None
             try:
-                return datetime.strptime(date_str, '%Y-%m-%d').date()
+                return datetime.strptime(date_str, "%Y-%m-%d").date()
             except ValueError:
                 print(f"{Colors.RED}Invalid format. Use YYYY-MM-DD.{Colors.ENDC}")
 
@@ -184,12 +187,23 @@ class EDMScraperCLI:
 
         # Output Settings
         default_file = ScraperConfig.get_default_filename()
-        filename = input(f"{Colors.YELLOW}Output filename (default: {default_file}): {Colors.ENDC}").strip() or default_file
+        filename = (
+            input(
+                f"{Colors.YELLOW}Output filename (default: {default_file}): {Colors.ENDC}"
+            ).strip()
+            or default_file
+        )
 
-        save_json = input(f"{Colors.YELLOW}Save JSON? (y/n, default: n): {Colors.ENDC}").lower().startswith('y')
+        save_json = (
+            input(f"{Colors.YELLOW}Save JSON? (y/n, default: n): {Colors.ENDC}")
+            .lower()
+            .startswith("y")
+        )
 
         rec_pages = ScraperConfig.calculate_recommended_pages(start_date, end_date)
-        max_pages_input = input(f"{Colors.YELLOW}Max pages (rec: {rec_pages}): {Colors.ENDC}").strip()
+        max_pages_input = input(
+            f"{Colors.YELLOW}Max pages (rec: {rec_pages}): {Colors.ENDC}"
+        ).strip()
         max_pages = int(max_pages_input) if max_pages_input.isdigit() else rec_pages
 
         return ScraperSettings(
@@ -200,7 +214,7 @@ class EDMScraperCLI:
             end_date=end_date,
             output_filename=filename,
             save_json=save_json,
-            max_pages=max_pages
+            max_pages=max_pages,
         )
 
     def quick_start(self) -> Optional[ScraperSettings]:
@@ -209,7 +223,7 @@ class EDMScraperCLI:
         if not url:
             return None
 
-        start_date = ScraperConfig.get_quick_date_ranges()['Last 3 months']
+        start_date = ScraperConfig.get_quick_date_ranges()["Last 3 months"]
 
         return ScraperSettings(
             url=url,
@@ -218,7 +232,7 @@ class EDMScraperCLI:
             start_date=start_date,
             end_date=datetime.now().date(),
             output_filename=f"quick_start_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-            max_pages=ScraperConfig.calculate_recommended_pages(start_date, None)
+            max_pages=ScraperConfig.calculate_recommended_pages(start_date, None),
         )
 
     def run_scraper(self, settings: ScraperSettings, is_async: bool = False):
@@ -238,15 +252,15 @@ class EDMScraperCLI:
                 result = self.runner.run(settings)
 
             # Save results
-            saved_files = self.runner.save_results(settings, result['results'])
+            saved_files = self.runner.save_results(settings, result["results"])
 
             print(f"\n{Colors.GREEN}{Colors.BOLD}Scraping Complete!{Colors.ENDC}")
             print(f"Found {result['count']} posts in {result['duration']:.1f}s")
             print(f"Saved to: {saved_files}")
 
-            if result['errors']:
+            if result["errors"]:
                 print(f"\n{Colors.RED}Errors encountered:{Colors.ENDC}")
-                for err in result['errors']:
+                for err in result["errors"]:
                     print(f"  - {err}")
 
         except KeyboardInterrupt:
@@ -261,7 +275,7 @@ class EDMScraperCLI:
         # The original had a lot of UI logic. Let's simplify it.
         print(f"\n{Colors.CYAN}Extract Links{Colors.ENDC}")
 
-        files = [f for f in os.listdir('.') if f.endswith(('.txt', '.json'))]
+        files = [f for f in os.listdir(".") if f.endswith((".txt", ".json"))]
         if not files:
             print(f"{Colors.RED}No files found.{Colors.ENDC}")
             return
@@ -272,12 +286,14 @@ class EDMScraperCLI:
         try:
             choice = int(input(f"\n{Colors.YELLOW}Select file: {Colors.ENDC}"))
             if 1 <= choice <= len(files):
-                input_file = files[choice-1]
+                input_file = files[choice - 1]
                 output_file = f"extracted_{input_file}"
 
                 extractor = LinkExtractor()
                 results = extractor.extract_and_save(input_file, output_file)
-                print(f"{Colors.GREEN}Extracted {results['total_links']} links to {output_file}{Colors.ENDC}")
+                print(
+                    f"{Colors.GREEN}Extracted {results['total_links']} links to {output_file}{Colors.ENDC}"
+                )
         except ValueError:
             pass
 
@@ -285,13 +301,7 @@ class EDMScraperCLI:
         """Main loop."""
         self.print_header()
         while True:
-            options = [
-                "Start New Session",
-                "Quick Start",
-                "Async Session",
-                "Extract Links",
-                "Exit"
-            ]
+            options = ["Start New Session", "Quick Start", "Async Session", "Extract Links", "Exit"]
             choice = self.print_menu("Main Menu", options, back_option=False)
 
             if choice == 1:

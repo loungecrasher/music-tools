@@ -20,7 +20,7 @@ from .models import LibraryFile, LibraryStatistics
 logger = logging.getLogger(__name__)
 
 # Type variable for generic retry decorator
-T = TypeVar('T')
+T = TypeVar("T")
 
 # Constants
 DEFAULT_VETTING_HISTORY_LIMIT: int = 10
@@ -29,23 +29,23 @@ MAX_VETTING_HISTORY_LIMIT: int = 1000
 
 # Database configuration for production robustness
 DEFAULT_DB_TIMEOUT: float = 30.0  # 30 seconds for concurrent access
-DEFAULT_ISOLATION_LEVEL: str = 'DEFERRED'  # Allows concurrent reads
+DEFAULT_ISOLATION_LEVEL: str = "DEFERRED"  # Allows concurrent reads
 
 # Retry configuration for transient database errors
 DEFAULT_MAX_RETRIES: int = 3
 DEFAULT_RETRY_DELAY: float = 0.1  # 100ms initial delay
 DEFAULT_RETRY_BACKOFF: float = 2.0  # Exponential backoff multiplier
 RETRYABLE_ERRORS = (
-    'database is locked',
-    'database is busy',
-    'unable to open database file',
+    "database is locked",
+    "database is busy",
+    "unable to open database file",
 )
 
 
 def with_retry(
     max_retries: int = DEFAULT_MAX_RETRIES,
     delay: float = DEFAULT_RETRY_DELAY,
-    backoff: float = DEFAULT_RETRY_BACKOFF
+    backoff: float = DEFAULT_RETRY_BACKOFF,
 ) -> Callable:
     """Decorator to retry database operations on transient errors.
 
@@ -57,6 +57,7 @@ def with_retry(
     Returns:
         Decorated function with retry logic.
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> T:
@@ -70,10 +71,7 @@ def with_retry(
                     error_msg = str(e).lower()
 
                     # Check if error is retryable
-                    is_retryable = any(
-                        retryable in error_msg
-                        for retryable in RETRYABLE_ERRORS
-                    )
+                    is_retryable = any(retryable in error_msg for retryable in RETRYABLE_ERRORS)
 
                     if not is_retryable or attempt >= max_retries:
                         raise
@@ -92,6 +90,7 @@ def with_retry(
                 raise last_error
 
         return wrapper
+
     return decorator
 
 
@@ -108,10 +107,22 @@ class LibraryDatabase(BatchOperationsMixin):
 
     # Whitelist of allowed columns to prevent SQL injection
     ALLOWED_COLUMNS = {
-        'id', 'file_path', 'filename', 'artist', 'title', 'album', 'year',
-        'duration', 'file_format', 'file_size', 'metadata_hash',
-        'file_content_hash', 'indexed_at', 'file_mtime', 'last_verified',
-        'is_active'
+        "id",
+        "file_path",
+        "filename",
+        "artist",
+        "title",
+        "album",
+        "year",
+        "duration",
+        "file_format",
+        "file_size",
+        "metadata_hash",
+        "file_content_hash",
+        "indexed_at",
+        "file_mtime",
+        "last_verified",
+        "is_active",
     }
 
     def __init__(self, db_path: str):
@@ -164,7 +175,7 @@ class LibraryDatabase(BatchOperationsMixin):
                 self.db_path,
                 timeout=DEFAULT_DB_TIMEOUT,  # 30.0 seconds for concurrent access
                 check_same_thread=False,  # Allow multi-threaded access
-                isolation_level=DEFAULT_ISOLATION_LEVEL  # 'DEFERRED' for concurrent reads
+                isolation_level=DEFAULT_ISOLATION_LEVEL,  # 'DEFERRED' for concurrent reads
             )
             conn.row_factory = sqlite3.Row  # Access columns by name
             yield conn
@@ -342,19 +353,19 @@ class LibraryDatabase(BatchOperationsMixin):
 
             file_dict = file.to_dict()
             # Remove id as it's auto-generated
-            file_dict.pop('id', None)
+            file_dict.pop("id", None)
 
             # Validate column names against whitelist to prevent SQL injection
             invalid_columns = set(file_dict.keys()) - self.ALLOWED_COLUMNS
             if invalid_columns:
                 raise ValueError(f"Invalid column names: {invalid_columns}")
 
-            columns = ', '.join(file_dict.keys())
-            placeholders = ', '.join(['?' for _ in file_dict])
+            columns = ", ".join(file_dict.keys())
+            placeholders = ", ".join(["?" for _ in file_dict])
 
             cursor.execute(
                 f"INSERT INTO library_index ({columns}) VALUES ({placeholders})",
-                list(file_dict.values())
+                list(file_dict.values()),
             )
 
             return cursor.lastrowid
@@ -370,10 +381,7 @@ class LibraryDatabase(BatchOperationsMixin):
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                "SELECT * FROM library_index WHERE file_path = ?",
-                (path,)
-            )
+            cursor.execute("SELECT * FROM library_index WHERE file_path = ?", (path,))
             row = cursor.fetchone()
 
             if row:
@@ -392,8 +400,7 @@ class LibraryDatabase(BatchOperationsMixin):
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM library_index WHERE metadata_hash = ? AND is_active = 1",
-                (hash,)
+                "SELECT * FROM library_index WHERE metadata_hash = ? AND is_active = 1", (hash,)
             )
             row = cursor.fetchone()
 
@@ -413,8 +420,7 @@ class LibraryDatabase(BatchOperationsMixin):
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM library_index WHERE metadata_hash = ? AND is_active = 1",
-                (hash,)
+                "SELECT * FROM library_index WHERE metadata_hash = ? AND is_active = 1", (hash,)
             )
             rows = cursor.fetchall()
 
@@ -432,8 +438,7 @@ class LibraryDatabase(BatchOperationsMixin):
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM library_index WHERE file_content_hash = ? AND is_active = 1",
-                (hash,)
+                "SELECT * FROM library_index WHERE file_content_hash = ? AND is_active = 1", (hash,)
             )
             row = cursor.fetchone()
 
@@ -442,9 +447,7 @@ class LibraryDatabase(BatchOperationsMixin):
             return None
 
     def search_by_artist_title(
-        self,
-        artist: Optional[str] = None,
-        title: Optional[str] = None
+        self, artist: Optional[str] = None, title: Optional[str] = None
     ) -> List[LibraryFile]:
         """Search files by artist and/or title.
 
@@ -471,10 +474,7 @@ class LibraryDatabase(BatchOperationsMixin):
 
             where_clause = " AND ".join(conditions)
 
-            cursor.execute(
-                f"SELECT * FROM library_index WHERE {where_clause}",
-                params
-            )
+            cursor.execute(f"SELECT * FROM library_index WHERE {where_clause}", params)
             rows = cursor.fetchall()
 
             return [LibraryFile.from_dict(dict(row)) for row in rows]
@@ -518,18 +518,18 @@ class LibraryDatabase(BatchOperationsMixin):
             cursor = conn.cursor()
 
             file_dict = file.to_dict()
-            file_id = file_dict.pop('id')
+            file_id = file_dict.pop("id")
 
             # Validate column names against whitelist to prevent SQL injection
             invalid_columns = set(file_dict.keys()) - self.ALLOWED_COLUMNS
             if invalid_columns:
                 raise ValueError(f"Invalid column names: {invalid_columns}")
 
-            set_clause = ', '.join([f"{key} = ?" for key in file_dict.keys()])
+            set_clause = ", ".join([f"{key} = ?" for key in file_dict.keys()])
 
             cursor.execute(
                 f"UPDATE library_index SET {set_clause} WHERE id = ?",
-                list(file_dict.values()) + [file_id]
+                list(file_dict.values()) + [file_id],
             )
 
     def mark_inactive(self, path: str) -> None:
@@ -546,10 +546,7 @@ class LibraryDatabase(BatchOperationsMixin):
             raise ValueError("path cannot be None or empty")
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                "UPDATE library_index SET is_active = 0 WHERE file_path = ?",
-                (path,)
-            )
+            cursor.execute("UPDATE library_index SET is_active = 0 WHERE file_path = ?", (path,))
 
     def delete_file(self, path: str) -> None:
         """Permanently delete a file from the index (hard delete).
@@ -565,10 +562,7 @@ class LibraryDatabase(BatchOperationsMixin):
             raise ValueError("path cannot be None or empty")
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                "DELETE FROM library_index WHERE file_path = ?",
-                (path,)
-            )
+            cursor.execute("DELETE FROM library_index WHERE file_path = ?", (path,))
 
     def get_statistics(self) -> LibraryStatistics:
         """Get library statistics.
@@ -588,8 +582,8 @@ class LibraryDatabase(BatchOperationsMixin):
                 WHERE is_active = 1
             """)
             row = cursor.fetchone()
-            total_files = row['total_files'] or 0
-            total_size = row['total_size'] or 0
+            total_files = row["total_files"] or 0
+            total_size = row["total_size"] or 0
 
             # Get format breakdown
             cursor.execute("""
@@ -598,7 +592,7 @@ class LibraryDatabase(BatchOperationsMixin):
                 WHERE is_active = 1
                 GROUP BY file_format
             """)
-            formats_breakdown = {row['file_format']: row['count'] for row in cursor.fetchall()}
+            formats_breakdown = {row["file_format"]: row["count"] for row in cursor.fetchall()}
 
             # Get unique artists and albums
             cursor.execute("""
@@ -606,14 +600,14 @@ class LibraryDatabase(BatchOperationsMixin):
                 FROM library_index
                 WHERE is_active = 1 AND artist IS NOT NULL
             """)
-            artists_count = cursor.fetchone()['artists_count'] or 0
+            artists_count = cursor.fetchone()["artists_count"] or 0
 
             cursor.execute("""
                 SELECT COUNT(DISTINCT album) as albums_count
                 FROM library_index
                 WHERE is_active = 1 AND album IS NOT NULL
             """)
-            albums_count = cursor.fetchone()['albums_count'] or 0
+            albums_count = cursor.fetchone()["albums_count"] or 0
 
             # Get last index time from stats table
             cursor.execute("""
@@ -628,9 +622,9 @@ class LibraryDatabase(BatchOperationsMixin):
             index_duration = 0.0
 
             if stats_row:
-                if stats_row['last_index_time']:
-                    last_index_time = datetime.fromisoformat(stats_row['last_index_time'])
-                index_duration = stats_row['index_duration'] or 0.0
+                if stats_row["last_index_time"]:
+                    last_index_time = datetime.fromisoformat(stats_row["last_index_time"])
+                index_duration = stats_row["index_duration"] or 0.0
 
             return LibraryStatistics(
                 total_files=total_files,
@@ -639,7 +633,7 @@ class LibraryDatabase(BatchOperationsMixin):
                 artists_count=artists_count,
                 albums_count=albums_count,
                 last_index_time=last_index_time,
-                index_duration=index_duration
+                index_duration=index_duration,
             )
 
     def save_statistics(self, stats: LibraryStatistics) -> None:
@@ -658,7 +652,8 @@ class LibraryDatabase(BatchOperationsMixin):
         with self._get_connection() as conn:
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO library_stats (
                     total_files,
                     total_size,
@@ -669,16 +664,18 @@ class LibraryDatabase(BatchOperationsMixin):
                     index_duration,
                     created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                stats.total_files,
-                stats.total_size,
-                json.dumps(stats.formats_breakdown),
-                stats.artists_count,
-                stats.albums_count,
-                stats.last_index_time.isoformat() if stats.last_index_time else None,
-                stats.index_duration,
-                datetime.now(timezone.utc).isoformat()
-            ))
+            """,
+                (
+                    stats.total_files,
+                    stats.total_size,
+                    json.dumps(stats.formats_breakdown),
+                    stats.artists_count,
+                    stats.albums_count,
+                    stats.last_index_time.isoformat() if stats.last_index_time else None,
+                    stats.index_duration,
+                    datetime.now(timezone.utc).isoformat(),
+                ),
+            )
 
     def save_vetting_result(
         self,
@@ -687,7 +684,7 @@ class LibraryDatabase(BatchOperationsMixin):
         duplicates_found: int,
         new_songs: int,
         uncertain_matches: int,
-        threshold_used: float
+        threshold_used: float,
     ) -> None:
         """Save vetting result to history.
 
@@ -720,7 +717,8 @@ class LibraryDatabase(BatchOperationsMixin):
         with self._get_connection() as conn:
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO vetting_history (
                     import_folder,
                     total_files,
@@ -730,17 +728,21 @@ class LibraryDatabase(BatchOperationsMixin):
                     threshold_used,
                     vetted_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-                import_folder,
-                total_files,
-                duplicates_found,
-                new_songs,
-                uncertain_matches,
-                threshold_used,
-                datetime.now(timezone.utc).isoformat()
-            ))
+            """,
+                (
+                    import_folder,
+                    total_files,
+                    duplicates_found,
+                    new_songs,
+                    uncertain_matches,
+                    threshold_used,
+                    datetime.now(timezone.utc).isoformat(),
+                ),
+            )
 
-    def get_vetting_history(self, limit: int = DEFAULT_VETTING_HISTORY_LIMIT) -> List[Dict[str, Any]]:
+    def get_vetting_history(
+        self, limit: int = DEFAULT_VETTING_HISTORY_LIMIT
+    ) -> List[Dict[str, Any]]:
         """Get recent vetting history.
 
         Args:
@@ -762,12 +764,15 @@ class LibraryDatabase(BatchOperationsMixin):
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT *
                 FROM vetting_history
                 ORDER BY vetted_at DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
             return [dict(row) for row in cursor.fetchall()]
 
@@ -808,10 +813,7 @@ class LibraryDatabase(BatchOperationsMixin):
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                "SELECT COUNT(*) FROM library_index WHERE file_path = ?",
-                (path,)
-            )
+            cursor.execute("SELECT COUNT(*) FROM library_index WHERE file_path = ?", (path,))
             return cursor.fetchone()[0] > 0
 
     def backup_database(self, backup_path: str) -> None:

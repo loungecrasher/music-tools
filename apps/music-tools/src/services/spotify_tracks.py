@@ -25,6 +25,7 @@ def _get_spotify_client():
     """Get authenticated Spotify client."""
     try:
         from music_tools_common.auth import get_spotify_client
+
         return get_spotify_client()
     except ImportError:
         raise ImportError("music_tools_common not available. Please install it first.")
@@ -35,7 +36,7 @@ def _get_spotify_client():
 def _extract_playlist_id(url_or_id: str) -> str:
     """Extract playlist ID from URL or return as-is if already an ID."""
     # Handle full URLs
-    match = re.search(r'playlist[/:]([a-zA-Z0-9]+)', url_or_id)
+    match = re.search(r"playlist[/:]([a-zA-Z0-9]+)", url_or_id)
     if match:
         return match.group(1)
     # Assume it's already an ID
@@ -48,11 +49,11 @@ def _get_all_playlist_tracks(sp, playlist_id: str) -> List[Dict[str, Any]]:
     results = sp.playlist_tracks(playlist_id)
 
     while results:
-        for item in results['items']:
-            if item['track']:  # Skip None tracks
+        for item in results["items"]:
+            if item["track"]:  # Skip None tracks
                 tracks.append(item)
 
-        if results['next']:
+        if results["next"]:
             results = sp.next(results)
         else:
             break
@@ -62,16 +63,18 @@ def _get_all_playlist_tracks(sp, playlist_id: str) -> List[Dict[str, Any]]:
 
 def run_playlist_manager():
     """Interactive Spotify Playlist Manager."""
-    console.print(Panel(
-        "[bold green]Spotify Playlist Manager[/bold green]\n\n"
-        "Manage your Spotify playlists with options to:\n"
-        "• View playlist details and tracks\n"
-        "• Create new playlists\n"
-        "• Copy tracks between playlists\n"
-        "• Remove duplicates from playlists",
-        title="[bold]Spotify Playlist Manager[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Spotify Playlist Manager[/bold green]\n\n"
+            "Manage your Spotify playlists with options to:\n"
+            "• View playlist details and tracks\n"
+            "• Create new playlists\n"
+            "• Copy tracks between playlists\n"
+            "• Remove duplicates from playlists",
+            title="[bold]Spotify Playlist Manager[/bold]",
+            border_style="green",
+        )
+    )
 
     try:
         sp = _get_spotify_client()
@@ -100,9 +103,9 @@ def run_playlist_manager():
         elif choice == "2":
             _view_playlist_details(sp)
         elif choice == "3":
-            _create_playlist(sp, user['id'])
+            _create_playlist(sp, user["id"])
         elif choice == "4":
-            _copy_tracks_to_new_playlist(sp, user['id'])
+            _copy_tracks_to_new_playlist(sp, user["id"])
         elif choice == "5":
             _find_remove_duplicates(sp)
 
@@ -112,7 +115,7 @@ def _list_playlists(sp):
     with console.status("[bold green]Fetching playlists...[/bold green]"):
         playlists = sp.current_user_playlists(limit=50)
 
-    if not playlists['items']:
+    if not playlists["items"]:
         console.print("[yellow]No playlists found.[/yellow]")
         return
 
@@ -123,13 +126,13 @@ def _list_playlists(sp):
     table.add_column("Owner", style="cyan")
     table.add_column("Public", justify="center")
 
-    for i, playlist in enumerate(playlists['items'], 1):
+    for i, playlist in enumerate(playlists["items"], 1):
         table.add_row(
             str(i),
-            playlist['name'][:40],
-            str(playlist['tracks']['total']),
-            playlist['owner']['display_name'][:20],
-            "✓" if playlist['public'] else "✗"
+            playlist["name"][:40],
+            str(playlist["tracks"]["total"]),
+            playlist["owner"]["display_name"][:20],
+            "✓" if playlist["public"] else "✗",
         )
 
     console.print(table)
@@ -152,15 +155,17 @@ def _view_playlist_details(sp):
             return
 
     # Show playlist info
-    console.print(Panel(
-        f"[bold]{playlist['name']}[/bold]\n"
-        f"Owner: {playlist['owner']['display_name']}\n"
-        f"Tracks: {len(tracks)}\n"
-        f"Followers: {playlist['followers']['total']}\n"
-        f"Public: {'Yes' if playlist['public'] else 'No'}",
-        title="Playlist Details",
-        border_style="cyan"
-    ))
+    console.print(
+        Panel(
+            f"[bold]{playlist['name']}[/bold]\n"
+            f"Owner: {playlist['owner']['display_name']}\n"
+            f"Tracks: {len(tracks)}\n"
+            f"Followers: {playlist['followers']['total']}\n"
+            f"Public: {'Yes' if playlist['public'] else 'No'}",
+            title="Playlist Details",
+            border_style="cyan",
+        )
+    )
 
     # Show first 10 tracks
     if tracks:
@@ -171,14 +176,9 @@ def _view_playlist_details(sp):
         table.add_column("Album", style="yellow")
 
         for i, item in enumerate(tracks[:10], 1):
-            track = item['track']
-            artists = ", ".join(a['name'] for a in track['artists'])
-            table.add_row(
-                str(i),
-                track['name'][:40],
-                artists[:30],
-                track['album']['name'][:30]
-            )
+            track = item["track"]
+            artists = ", ".join(a["name"] for a in track["artists"])
+            table.add_row(str(i), track["name"][:40], artists[:30], track["album"]["name"][:30])
 
         console.print(table)
 
@@ -193,12 +193,7 @@ def _create_playlist(sp, user_id: str):
     public = Confirm.ask("Make public?", default=False)
 
     try:
-        playlist = sp.user_playlist_create(
-            user_id,
-            name,
-            public=public,
-            description=description
-        )
+        playlist = sp.user_playlist_create(user_id, name, public=public, description=description)
         console.print(f"\n[bold green]✓ Created playlist:[/bold green] {playlist['name']}")
         console.print(f"[dim]URL: {playlist['external_urls']['spotify']}[/dim]")
     except Exception as e:
@@ -231,21 +226,21 @@ def _copy_tracks_to_new_playlist(sp, user_id: str):
         new_playlist = sp.user_playlist_create(user_id, new_name, public=public)
 
         # Add tracks in batches of 100
-        track_uris = [t['track']['uri'] for t in tracks if t['track']]
+        track_uris = [t["track"]["uri"] for t in tracks if t["track"]]
 
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             task = progress.add_task("Adding tracks...", total=len(track_uris))
 
             for i in range(0, len(track_uris), 100):
-                batch = track_uris[i:i+100]
-                sp.playlist_add_items(new_playlist['id'], batch)
+                batch = track_uris[i : i + 100]
+                sp.playlist_add_items(new_playlist["id"], batch)
                 progress.update(task, advance=len(batch))
 
-        console.print(f"\n[bold green]✓ Created playlist with {len(track_uris)} tracks[/bold green]")
+        console.print(
+            f"\n[bold green]✓ Created playlist with {len(track_uris)} tracks[/bold green]"
+        )
         console.print(f"[dim]URL: {new_playlist['external_urls']['spotify']}[/dim]")
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {str(e)}")
@@ -272,9 +267,9 @@ def _find_remove_duplicates(sp):
     duplicates = []
 
     for i, item in enumerate(tracks):
-        track = item['track']
+        track = item["track"]
         if track:
-            track_id = track['id']
+            track_id = track["id"]
             if track_id in seen:
                 duplicates.append((i, track))
             else:
@@ -292,8 +287,8 @@ def _find_remove_duplicates(sp):
     table.add_column("Artist", style="cyan")
 
     for pos, track in duplicates[:10]:
-        artists = ", ".join(a['name'] for a in track['artists'])
-        table.add_row(str(pos + 1), track['name'][:40], artists[:30])
+        artists = ", ".join(a["name"] for a in track["artists"])
+        table.add_row(str(pos + 1), track["name"][:40], artists[:30])
 
     if len(duplicates) > 10:
         console.print(f"[dim]... and {len(duplicates) - 10} more[/dim]")
@@ -305,8 +300,7 @@ def _find_remove_duplicates(sp):
         with console.status("[bold green]Removing duplicates...[/bold green]"):
             for pos, track in sorted(duplicates, key=lambda x: x[0], reverse=True):
                 sp.playlist_remove_specific_occurrences_of_items(
-                    playlist_id,
-                    [{"uri": track['uri'], "positions": [pos]}]
+                    playlist_id, [{"uri": track["uri"], "positions": [pos]}]
                 )
 
         console.print(f"[bold green]✓ Removed {len(duplicates)} duplicates[/bold green]")
@@ -318,7 +312,7 @@ def filter_tracks_after_date(
     new_playlist_name: Optional[str] = None,
     description: Optional[str] = None,
     public: bool = False,
-    dry_run: bool = True
+    dry_run: bool = True,
 ) -> Dict[str, Any]:
     """Filter tracks from a playlist by release date."""
     sp = _get_spotify_client()
@@ -332,9 +326,9 @@ def filter_tracks_after_date(
     # Filter by date
     filtered = []
     for item in tracks:
-        track = item['track']
-        if track and track['album']:
-            release_date = track['album']['release_date']
+        track = item["track"]
+        if track and track["album"]:
+            release_date = track["album"]["release_date"]
             # Handle different date precisions
             try:
                 if len(release_date) == 4:  # Year only
@@ -353,23 +347,23 @@ def filter_tracks_after_date(
         "total_tracks": len(tracks),
         "filtered_tracks": len(filtered),
         "cutoff_date": cutoff_date,
-        "tracks": filtered
+        "tracks": filtered,
     }
 
     if not dry_run and new_playlist_name and filtered:
         user = sp.me()
         new_playlist = sp.user_playlist_create(
-            user['id'],
+            user["id"],
             new_playlist_name,
             public=public,
-            description=description or f"Tracks released after {cutoff_date}"
+            description=description or f"Tracks released after {cutoff_date}",
         )
 
-        track_uris = [t['uri'] for t in filtered]
+        track_uris = [t["uri"] for t in filtered]
         for i in range(0, len(track_uris), 100):
-            sp.playlist_add_items(new_playlist['id'], track_uris[i:i+100])
+            sp.playlist_add_items(new_playlist["id"], track_uris[i : i + 100])
 
-        result["new_playlist_url"] = new_playlist['external_urls']['spotify']
+        result["new_playlist_url"] = new_playlist["external_urls"]["spotify"]
 
     return result
 
@@ -380,7 +374,7 @@ def collect_recently_added_tracks(
     new_playlist_name: Optional[str] = None,
     description: Optional[str] = None,
     public: bool = False,
-    dry_run: bool = True
+    dry_run: bool = True,
 ) -> Dict[str, Any]:
     """Collect tracks added to multiple playlists after a specific date.
 
@@ -411,82 +405,86 @@ def collect_recently_added_tracks(
 
             added_count = 0
             for item in tracks:
-                if not item.get('track') or not item.get('added_at'):
+                if not item.get("track") or not item.get("added_at"):
                     continue
 
-                track = item['track']
-                track_id = track.get('id')
+                track = item["track"]
+                track_id = track.get("id")
 
                 if not track_id or track_id in seen_track_ids:
                     continue
 
                 # Parse the added_at date
-                added_at_str = item['added_at']  # ISO format: 2024-01-15T12:30:00Z
+                added_at_str = item["added_at"]  # ISO format: 2024-01-15T12:30:00Z
                 try:
-                    added_at = datetime.fromisoformat(added_at_str.replace('Z', '+00:00'))
+                    added_at = datetime.fromisoformat(added_at_str.replace("Z", "+00:00"))
                     added_at = added_at.replace(tzinfo=None)  # Remove timezone for comparison
                 except ValueError:
                     continue
 
                 if added_at >= cutoff:
-                    all_tracks.append({
-                        'track': track,
-                        'added_at': added_at_str,
-                        'from_playlist': playlist['name']
-                    })
+                    all_tracks.append(
+                        {
+                            "track": track,
+                            "added_at": added_at_str,
+                            "from_playlist": playlist["name"],
+                        }
+                    )
                     seen_track_ids.add(track_id)
                     added_count += 1
 
-            playlist_stats.append({
-                'name': playlist['name'],
-                'total_tracks': len(tracks),
-                'matched_tracks': added_count
-            })
+            playlist_stats.append(
+                {
+                    "name": playlist["name"],
+                    "total_tracks": len(tracks),
+                    "matched_tracks": added_count,
+                }
+            )
         except Exception as e:
-            playlist_stats.append({
-                'name': playlist_url,
-                'error': str(e)
-            })
+            playlist_stats.append({"name": playlist_url, "error": str(e)})
 
     result = {
-        'total_playlists': len(playlist_ids),
-        'total_tracks_found': len(all_tracks),
-        'cutoff_date': cutoff_date,
-        'playlist_stats': playlist_stats,
-        'tracks': all_tracks
+        "total_playlists": len(playlist_ids),
+        "total_tracks_found": len(all_tracks),
+        "cutoff_date": cutoff_date,
+        "playlist_stats": playlist_stats,
+        "tracks": all_tracks,
     }
 
     if not dry_run and new_playlist_name and all_tracks:
         user = sp.me()
         new_playlist = sp.user_playlist_create(
-            user['id'],
+            user["id"],
             new_playlist_name,
             public=public,
-            description=description or f"Tracks added after {cutoff_date} from {len(playlist_ids)} playlists"
+            description=description
+            or f"Tracks added after {cutoff_date} from {len(playlist_ids)} playlists",
         )
 
-        track_uris = [t['track']['uri'] for t in all_tracks]
+        track_uris = [t["track"]["uri"] for t in all_tracks]
         for i in range(0, len(track_uris), 100):
-            sp.playlist_add_items(new_playlist['id'], track_uris[i:i+100])
+            sp.playlist_add_items(new_playlist["id"], track_uris[i : i + 100])
 
-        result['new_playlist_url'] = new_playlist['external_urls']['spotify']
-        result['new_playlist_id'] = new_playlist['id']
+        result["new_playlist_url"] = new_playlist["external_urls"]["spotify"]
+        result["new_playlist_id"] = new_playlist["id"]
 
     return result
 
 
 def run_collect_from_folder():
     """Collect recently added tracks from multiple playlists into one."""
-    console.print(Panel(
-        "[bold green]Collect Recently Added Tracks from Playlist Folder[/bold green]\n\n"
-        "Scan a folder of playlists and collect all tracks that were\n"
-        "ADDED to those playlists after a specific date.\n"
-        "Combine them into a single new playlist.\n\n"
-        "[dim]Note: Spotify doesn't expose folders via API, so we use naming\n"
-        "patterns to identify playlists in a 'folder' (e.g., 'EDM/', '2024 - ')[/dim]",
-        title="[bold]Collect From Playlist Folder[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Collect Recently Added Tracks from Playlist Folder[/bold green]\n\n"
+            "Scan a folder of playlists and collect all tracks that were\n"
+            "ADDED to those playlists after a specific date.\n"
+            "Combine them into a single new playlist.\n\n"
+            "[dim]Note: Spotify doesn't expose folders via API, so we use naming\n"
+            "patterns to identify playlists in a 'folder' (e.g., 'EDM/', '2024 - ')[/dim]",
+            title="[bold]Collect From Playlist Folder[/bold]",
+            border_style="green",
+        )
+    )
 
     try:
         sp = _get_spotify_client()
@@ -521,13 +519,13 @@ def run_collect_from_folder():
             all_playlists = []
             results = sp.current_user_playlists(limit=50)
             while results:
-                all_playlists.extend(results['items'])
-                if results['next']:
+                all_playlists.extend(results["items"])
+                if results["next"]:
                     results = sp.next(results)
                 else:
                     break
 
-        matched = [pl for pl in all_playlists if pattern.lower() in pl['name'].lower()]
+        matched = [pl for pl in all_playlists if pattern.lower() in pl["name"].lower()]
 
         if not matched:
             console.print(f"[yellow]No playlists found matching '{pattern}'[/yellow]")
@@ -535,7 +533,7 @@ def run_collect_from_folder():
             return
 
         # Sort by name for better display
-        matched = sorted(matched, key=lambda x: x['name'])
+        matched = sorted(matched, key=lambda x: x["name"])
 
         console.print(f"\n[green]Found {len(matched)} playlists in folder '{pattern}':[/green]")
 
@@ -545,18 +543,18 @@ def run_collect_from_folder():
         table.add_column("Tracks", justify="right")
 
         for i, pl in enumerate(matched, 1):
-            table.add_row(str(i), pl['name'], str(pl['tracks']['total']))
+            table.add_row(str(i), pl["name"], str(pl["tracks"]["total"]))
 
         console.print(table)
 
-        total_tracks = sum(pl['tracks']['total'] for pl in matched)
+        total_tracks = sum(pl["tracks"]["total"] for pl in matched)
         console.print(f"\n[cyan]Total: {len(matched)} playlists, {total_tracks} tracks[/cyan]")
 
         if not Confirm.ask("\nUse these playlists?", default=True):
             Prompt.ask("\nPress Enter to continue")
             return
 
-        playlist_ids = [pl['id'] for pl in matched]
+        playlist_ids = [pl["id"] for pl in matched]
 
     elif choice == "2":
         # Select from user's playlists
@@ -564,8 +562,8 @@ def run_collect_from_folder():
             all_playlists = []
             results = sp.current_user_playlists(limit=50)
             while results:
-                all_playlists.extend(results['items'])
-                if results['next']:
+                all_playlists.extend(results["items"])
+                if results["next"]:
                     results = sp.next(results)
                 else:
                     break
@@ -577,7 +575,7 @@ def run_collect_from_folder():
         table.add_column("Tracks", justify="right")
 
         for i, pl in enumerate(all_playlists, 1):
-            table.add_row(str(i), pl['name'][:50], str(pl['tracks']['total']))
+            table.add_row(str(i), pl["name"][:50], str(pl["tracks"]["total"]))
 
         console.print(table)
 
@@ -587,10 +585,10 @@ def run_collect_from_folder():
 
         # Parse selection
         selected_indices = set()
-        for part in selection.split(','):
+        for part in selection.split(","):
             part = part.strip()
-            if '-' in part:
-                start, end = part.split('-')
+            if "-" in part:
+                start, end = part.split("-")
                 for i in range(int(start), int(end) + 1):
                     selected_indices.add(i)
             elif part.isdigit():
@@ -598,11 +596,13 @@ def run_collect_from_folder():
 
         for idx in selected_indices:
             if 1 <= idx <= len(all_playlists):
-                playlist_ids.append(all_playlists[idx - 1]['id'])
+                playlist_ids.append(all_playlists[idx - 1]["id"])
 
     elif choice == "3":
         # Manual entry
-        console.print("\n[dim]Enter playlist URLs or IDs, one per line. Enter empty line when done.[/dim]")
+        console.print(
+            "\n[dim]Enter playlist URLs or IDs, one per line. Enter empty line when done.[/dim]"
+        )
         while True:
             url = Prompt.ask("Playlist URL/ID (or Enter to finish)", default="")
             if not url:
@@ -629,16 +629,14 @@ def run_collect_from_folder():
 
     try:
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             task = progress.add_task("Collecting tracks...", total=None)
             result = collect_recently_added_tracks(
                 playlist_ids,
                 cutoff_date,
                 new_playlist_name=new_playlist_name,
-                dry_run=new_playlist_name is None
+                dry_run=new_playlist_name is None,
             )
             progress.update(task, description="Complete!")
 
@@ -653,18 +651,22 @@ def run_collect_from_folder():
         table.add_column("Matched", justify="right", style="green")
         table.add_column("Total", justify="right")
 
-        for stat in result['playlist_stats']:
-            if 'error' in stat:
-                table.add_row(stat['name'][:40], f"[red]Error: {stat['error'][:20]}[/red]", "-")
+        for stat in result["playlist_stats"]:
+            if "error" in stat:
+                table.add_row(stat["name"][:40], f"[red]Error: {stat['error'][:20]}[/red]", "-")
             else:
-                table.add_row(stat['name'][:40], str(stat['matched_tracks']), str(stat['total_tracks']))
+                table.add_row(
+                    stat["name"][:40], str(stat["matched_tracks"]), str(stat["total_tracks"])
+                )
 
         console.print(table)
 
-        if result.get('new_playlist_url'):
-            console.print(f"\n[bold green]✓ Created playlist with {result['total_tracks_found']} tracks![/bold green]")
+        if result.get("new_playlist_url"):
+            console.print(
+                f"\n[bold green]✓ Created playlist with {result['total_tracks_found']} tracks![/bold green]"
+            )
             console.print(f"URL: {result['new_playlist_url']}")
-        elif result['total_tracks_found'] > 0 and not new_playlist_name:
+        elif result["total_tracks_found"] > 0 and not new_playlist_name:
             console.print("\n[dim]No new playlist created (no name provided)[/dim]")
 
             if Confirm.ask("Create playlist now?", default=True):
@@ -673,15 +675,15 @@ def run_collect_from_folder():
                     with console.status("[bold green]Creating playlist...[/bold green]"):
                         user = sp.me()
                         new_playlist = sp.user_playlist_create(
-                            user['id'],
+                            user["id"],
                             name,
                             public=False,
-                            description=f"Tracks added after {cutoff_date} from {len(playlist_ids)} playlists"
+                            description=f"Tracks added after {cutoff_date} from {len(playlist_ids)} playlists",
                         )
 
-                        track_uris = [t['track']['uri'] for t in result['tracks']]
+                        track_uris = [t["track"]["uri"] for t in result["tracks"]]
                         for i in range(0, len(track_uris), 100):
-                            sp.playlist_add_items(new_playlist['id'], track_uris[i:i+100])
+                            sp.playlist_add_items(new_playlist["id"], track_uris[i : i + 100])
 
                     console.print("\n[bold green]✓ Created playlist![/bold green]")
                     console.print(f"URL: {new_playlist['external_urls']['spotify']}")
@@ -694,13 +696,15 @@ def run_collect_from_folder():
 
 def run_tracks_after_date():
     """Interactive wrapper for filtering Spotify tracks by release date."""
-    console.print(Panel(
-        "[bold green]Filter Spotify Tracks by Release Date[/bold green]\n\n"
-        "Filter tracks from a Spotify playlist based on their release date.\n"
-        "You can create a new playlist with tracks released after a specific date.",
-        title="[bold]Spotify Tracks After Date[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Filter Spotify Tracks by Release Date[/bold green]\n\n"
+            "Filter tracks from a Spotify playlist based on their release date.\n"
+            "You can create a new playlist with tracks released after a specific date.",
+            title="[bold]Spotify Tracks After Date[/bold]",
+            border_style="green",
+        )
+    )
 
     try:
         sp = _get_spotify_client()
@@ -719,7 +723,9 @@ def run_tracks_after_date():
     playlist_url = playlist_url.strip("'\"")
     cutoff_date = Prompt.ask("Enter cutoff date (YYYY-MM-DD)")
 
-    new_playlist_name = Prompt.ask("Enter name for new playlist (or press Enter to just preview)", default="")
+    new_playlist_name = Prompt.ask(
+        "Enter name for new playlist (or press Enter to just preview)", default=""
+    )
     new_playlist_name = new_playlist_name if new_playlist_name else None
 
     description = ""
@@ -738,17 +744,17 @@ def run_tracks_after_date():
                 new_playlist_name=new_playlist_name,
                 description=description,
                 public=False,
-                dry_run=new_playlist_name is None
+                dry_run=new_playlist_name is None,
             )
 
         console.print("\n[bold green]Results:[/bold green]")
         console.print(f"Total tracks in playlist: {result['total_tracks']}")
         console.print(f"Tracks after {cutoff_date}: {result['filtered_tracks']}")
 
-        if result.get('new_playlist_url'):
+        if result.get("new_playlist_url"):
             console.print("\n[bold green]✓ Created new playlist![/bold green]")
             console.print(f"URL: {result['new_playlist_url']}")
-        elif result['filtered_tracks'] > 0:
+        elif result["filtered_tracks"] > 0:
             console.print("\n[dim]No new playlist created (preview mode)[/dim]")
 
     except Exception as e:
@@ -757,7 +763,7 @@ def run_tracks_after_date():
     Prompt.ask("\nPress Enter to continue")
 
 
-logger = logging.getLogger('music_tools.spotify_tracks')
+logger = logging.getLogger("music_tools.spotify_tracks")
 
 
 def _get_all_playlists(sp) -> List[Dict[str, Any]]:
@@ -781,19 +787,21 @@ def run_recent_tracks_aggregator():
     and creates or updates a single consolidated playlist sorted by date
     added (newest first).
     """
-    console.print(Panel(
-        "[bold green]Recent Tracks Aggregator[/bold green]\n\n"
-        "Scans your playlists and collects every track added within\n"
-        "a configurable window (default: 30 days) into a single playlist.\n\n"
-        "Features:\n"
-        "  - Scans all playlists or a filtered subset\n"
-        "  - Deduplicates across playlists (keeps earliest add date)\n"
-        "  - Creates a new playlist or updates an existing one\n"
-        "  - Dry-run mode to preview without changes\n"
-        "  - Sorted newest-first",
-        title="[bold]Recent Tracks Aggregator[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Recent Tracks Aggregator[/bold green]\n\n"
+            "Scans your playlists and collects every track added within\n"
+            "a configurable window (default: 30 days) into a single playlist.\n\n"
+            "Features:\n"
+            "  - Scans all playlists or a filtered subset\n"
+            "  - Deduplicates across playlists (keeps earliest add date)\n"
+            "  - Creates a new playlist or updates an existing one\n"
+            "  - Dry-run mode to preview without changes\n"
+            "  - Sorted newest-first",
+            title="[bold]Recent Tracks Aggregator[/bold]",
+            border_style="green",
+        )
+    )
 
     # --- Authenticate ---
     try:
@@ -817,8 +825,7 @@ def run_recent_tracks_aggregator():
         days_back = 30
 
     playlist_name = Prompt.ask(
-        "Name for the aggregated playlist",
-        default=f"Recent Adds (Last {days_back} Days)"
+        "Name for the aggregated playlist", default=f"Recent Adds (Last {days_back} Days)"
     )
 
     # Playlist scope
@@ -840,13 +847,9 @@ def run_recent_tracks_aggregator():
     console.print(f"Found {len(all_playlists)} playlists in your library.")
 
     if filter_pattern:
-        target_playlists = [
-            p for p in all_playlists
-            if filter_pattern.lower() in p["name"].lower()
-        ]
+        target_playlists = [p for p in all_playlists if filter_pattern.lower() in p["name"].lower()]
         console.print(
-            f"Filtered to {len(target_playlists)} playlists matching "
-            f"'{filter_pattern}'."
+            f"Filtered to {len(target_playlists)} playlists matching " f"'{filter_pattern}'."
         )
     else:
         target_playlists = all_playlists
@@ -867,9 +870,7 @@ def run_recent_tracks_aggregator():
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
-        task = progress.add_task(
-            "Scanning playlists...", total=len(target_playlists)
-        )
+        task = progress.add_task("Scanning playlists...", total=len(target_playlists))
 
         for playlist in target_playlists:
             pname = playlist["name"]
@@ -907,19 +908,13 @@ def run_recent_tracks_aggregator():
                         continue
 
                     try:
-                        added_at = datetime.fromisoformat(
-                            added_at_str.replace("Z", "+00:00")
-                        )
+                        added_at = datetime.fromisoformat(added_at_str.replace("Z", "+00:00"))
                     except ValueError:
                         continue
 
                     if added_at >= cutoff:
                         uri = track["uri"]
-                        artist = (
-                            track["artists"][0]["name"]
-                            if track.get("artists")
-                            else "Unknown"
-                        )
+                        artist = track["artists"][0]["name"] if track.get("artists") else "Unknown"
                         # Keep earliest add date when same track in multiple playlists
                         if uri not in recent_tracks or added_at < recent_tracks[uri]["added_at"]:
                             recent_tracks[uri] = {
@@ -941,11 +936,13 @@ def run_recent_tracks_aggregator():
                 else:
                     break
 
-            playlist_stats.append({
-                "name": pname,
-                "total": playlist["tracks"]["total"],
-                "matched": matched_count,
-            })
+            playlist_stats.append(
+                {
+                    "name": pname,
+                    "total": playlist["tracks"]["total"],
+                    "matched": matched_count,
+                }
+            )
             progress.advance(task)
 
     # --- Display results ---
@@ -956,9 +953,7 @@ def run_recent_tracks_aggregator():
     )
 
     if skipped:
-        console.print(
-            f"[yellow]Skipped {len(skipped)} playlists due to API errors.[/yellow]"
-        )
+        console.print(f"[yellow]Skipped {len(skipped)} playlists due to API errors.[/yellow]")
 
     # Per-playlist breakdown
     stats_with_matches = [s for s in playlist_stats if s.get("matched", 0) > 0]
@@ -982,9 +977,7 @@ def run_recent_tracks_aggregator():
         return
 
     # Sort newest first
-    sorted_tracks = sorted(
-        recent_tracks.items(), key=lambda x: x[1]["added_at"], reverse=True
-    )
+    sorted_tracks = sorted(recent_tracks.items(), key=lambda x: x[1]["added_at"], reverse=True)
 
     # Show preview
     preview_count = min(15, len(sorted_tracks))
@@ -1016,9 +1009,7 @@ def run_recent_tracks_aggregator():
         return
 
     # --- Create or update playlist ---
-    if not Confirm.ask(
-        f"\nAdd {len(sorted_tracks)} tracks to '{playlist_name}'?", default=True
-    ):
+    if not Confirm.ask(f"\nAdd {len(sorted_tracks)} tracks to '{playlist_name}'?", default=True):
         console.print("[yellow]Cancelled.[/yellow]")
         Prompt.ask("\nPress Enter to continue")
         return
@@ -1041,8 +1032,7 @@ def run_recent_tracks_aggregator():
                 playlist_name,
                 public=False,
                 description=(
-                    f"Auto-generated: tracks added to playlists "
-                    f"in the last {days_back} days."
+                    f"Auto-generated: tracks added to playlists " f"in the last {days_back} days."
                 ),
             )
             target_id = new_pl["id"]
@@ -1060,7 +1050,7 @@ def run_recent_tracks_aggregator():
         ) as progress:
             add_task = progress.add_task("Adding tracks...", total=len(track_uris))
             for batch_start in range(0, len(track_uris), 100):
-                batch = track_uris[batch_start: batch_start + 100]
+                batch = track_uris[batch_start : batch_start + 100]
                 sp.playlist_add_items(target_id, batch)
                 progress.advance(add_task, advance=len(batch))
 
@@ -1068,9 +1058,7 @@ def run_recent_tracks_aggregator():
             f"\n[bold green]Done! {len(track_uris)} tracks added to "
             f"'{playlist_name}'[/bold green]"
         )
-        console.print(
-            f"[dim]https://open.spotify.com/playlist/{target_id}[/dim]"
-        )
+        console.print(f"[dim]https://open.spotify.com/playlist/{target_id}[/dim]")
 
     except Exception as e:
         console.print(f"[bold red]Error creating/updating playlist:[/bold red] {str(e)}")

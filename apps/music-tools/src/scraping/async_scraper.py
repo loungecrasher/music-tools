@@ -62,8 +62,7 @@ from .error_handling import (
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -71,8 +70,12 @@ logger = logging.getLogger(__name__)
 class AsyncMusicBlogScraper:
     """Asynchronous music blog scraper for improved performance."""
 
-    def __init__(self, base_url: str, output_file: str = "async_download_links.txt",
-                 max_concurrent: int = MAX_CONCURRENT_REQUESTS):
+    def __init__(
+        self,
+        base_url: str,
+        output_file: str = "async_download_links.txt",
+        max_concurrent: int = MAX_CONCURRENT_REQUESTS,
+    ):
         """
         Initialize the async scraper.
 
@@ -84,7 +87,7 @@ class AsyncMusicBlogScraper:
         if not validate_url(base_url):
             raise ValidationError(f"Invalid base URL: {base_url}")
 
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.output_file = output_file
         self.max_concurrent = min(max_concurrent, MAX_CONCURRENT_REQUESTS)
         self.semaphore = asyncio.Semaphore(self.max_concurrent)
@@ -102,23 +105,19 @@ class AsyncMusicBlogScraper:
         connector = TCPConnector(
             limit=MAX_CONCURRENT_REQUESTS_PER_HOST,
             limit_per_host=MAX_CONCURRENT_REQUESTS_PER_HOST,
-            ttl_dns_cache=300
+            ttl_dns_cache=300,
         )
 
         headers = {
-            'User-Agent': get_random_user_agent(),
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
+            "User-Agent": get_random_user_agent(),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
         }
 
-        async with ClientSession(
-            timeout=timeout,
-            connector=connector,
-            headers=headers
-        ) as session:
+        async with ClientSession(timeout=timeout, connector=connector, headers=headers) as session:
             yield session
 
     async def rate_limit(self, url: str):
@@ -144,7 +143,7 @@ class AsyncMusicBlogScraper:
                 async with session.get(url) as response:
                     # Handle rate limiting
                     if response.status == 429:
-                        retry_after = response.headers.get('Retry-After', 60)
+                        retry_after = response.headers.get("Retry-After", 60)
                         logger.warning(f"Rate limited on {url}. Waiting {retry_after} seconds...")
                         await asyncio.sleep(int(retry_after))
                         # Retry once after rate limit
@@ -170,13 +169,15 @@ class AsyncMusicBlogScraper:
         html = await self.fetch_page(session, url)
         if html:
             try:
-                return BeautifulSoup(html, 'html.parser')
+                return BeautifulSoup(html, "html.parser")
             except Exception as e:
                 logger.error(f"Error parsing HTML from {url}: {e}")
                 return None
         return None
 
-    async def find_blog_posts_async(self, session: ClientSession, max_pages: int = DEFAULT_MAX_PAGES) -> List[str]:
+    async def find_blog_posts_async(
+        self, session: ClientSession, max_pages: int = DEFAULT_MAX_PAGES
+    ) -> List[str]:
         """Find blog post URLs asynchronously."""
         post_urls = []
 
@@ -194,10 +195,7 @@ class AsyncMusicBlogScraper:
         # Create tasks for pagination pages
         page_tasks = []
         for page_num in range(2, max_pages + 2):
-            page_urls = [
-                f"{self.base_url}/page/{page_num}/",
-                f"{self.base_url}/page/{page_num}"
-            ]
+            page_urls = [f"{self.base_url}/page/{page_num}/", f"{self.base_url}/page/{page_num}"]
             for page_url in page_urls:
                 page_tasks.append(self.fetch_page_posts(session, page_url, page_num))
 
@@ -217,7 +215,9 @@ class AsyncMusicBlogScraper:
         logger.info(f"Total unique posts discovered: {len(unique_posts)}")
         return unique_posts
 
-    async def fetch_page_posts(self, session: ClientSession, page_url: str, page_num: int) -> List[str]:
+    async def fetch_page_posts(
+        self, session: ClientSession, page_url: str, page_num: int
+    ) -> List[str]:
         """Fetch posts from a single page."""
         logger.debug(f"Fetching page {page_num}: {page_url}")
         soup = await self.get_page_content(session, page_url)
@@ -237,7 +237,7 @@ class AsyncMusicBlogScraper:
             try:
                 links = soup.select(selector)
                 for link in links:
-                    href = link.get('href')
+                    href = link.get("href")
                     if href and self.is_blog_post_url(href):
                         full_url = urljoin(page_url, href)
                         if full_url not in found_posts:
@@ -264,14 +264,19 @@ class AsyncMusicBlogScraper:
             return True
 
         # Check for year patterns
-        if self.base_url in url and re.search(r'\d{4}', url):
+        if self.base_url in url and re.search(r"\d{4}", url):
             return True
 
         return False
 
-    async def process_post(self, session: ClientSession, post_url: str,
-                           target_genres: List[str], start_date: Optional[date] = None,
-                           end_date: Optional[date] = None) -> Optional[Dict]:
+    async def process_post(
+        self,
+        session: ClientSession,
+        post_url: str,
+        target_genres: List[str],
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+    ) -> Optional[Dict]:
         """Process a single post asynchronously."""
         soup = await self.get_page_content(session, post_url)
         if not soup:
@@ -295,8 +300,9 @@ class AsyncMusicBlogScraper:
         post_genres = self.extract_genre_keywords(soup)
 
         # Check if any target genres match
-        matching_genres = [genre for genre in target_genres
-                           if genre.lower() in [g.lower() for g in post_genres]]
+        matching_genres = [
+            genre for genre in target_genres if genre.lower() in [g.lower() for g in post_genres]
+        ]
 
         if matching_genres:
             # Extract download links
@@ -306,12 +312,12 @@ class AsyncMusicBlogScraper:
             title = self.extract_post_title(soup)
 
             post_info = {
-                'url': post_url,
-                'title': title,
-                'genres': post_genres,
-                'matching_genres': matching_genres,
-                'download_links': download_links,
-                'post_date': post_date.isoformat() if post_date else None
+                "url": post_url,
+                "title": title,
+                "genres": post_genres,
+                "matching_genres": matching_genres,
+                "download_links": download_links,
+                "post_date": post_date.isoformat() if post_date else None,
             }
 
             logger.debug(f"Found {len(download_links)} download links for: {title}")
@@ -319,17 +325,23 @@ class AsyncMusicBlogScraper:
 
         return None
 
-    async def filter_posts_by_genre_async(self, session: ClientSession,
-                                          post_urls: List[str],
-                                          target_genres: List[str],
-                                          start_date: Optional[date] = None,
-                                          end_date: Optional[date] = None) -> List[Dict]:
+    async def filter_posts_by_genre_async(
+        self,
+        session: ClientSession,
+        post_urls: List[str],
+        target_genres: List[str],
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+    ) -> List[Dict]:
         """Filter posts by genre asynchronously."""
         logger.info(f"Filtering {len(post_urls)} posts for genres: {', '.join(target_genres)}")
 
         if start_date or end_date:
-            date_range = f" from {start_date} to {end_date}" if start_date and end_date else \
-                        f" from {start_date}" if start_date else f" until {end_date}"
+            date_range = (
+                f" from {start_date} to {end_date}"
+                if start_date and end_date
+                else f" from {start_date}" if start_date else f" until {end_date}"
+            )
             logger.info(f"Date range: {date_range}")
 
         # Create tasks for all posts
@@ -396,10 +408,10 @@ class AsyncMusicBlogScraper:
         seen_links = set()
 
         # Find all links on the page
-        links = soup.find_all('a', href=True)
+        links = soup.find_all("a", href=True)
 
         for link in links:
-            href = link.get('href')
+            href = link.get("href")
             if href:
                 # Check if it matches download patterns
                 for pattern in self.download_patterns:
@@ -457,7 +469,7 @@ class AsyncMusicBlogScraper:
             return None
 
         # Clean up text (handle newlines in "Nov\n21\n2025" format)
-        date_text = re.sub(r'\s+', ' ', date_text.strip())
+        date_text = re.sub(r"\s+", " ", date_text.strip())
 
         for fmt in DATE_FORMATS:
             try:
@@ -476,21 +488,23 @@ class AsyncMusicBlogScraper:
     async def save_results_async(self, matching_posts: List[Dict]):
         """Save results to file asynchronously."""
         async with asyncio.Lock():
-            with open(self.output_file, 'w', encoding=DEFAULT_ENCODING) as f:
-                f.write(f"EDM Music Download Links (Async) - Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            with open(self.output_file, "w", encoding=DEFAULT_ENCODING) as f:
+                f.write(
+                    f"EDM Music Download Links (Async) - Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                )
                 f.write("=" * 80 + "\n\n")
 
                 for post in matching_posts:
                     f.write(f"Title: {post['title']}\n")
                     f.write(f"URL: {post['url']}\n")
-                    if post.get('post_date'):
+                    if post.get("post_date"):
                         f.write(f"Date: {post['post_date']}\n")
                     f.write(f"Genres: {', '.join(post['genres'])}\n")
                     f.write(f"Matching Genres: {', '.join(post['matching_genres'])}\n")
                     f.write("Download Links:\n")
 
-                    if post['download_links']:
-                        for link in post['download_links']:
+                    if post["download_links"]:
+                        for link in post["download_links"]:
                             f.write(f"  - {link}\n")
                     else:
                         f.write("  No download links found\n")
@@ -500,11 +514,16 @@ class AsyncMusicBlogScraper:
             logger.info(f"Results saved to {self.output_file}")
             logger.info(f"Found {len(matching_posts)} matching posts")
 
-            total_links = sum(len(post['download_links']) for post in matching_posts)
+            total_links = sum(len(post["download_links"]) for post in matching_posts)
             logger.info(f"Total download links found: {total_links}")
 
-    async def run(self, target_genres: List[str], max_pages: int = DEFAULT_MAX_PAGES,
-                  start_date: Optional[date] = None, end_date: Optional[date] = None) -> List[Dict]:
+    async def run(
+        self,
+        target_genres: List[str],
+        max_pages: int = DEFAULT_MAX_PAGES,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+    ) -> List[Dict]:
         """
         Run the async scraper.
 
@@ -535,7 +554,9 @@ class AsyncMusicBlogScraper:
 
             return results
 
-    async def scrape_website(self, max_pages: int = DEFAULT_MAX_PAGES, start_date=None, end_date=None) -> List[Dict]:
+    async def scrape_website(
+        self, max_pages: int = DEFAULT_MAX_PAGES, start_date=None, end_date=None
+    ) -> List[Dict]:
         """
         Alias for run method to match synchronous interface.
 
@@ -559,21 +580,26 @@ class AsyncMusicBlogScraper:
 
 def main():
     """Main entry point for async scraper."""
-    parser = argparse.ArgumentParser(description='Async EDM blog scraper')
-    parser.add_argument('url', help='Base URL of the blog site')
-    parser.add_argument('--genres', nargs='+',
-                        default=['house', 'progressive house', 'melodic', 'indie dance', 'bass house'],
-                        help='Genre keywords to search for')
-    parser.add_argument('--output', default='async_download_links.txt',
-                        help='Output file name')
-    parser.add_argument('--max-pages', type=int, default=DEFAULT_MAX_PAGES,
-                        help='Maximum pages to search')
-    parser.add_argument('--max-concurrent', type=int, default=MAX_CONCURRENT_REQUESTS,
-                        help='Maximum concurrent requests')
-    parser.add_argument('--start-date',
-                        help='Start date for filtering (YYYY-MM-DD format)')
-    parser.add_argument('--end-date',
-                        help='End date for filtering (YYYY-MM-DD format)')
+    parser = argparse.ArgumentParser(description="Async EDM blog scraper")
+    parser.add_argument("url", help="Base URL of the blog site")
+    parser.add_argument(
+        "--genres",
+        nargs="+",
+        default=["house", "progressive house", "melodic", "indie dance", "bass house"],
+        help="Genre keywords to search for",
+    )
+    parser.add_argument("--output", default="async_download_links.txt", help="Output file name")
+    parser.add_argument(
+        "--max-pages", type=int, default=DEFAULT_MAX_PAGES, help="Maximum pages to search"
+    )
+    parser.add_argument(
+        "--max-concurrent",
+        type=int,
+        default=MAX_CONCURRENT_REQUESTS,
+        help="Maximum concurrent requests",
+    )
+    parser.add_argument("--start-date", help="Start date for filtering (YYYY-MM-DD format)")
+    parser.add_argument("--end-date", help="End date for filtering (YYYY-MM-DD format)")
 
     args = parser.parse_args()
 
@@ -583,14 +609,14 @@ def main():
 
     if args.start_date:
         try:
-            start_date = datetime.strptime(args.start_date, '%Y-%m-%d').date()
+            start_date = datetime.strptime(args.start_date, "%Y-%m-%d").date()
         except ValueError:
             logger.error("Invalid start date format. Use YYYY-MM-DD")
             return
 
     if args.end_date:
         try:
-            end_date = datetime.strptime(args.end_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(args.end_date, "%Y-%m-%d").date()
         except ValueError:
             logger.error("Invalid end date format. Use YYYY-MM-DD")
             return

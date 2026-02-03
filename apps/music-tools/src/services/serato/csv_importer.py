@@ -1,4 +1,5 @@
 """Import a CSV playlist into a Serato crate via fuzzy matching."""
+
 import csv
 import logging
 from dataclasses import dataclass, field
@@ -77,21 +78,21 @@ class CSVImporter:
 
         tracks: List[Tuple[str, str]] = []
 
-        with open(csv_path, 'r', encoding='utf-8-sig') as fh:
+        with open(csv_path, "r", encoding="utf-8-sig") as fh:
             reader = csv.DictReader(fh)
 
             if reader.fieldnames is None:
                 raise ValueError("CSV file is empty or has no header row")
 
-            if 'Artist' not in reader.fieldnames or 'Title' not in reader.fieldnames:
+            if "Artist" not in reader.fieldnames or "Title" not in reader.fieldnames:
                 raise ValueError(
                     f"CSV must have 'Artist' and 'Title' columns. "
                     f"Found columns: {reader.fieldnames}"
                 )
 
             for row in reader:
-                artist = row['Artist'].strip()
-                title = row['Title'].strip()
+                artist = row["Artist"].strip()
+                title = row["Title"].strip()
                 if artist and title:
                     tracks.append((artist, title))
 
@@ -131,9 +132,7 @@ class CSVImporter:
 
         for artist, title in csv_tracks:
             query = f"{artist} {title}"
-            best_match, all_matches, score = find_best_match(
-                query, index_data, threshold=threshold
-            )
+            best_match, all_matches, score = find_best_match(query, index_data, threshold=threshold)
 
             if best_match is not None:
                 result.matched.append((artist, title, best_match, score))
@@ -158,8 +157,6 @@ class CSVImporter:
                 len(result.multiple_matches),
             )
         else:
-            logger.warning(
-                "No tracks matched from %s -- crate not created", csv_path
-            )
+            logger.warning("No tracks matched from %s -- crate not created", csv_path)
 
         return result

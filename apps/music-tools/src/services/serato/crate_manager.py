@@ -1,4 +1,5 @@
 """Manage Serato crate files -- read, create, and list crate families."""
+
 import logging
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
@@ -76,7 +77,7 @@ class CrateManager:
             crate = Crate(str(crate_path))
             paths: List[str] = []
             for rel in crate.get_track_paths():
-                absolute = rel if rel.startswith('/') else f'/{rel}'
+                absolute = rel if rel.startswith("/") else f"/{rel}"
                 paths.append(absolute)
             return paths
         except Exception as exc:
@@ -111,9 +112,7 @@ class CrateManager:
             )
             return {}
 
-        logger.info(
-            "Found %d crate(s) in family '%s'", len(crate_files), source_crate
-        )
+        logger.info("Found %d crate(s) in family '%s'", len(crate_files), source_crate)
 
         all_tracks: Dict[str, TrackMetadata] = {}
         track_count = 0
@@ -136,11 +135,11 @@ class CrateManager:
                 processed += 1
                 meta = MetadataReader.read(track_path, fallback_to_filename=True)
 
-                if meta and meta.get('artist') and meta.get('title'):
+                if meta and meta.get("artist") and meta.get("title"):
                     tm = TrackMetadata(
                         path=track_path,
-                        artist=meta['artist'],
-                        title=meta['title'],
+                        artist=meta["artist"],
+                        title=meta["title"],
                         crate_name=crate_name,
                     )
                     all_tracks[tm.search_string] = tm
@@ -152,9 +151,7 @@ class CrateManager:
                 if progress_callback is not None:
                     progress_callback(processed, total_paths)
 
-        logger.info(
-            "Loaded %d tracks with metadata (skipped %d)", track_count, skipped_count
-        )
+        logger.info("Loaded %d tracks with metadata (skipped %d)", track_count, skipped_count)
         return all_tracks
 
     # ------------------------------------------------------------------
@@ -184,7 +181,7 @@ class CrateManager:
             crate = Crate(str(crate_path))
 
             for track_path in track_paths:
-                relative = track_path.lstrip('/')
+                relative = track_path.lstrip("/")
                 crate.add_track(relative)
 
             crate.save(str(crate_path))

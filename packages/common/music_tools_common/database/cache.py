@@ -2,6 +2,7 @@
 Cache manager for Music Tools.
 Provides in-memory and file-based caching with TTL support.
 """
+
 import hashlib
 import json
 import logging
@@ -9,7 +10,7 @@ import os
 import time
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger('music_tools_common.database.cache')
+logger = logging.getLogger("music_tools_common.database.cache")
 
 
 class CacheManager:
@@ -24,7 +25,7 @@ class CacheManager:
             max_size: Maximum number of cached items
         """
         if cache_dir is None:
-            cache_dir = os.path.expanduser('~/.music_tools/cache')
+            cache_dir = os.path.expanduser("~/.music_tools/cache")
 
         self.cache_dir = cache_dir
         self.ttl = ttl
@@ -72,21 +73,21 @@ class CacheManager:
         # Check memory cache first
         if cache_key in self._memory_cache:
             entry = self._memory_cache[cache_key]
-            if not self._is_expired(entry['timestamp']):
-                return entry['value']
+            if not self._is_expired(entry["timestamp"]):
+                return entry["value"]
             else:
                 del self._memory_cache[cache_key]
 
         # Check file cache
-        cache_file = os.path.join(self.cache_dir, f'{cache_key}.json')
+        cache_file = os.path.join(self.cache_dir, f"{cache_key}.json")
         if os.path.exists(cache_file):
             try:
-                with open(cache_file, 'r') as f:
+                with open(cache_file, "r") as f:
                     entry = json.load(f)
-                if not self._is_expired(entry['timestamp']):
+                if not self._is_expired(entry["timestamp"]):
                     # Restore to memory cache
                     self._memory_cache[cache_key] = entry
-                    return entry['value']
+                    return entry["value"]
                 else:
                     os.remove(cache_file)
             except Exception as e:
@@ -103,10 +104,7 @@ class CacheManager:
         """
         cache_key = self._get_cache_key(key)
 
-        entry = {
-            'timestamp': time.time(),
-            'value': value
-        }
+        entry = {"timestamp": time.time(), "value": value}
 
         # Store in memory
         self._memory_cache[cache_key] = entry
@@ -114,17 +112,14 @@ class CacheManager:
         # Enforce max size
         if len(self._memory_cache) > self.max_size:
             # Remove oldest entries
-            sorted_entries = sorted(
-                self._memory_cache.items(),
-                key=lambda x: x[1]['timestamp']
-            )
-            for old_key, _ in sorted_entries[:len(self._memory_cache) - self.max_size]:
+            sorted_entries = sorted(self._memory_cache.items(), key=lambda x: x[1]["timestamp"])
+            for old_key, _ in sorted_entries[: len(self._memory_cache) - self.max_size]:
                 del self._memory_cache[old_key]
 
         # Store in file with secure permissions
-        cache_file = os.path.join(self.cache_dir, f'{cache_key}.json')
+        cache_file = os.path.join(self.cache_dir, f"{cache_key}.json")
         try:
-            with open(cache_file, 'w') as f:
+            with open(cache_file, "w") as f:
                 json.dump(entry, f)
             # Set secure permissions (owner read/write only)
             os.chmod(cache_file, 0o600)
@@ -144,7 +139,7 @@ class CacheManager:
             del self._memory_cache[cache_key]
 
         # Remove file
-        cache_file = os.path.join(self.cache_dir, f'{cache_key}.json')
+        cache_file = os.path.join(self.cache_dir, f"{cache_key}.json")
         if os.path.exists(cache_file):
             try:
                 os.remove(cache_file)
@@ -157,7 +152,7 @@ class CacheManager:
 
         # Remove all cache files
         for filename in os.listdir(self.cache_dir):
-            if filename.endswith('.json'):
+            if filename.endswith(".json"):
                 try:
                     os.remove(os.path.join(self.cache_dir, filename))
                 except Exception as e:
@@ -173,8 +168,7 @@ class CacheManager:
 
         # Clean memory cache
         expired_keys = [
-            k for k, v in self._memory_cache.items()
-            if self._is_expired(v['timestamp'])
+            k for k, v in self._memory_cache.items() if self._is_expired(v["timestamp"])
         ]
         for key in expired_keys:
             del self._memory_cache[key]
@@ -182,12 +176,12 @@ class CacheManager:
 
         # Clean file cache
         for filename in os.listdir(self.cache_dir):
-            if filename.endswith('.json'):
+            if filename.endswith(".json"):
                 cache_file = os.path.join(self.cache_dir, filename)
                 try:
-                    with open(cache_file, 'r') as f:
+                    with open(cache_file, "r") as f:
                         entry = json.load(f)
-                    if self._is_expired(entry['timestamp']):
+                    if self._is_expired(entry["timestamp"]):
                         os.remove(cache_file)
                         removed += 1
                 except Exception as e:
@@ -203,7 +197,9 @@ class CacheManager:
 _cache_manager = None
 
 
-def get_cache(cache_dir: Optional[str] = None, ttl: int = 3600, max_size: int = 1000) -> CacheManager:
+def get_cache(
+    cache_dir: Optional[str] = None, ttl: int = 3600, max_size: int = 1000
+) -> CacheManager:
     """Get cache manager instance.
 
     Args:

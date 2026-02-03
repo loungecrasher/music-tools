@@ -1,4 +1,5 @@
 """Data models for Serato integration."""
+
 from dataclasses import dataclass
 
 
@@ -23,20 +24,20 @@ class TrackMetadata:
     def to_dict(self) -> dict:
         """Serialise to the JSON index format."""
         return {
-            'path': self.path,
-            'artist': self.artist,
-            'title': self.title,
-            'crate': self.crate_name,
+            "path": self.path,
+            "artist": self.artist,
+            "title": self.title,
+            "crate": self.crate_name,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'TrackMetadata':
+    def from_dict(cls, data: dict) -> "TrackMetadata":
         """Deserialise from the JSON index format."""
         return cls(
-            path=data['path'],
-            artist=data['artist'],
-            title=data['title'],
-            crate_name=data['crate'],
+            path=data["path"],
+            artist=data["artist"],
+            title=data["title"],
+            crate_name=data["crate"],
         )
 
     def __repr__(self) -> str:

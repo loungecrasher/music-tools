@@ -1,6 +1,7 @@
 """
 Spotify API client.
 """
+
 from .base import BaseAPIClient
 
 

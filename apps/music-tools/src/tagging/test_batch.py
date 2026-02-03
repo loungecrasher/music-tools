@@ -5,7 +5,10 @@ Test batch research functionality
 
 import sys
 
-sys.path.insert(0, '/Users/patrickoliver/Music Inxite/Office/Tech/Local Development/Music Tools/Tag Country Origin Editor/Codebase/music_tagger/src')
+sys.path.insert(
+    0,
+    "/Users/patrickoliver/Music Inxite/Office/Tech/Local Development/Music Tools/Tag Country Origin Editor/Codebase/music_tagger/src",
+)
 
 from .claude_code_researcher import ClaudeCodeResearcher
 
@@ -13,10 +16,7 @@ from .claude_code_researcher import ClaudeCodeResearcher
 researcher = ClaudeCodeResearcher(timeout=60)
 
 # Test with a small batch
-test_artists = [
-    ("The Beatles", "Hey Jude"),
-    ("Bob Marley", "No Woman No Cry")
-]
+test_artists = [("The Beatles", "Hey Jude"), ("Bob Marley", "No Woman No Cry")]
 
 print("Testing batch research with 2 artists...")
 print("-" * 40)

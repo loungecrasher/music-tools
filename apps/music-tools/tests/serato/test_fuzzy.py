@@ -34,9 +34,7 @@ class TestFindBestMatch:
             "boards of canada roygbiv": {"id": 3},
         }
         # Slightly misspelled query
-        best, matches, score = find_best_match(
-            "masive atack teardrop", candidates, threshold=60
-        )
+        best, matches, score = find_best_match("masive atack teardrop", candidates, threshold=60)
         assert best is not None
         assert best["id"] == 1
         assert score >= 60
@@ -63,12 +61,8 @@ class TestFindBestMatch:
 
     def test_find_best_match_respects_limit(self):
         """The limit parameter caps the number of returned matches."""
-        candidates = {
-            f"artist song {i}": {"id": i} for i in range(20)
-        }
-        best, matches, score = find_best_match(
-            "artist song", candidates, threshold=30, limit=3
-        )
+        candidates = {f"artist song {i}": {"id": i} for i in range(20)}
+        best, matches, score = find_best_match("artist song", candidates, threshold=30, limit=3)
         assert len(matches) <= 3
 
 

@@ -44,7 +44,7 @@ jobs:
 
       - name: Run common package tests
         run: |
-          python -m pytest packages/common/tests/ -v --tb=short --ignore=packages/common/tests/test_config_manager.py --ignore=packages/common/tests/test_security.py
+          python -m pytest packages/common/tests/ -v --tb=short
 
   lint:
     runs-on: ubuntu-latest
@@ -66,8 +66,17 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 apps/ packages/ --max-line-length=100 --extend-ignore=E501,W503,E402,F401 --exclude=__pycache__,build,dist,.eggs
+          flake8 apps/ packages/ --max-line-length=100 --extend-ignore=E501,W503,E402,F401,E203 --exclude=__pycache__,build,dist,.eggs
+
+      - name: Check code formatting
+        run: |
+          black --check apps/ packages/
 
       - name: Check import sorting
         run: |
           isort --check-only --diff apps/ packages/
+
+      - name: Type check with mypy
+        continue-on-error: true
+        run: |
+          mypy packages/common/music_tools_common/ --ignore-missing-imports

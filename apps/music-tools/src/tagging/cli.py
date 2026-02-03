@@ -35,7 +35,7 @@ from rich.table import Table
 # Import universal CLI utilities for consistent theme
 try:
     # Try importing from music_tools_common if installed as package
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'packages'))
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "packages"))
     from music_tools_common.cli import (
         clear_screen,
         format_error_details,
@@ -46,6 +46,7 @@ try:
         show_panel,
     )
     from music_tools_common.cli.styles import Theme
+
     UNIVERSAL_CLI_AVAILABLE = True
     # Get universal theme
     theme = Theme.default()
@@ -55,10 +56,12 @@ except ImportError:
 
 try:
     from .config import AppConfig, ConfigManager
+
     CONFIG_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.config import AppConfig, ConfigManager
+
         CONFIG_AVAILABLE = True
     except ImportError:
         CONFIG_AVAILABLE = False
@@ -67,10 +70,12 @@ except ImportError:
 
 try:
     from .claude_code_researcher import ClaudeCodeResearcher
+
     CLAUDE_CODE_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.claude_code_researcher import ClaudeCodeResearcher
+
         CLAUDE_CODE_AVAILABLE = True
     except ImportError:
         CLAUDE_CODE_AVAILABLE = False
@@ -78,10 +83,12 @@ except ImportError:
 
 try:
     from .ai_researcher import AIResearcher
+
     AI_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.ai_researcher import AIResearcher
+
         AI_AVAILABLE = True
     except ImportError:
         AI_AVAILABLE = False
@@ -89,10 +96,12 @@ except ImportError:
 
 try:
     from .scanner import MusicFileScanner
+
     SCANNER_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.scanner import MusicFileScanner
+
         SCANNER_AVAILABLE = True
     except ImportError:
         SCANNER_AVAILABLE = False
@@ -100,10 +109,12 @@ except ImportError:
 
 try:
     from .metadata import MetadataHandler
+
     METADATA_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.metadata import MetadataHandler
+
         METADATA_AVAILABLE = True
     except ImportError:
         METADATA_AVAILABLE = False
@@ -111,10 +122,12 @@ except ImportError:
 
 try:
     from .cache import CacheManager
+
     CACHE_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.cache import CacheManager
+
         CACHE_AVAILABLE = True
     except ImportError:
         CACHE_AVAILABLE = False
@@ -145,11 +158,7 @@ def theme_print_success(message: str, title: str = "Success") -> None:
         # print_success only takes message, combine with title
         print_success(f"{title}: {message}" if title != "Success" else message)
     else:
-        console.print(Panel.fit(
-            message,
-            title=f"✓ {title}",
-            border_style="green"
-        ))
+        console.print(Panel.fit(message, title=f"✓ {title}", border_style="green"))
 
 
 def theme_print_error(message: str, title: str = "Error") -> None:
@@ -158,11 +167,7 @@ def theme_print_error(message: str, title: str = "Error") -> None:
         # print_error takes message and optional details
         print_error(message, title if title != "Error" else None)
     else:
-        console.print(Panel.fit(
-            message,
-            title=f"✗ {title}",
-            border_style="red"
-        ))
+        console.print(Panel.fit(message, title=f"✗ {title}", border_style="red"))
 
 
 def theme_print_warning(message: str, title: str = "Warning") -> None:
@@ -171,11 +176,7 @@ def theme_print_warning(message: str, title: str = "Warning") -> None:
         # print_warning only takes message
         print_warning(f"{title}: {message}" if title != "Warning" else message)
     else:
-        console.print(Panel.fit(
-            message,
-            title=f"⚠ {title}",
-            border_style="yellow"
-        ))
+        console.print(Panel.fit(message, title=f"⚠ {title}", border_style="yellow"))
 
 
 def theme_print_info(message: str, title: str = "Info") -> None:
@@ -184,11 +185,7 @@ def theme_print_info(message: str, title: str = "Info") -> None:
         # print_info only takes message
         print_info(f"{title}: {message}" if title != "Info" else message)
     else:
-        console.print(Panel.fit(
-            message,
-            title=f"ℹ {title}",
-            border_style="cyan"
-        ))
+        console.print(Panel.fit(message, title=f"ℹ {title}", border_style="cyan"))
 
 
 def get_theme_icon(icon_name: str) -> str:
@@ -206,7 +203,7 @@ def get_theme_icon(icon_name: str) -> str:
         "stats": "📊",
         "config": "⚙",
         "clock": "⏱",
-        "rocket": "🚀"
+        "rocket": "🚀",
     }
     return fallback_icons.get(icon_name, "")
 
@@ -237,7 +234,9 @@ class ConfigurationWizard:
     def _configure_api_only(self) -> None:
         """Configure when only API is available (DEPRECATED - Claude Max only!)"""
         console.print("\n[red]⚠️  API key configuration no longer supported[/red]")
-        console.print("[yellow]This tool now requires Claude Max plan with local `claude` command[/yellow]")
+        console.print(
+            "[yellow]This tool now requires Claude Max plan with local `claude` command[/yellow]"
+        )
         console.print("[dim]Please install Claude Code to use this feature[/dim]")
 
     def _prompt_for_api_key(self, optional: bool = False) -> None:
@@ -263,7 +262,11 @@ class ConfigurationWizard:
 
         # Show current model with version info
         current_model = self.config.claude_code_model
-        if not current_model or current_model == "sonnet" or "sonnet-4" in str(current_model).lower():
+        if (
+            not current_model
+            or current_model == "sonnet"
+            or "sonnet-4" in str(current_model).lower()
+        ):
             display_model = "Claude Sonnet 4.5 (default - fast & accurate)"
         elif current_model == "opus" or "opus" in str(current_model).lower():
             display_model = "Claude Opus 4.5 (most capable)"
@@ -277,7 +280,7 @@ class ConfigurationWizard:
             models = [
                 ("claude-sonnet-4-5-20250929", "Claude Sonnet 4.5 (Fast & accurate) ⚡"),
                 ("claude-opus-4-5-20251101", "Claude Opus 4.5 (Most capable) 🧠"),
-                ("claude-3-5-haiku-20241022", "Claude Haiku 3.5 (Fastest) 🚀")
+                ("claude-3-5-haiku-20241022", "Claude Haiku 3.5 (Fastest) 🚀"),
             ]
 
             console.print("\nAvailable Claude Code models:")
@@ -287,13 +290,15 @@ class ConfigurationWizard:
             model_choice = IntPrompt.ask(
                 "Select model (or 0 to keep current)",
                 choices=[str(i) for i in range(len(models) + 1)],
-                default=0
+                default=0,
             )
 
             if model_choice > 0:
                 selected_model = models[model_choice - 1][0]
                 self.config.claude_code_model = selected_model
-                console.print(f"[green]✓ Claude Code model set to: {models[model_choice - 1][1]}[/green]")
+                console.print(
+                    f"[green]✓ Claude Code model set to: {models[model_choice - 1][1]}[/green]"
+                )
         else:
             console.print("[green]✓ Using Claude Code's default model selection[/green]")
 
@@ -325,14 +330,12 @@ class ConfigurationWizard:
 
         console.print(f"Current batch size: {self.config.batch_size}")
         new_batch_size = IntPrompt.ask(
-            "Batch size (files processed per API call)",
-            default=self.config.batch_size
+            "Batch size (files processed per API call)", default=self.config.batch_size
         )
         self.config.batch_size = new_batch_size
 
         self.config.overwrite_existing_tags = Confirm.ask(
-            "Overwrite existing country tags?",
-            default=self.config.overwrite_existing_tags
+            "Overwrite existing country tags?", default=self.config.overwrite_existing_tags
         )
 
 
@@ -377,14 +380,16 @@ class MusicTaggerCLI:
                 "Music Library Country Tagger\n"
                 "AI-powered metadata enrichment for your music collection",
                 title="Music Tools Suite",
-                border_style="cyan"
+                border_style="cyan",
             )
         else:
-            console.print(Panel.fit(
-                "[bold cyan]Music Library Country Tagger[/bold cyan]\n"
-                "[dim]AI-powered metadata enrichment for your music collection[/dim]",
-                border_style="cyan"
-            ))
+            console.print(
+                Panel.fit(
+                    "[bold cyan]Music Library Country Tagger[/bold cyan]\n"
+                    "[dim]AI-powered metadata enrichment for your music collection[/dim]",
+                    border_style="cyan",
+                )
+            )
 
     def _check_dependencies(self) -> bool:
         """Check if all required dependencies are available"""
@@ -415,7 +420,7 @@ class MusicTaggerCLI:
             ("2", "Configuration", "config"),
             ("3", "Diagnostics & Tools", "stats"),
             ("4", "Help & Information", "info"),
-            ("5", "Exit", "error")
+            ("5", "Exit", "error"),
         ]
 
         for key, label, icon_name in options:
@@ -432,7 +437,9 @@ class MusicTaggerCLI:
     def _handle_tag_library(self):
         """Handle tagging workflow"""
         if not self.config.library_paths:
-            theme_print_warning("No library paths configured. Please configure first.", "Configuration Required")
+            theme_print_warning(
+                "No library paths configured. Please configure first.", "Configuration Required"
+            )
             if Confirm.ask("Go to configuration now?", default=True):
                 self._handle_configure()
             return
@@ -450,15 +457,16 @@ class MusicTaggerCLI:
         metadata_handler = MetadataHandler()
 
         # Get cache directory from config manager and create cache manager ONCE
-        cache_dir = str(self.config_manager.config_dir / 'cache')
+        cache_dir = str(self.config_manager.config_dir / "cache")
         cache_manager = CacheManager(cache_dir) if self.config.cache_enabled else None
 
         # Initialize AI researcher (reuse the same cache_manager instance)
         if CLAUDE_CODE_AVAILABLE:
             # Load Brave API key from environment (optional fallback for web search)
             from dotenv import load_dotenv
-            load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
-            brave_api_key = os.getenv('BRAVE_API_KEY')
+
+            load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+            brave_api_key = os.getenv("BRAVE_API_KEY")
 
             # Use config model or default to Sonnet 4.5 (faster with great accuracy)
             model = self.config.claude_code_model or "claude-sonnet-4-5-20250929"
@@ -469,11 +477,11 @@ class MusicTaggerCLI:
                 cache_manager=cache_manager,
                 model=model,
                 enable_websearch=True,  # Enable web search for newer/unknown artists
-                brave_api_key=brave_api_key  # Brave fallback for unknown artists
+                brave_api_key=brave_api_key,  # Brave fallback for unknown artists
             )
         else:
             # Fallback to API key (legacy)
-            api_key = os.getenv('ANTHROPIC_API_KEY')
+            api_key = os.getenv("ANTHROPIC_API_KEY")
             if not api_key:
                 theme_print_error("No Claude Code or API key found", "Authentication Error")
                 return
@@ -490,13 +498,17 @@ class MusicTaggerCLI:
             return
 
         # Ask for missing tags only (Feature: Fill Missing Tags)
-        missing_only = Confirm.ask("Scan for missing tags ONLY? (Skip files with existing Genre/Grouping)", default=False)
+        missing_only = Confirm.ask(
+            "Scan for missing tags ONLY? (Skip files with existing Genre/Grouping)", default=False
+        )
 
         # Ask for dry run
         dry_run = Confirm.ask("Run in DRY RUN mode? (No files will be modified)", default=True)
 
         # Run processing
-        processor.process(path, self.config.batch_size, dry_run, resume=False, missing_only=missing_only)
+        processor.process(
+            path, self.config.batch_size, dry_run, resume=False, missing_only=missing_only
+        )
 
         Prompt.ask("\nPress Enter to return to menu")
 
@@ -514,7 +526,7 @@ class MusicTaggerCLI:
         choice = IntPrompt.ask(
             "Select option",
             choices=[str(i) for i in range(len(self.config.library_paths) + 2)],
-            default=1
+            default=1,
         )
 
         if choice == 0:
@@ -523,7 +535,9 @@ class MusicTaggerCLI:
             return self.config.library_paths[choice - 1]
         else:
             # Process all libraries (not implemented in this simple version)
-            theme_print_warning("Batch processing all libraries not yet supported in this version", "Not Supported")
+            theme_print_warning(
+                "Batch processing all libraries not yet supported in this version", "Not Supported"
+            )
             return self.config.library_paths[0]
 
     def _handle_configure(self):
@@ -539,7 +553,7 @@ class MusicTaggerCLI:
                 ("2", "Configure Library Paths"),
                 ("3", "Configure Processing Settings"),
                 ("4", "View Current Config"),
-                ("5", "Save & Back")
+                ("5", "Save & Back"),
             ]
 
             for key, label in options:
@@ -586,7 +600,7 @@ class MusicTaggerCLI:
             ("2", "Test Claude Connection"),
             ("3", "View Cache Stats"),
             ("4", "Clear Cache"),
-            ("5", "Back")
+            ("5", "Back"),
         ]
 
         for key, label in options:
@@ -630,7 +644,7 @@ class MusicTaggerCLI:
     def _view_cache_stats(self):
         """View cache statistics"""
         if self.config.cache_enabled and CACHE_AVAILABLE:
-            cache_dir = str(self.config_manager.config_dir / 'cache')
+            cache_dir = str(self.config_manager.config_dir / "cache")
             manager = CacheManager(cache_dir)
             stats = manager.get_statistics()
 
@@ -649,7 +663,7 @@ class MusicTaggerCLI:
         """Clear the cache"""
         if self.config.cache_enabled and CACHE_AVAILABLE:
             if Confirm.ask("Are you sure you want to clear the cache?", default=False):
-                cache_dir = str(self.config_manager.config_dir / 'cache')
+                cache_dir = str(self.config_manager.config_dir / "cache")
                 manager = CacheManager(cache_dir)
                 manager.clear_cache()
                 theme_print_success("Cache cleared", "Success")

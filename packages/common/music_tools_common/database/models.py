@@ -2,6 +2,7 @@
 Database models for Music Tools.
 Defines data structures for playlists, tracks, and settings.
 """
+
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
@@ -16,7 +17,7 @@ class Playlist:
     url: str
     owner: str
     tracks_count: int = 0
-    service: str = 'spotify'
+    service: str = "spotify"
     is_algorithmic: bool = False
     added_on: Optional[str] = None
     last_updated: Optional[str] = None
@@ -45,7 +46,7 @@ class Track:
     duration: int = 0
     release_date: Optional[str] = None
     isrc: Optional[str] = None
-    service: str = 'spotify'
+    service: str = "spotify"
     added_on: Optional[str] = None
     last_updated: Optional[str] = None
 

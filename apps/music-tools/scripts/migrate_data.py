@@ -3,6 +3,7 @@
 Data migration script for Music Tools.
 Migrates data from JSON files to SQLite database.
 """
+
 import argparse
 import os
 import sys
@@ -11,7 +12,9 @@ from typing import List, Tuple
 # Add the current directory and packages to the Python path
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 # Add packages directory to path (music_tools_common is a symlink to packages/common)
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', 'packages'))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "packages")
+)
 
 # Import core modules
 try:
@@ -27,13 +30,14 @@ try:
         response = input(prompt + suffix).strip().lower()
         if not response:
             return default
-        return response in ['y', 'yes']
+        return response in ["y", "yes"]
+
 except ImportError as e:
     print(f"Error: Core modules not found. Please ensure music_tools_common is installed: {e}")
     sys.exit(1)
 
 # Set up logging
-logger = setup_logger('music_tools.migrate')
+logger = setup_logger("music_tools.migrate")
 
 
 def migrate_spotify_playlists(json_file: str) -> Tuple[int, int]:
@@ -53,7 +57,7 @@ def migrate_spotify_playlists(json_file: str) -> Tuple[int, int]:
 
     try:
         # Import playlists
-        success, error = db.import_json_playlists(json_file, 'spotify')
+        success, error = db.import_json_playlists(json_file, "spotify")
 
         print("Migration completed:")
         print(f"  - Successfully migrated: {success} playlists")
@@ -77,7 +81,7 @@ def find_json_files() -> List[str]:
     locations = [
         "Spotify Script/V2/playlist_database.json",
         "config/spotify_config.json",
-        "config/deezer_config.json"
+        "config/deezer_config.json",
     ]
 
     for location in locations:
@@ -91,7 +95,9 @@ def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(description="Migrate data from JSON files to SQLite database")
     parser.add_argument("--file", help="Path to JSON file to migrate")
-    parser.add_argument("--service", choices=["spotify", "deezer"], help="Service to migrate data for")
+    parser.add_argument(
+        "--service", choices=["spotify", "deezer"], help="Service to migrate data for"
+    )
     parser.add_argument("--auto", action="store_true", help="Automatically migrate all found files")
 
     args = parser.parse_args()
@@ -138,7 +144,9 @@ def main() -> None:
             print("No JSON files found to migrate")
 
             # Prompt for manual file path
-            file_path = input("\nEnter path to JSON file to migrate (or leave blank to cancel): ").strip()
+            file_path = input(
+                "\nEnter path to JSON file to migrate (or leave blank to cancel): "
+            ).strip()
             if not file_path:
                 print("Migration cancelled")
                 return
@@ -163,7 +171,7 @@ def main() -> None:
 
         choice = input("\nEnter file number to migrate (or 'a' for all): ").strip()
 
-        if choice.lower() == 'a':
+        if choice.lower() == "a":
             # Migrate all files
             for file in json_files:
                 if "spotify" in file.lower():

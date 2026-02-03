@@ -2,6 +2,7 @@
 Common decorators for Music Tools.
 Provides reusable decorators for error handling, logging, and more.
 """
+
 import functools
 import logging
 from typing import Any, Callable
@@ -17,7 +18,7 @@ def handle_errors(
     log_error: bool = True,
     raise_error: bool = False,
     return_value: Any = None,
-    error_types: tuple = (Exception,)
+    error_types: tuple = (Exception,),
 ) -> Callable:
     """
     Decorator for standardized error handling.
@@ -35,6 +36,7 @@ def handle_errors(
             # Process file logic
             pass
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -50,7 +52,9 @@ def handle_errors(
                     raise
 
                 return return_value
+
         return wrapper
+
     return decorator
 
 
@@ -58,7 +62,7 @@ def retry(
     max_attempts: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
-    exceptions: tuple = (Exception,)
+    exceptions: tuple = (Exception,),
 ) -> Callable:
     """
     Decorator to retry a function on failure.
@@ -75,10 +79,12 @@ def retry(
             # Fetch data logic
             pass
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             import time
+
             current_delay = delay
 
             for attempt in range(1, max_attempts + 1):
@@ -97,13 +103,12 @@ def retry(
                     current_delay *= backoff
 
         return wrapper
+
     return decorator
 
 
 def log_execution(
-    level: int = logging.INFO,
-    include_args: bool = False,
-    include_result: bool = False
+    level: int = logging.INFO, include_args: bool = False, include_result: bool = False
 ) -> Callable:
     """
     Decorator to log function execution.
@@ -118,6 +123,7 @@ def log_execution(
         def important_function(x, y):
             return x + y
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -136,7 +142,9 @@ def log_execution(
                 logger.log(level, f"{func_name} completed")
 
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -155,11 +163,13 @@ def validate_args(**validators) -> Callable:
         def create_user(name: str, age: int):
             pass
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # Get function signature
             import inspect
+
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
@@ -175,5 +185,7 @@ def validate_args(**validators) -> Callable:
                         )
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator

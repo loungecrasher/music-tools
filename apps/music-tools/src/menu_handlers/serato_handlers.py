@@ -12,7 +12,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
-logger = setup_logger('music_tools.menu.serato')
+logger = setup_logger("music_tools.menu.serato")
 console = Console()
 
 
@@ -28,17 +28,19 @@ def run_serato_build_index() -> None:
     """
     clear_screen()
 
-    console.print(Panel(
-        "[bold green]Build Serato Track Index[/bold green]\n\n"
-        "Build a searchable index of your music library for fast CSV-to-crate\n"
-        "conversion. The index stores artist/title metadata extracted from your\n"
-        "audio files so that CSV playlists can be matched quickly.\n\n"
-        "Indexing methods:\n"
-        "  [cyan]1.[/cyan] Scan Directory  [dim](recommended -- 8-10x faster)[/dim]\n"
-        "  [cyan]2.[/cyan] Scan Serato Crate Family",
-        title="[bold]Serato Track Index[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Build Serato Track Index[/bold green]\n\n"
+            "Build a searchable index of your music library for fast CSV-to-crate\n"
+            "conversion. The index stores artist/title metadata extracted from your\n"
+            "audio files so that CSV playlists can be matched quickly.\n\n"
+            "Indexing methods:\n"
+            "  [cyan]1.[/cyan] Scan Directory  [dim](recommended -- 8-10x faster)[/dim]\n"
+            "  [cyan]2.[/cyan] Scan Serato Crate Family",
+            title="[bold]Serato Track Index[/bold]",
+            border_style="green",
+        )
+    )
 
     choice = Prompt.ask(
         "\nSelect indexing method",
@@ -62,15 +64,17 @@ def run_serato_csv_to_crate() -> None:
 
     clear_screen()
 
-    console.print(Panel(
-        "[bold green]CSV to Serato Crate[/bold green]\n\n"
-        "Import a CSV playlist file into a new Serato crate.\n\n"
-        "Requirements:\n"
-        "  - CSV file with 'Artist' and 'Title' columns\n"
-        "  - Built track index (run 'Build Track Index' first)",
-        title="[bold]CSV Import[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]CSV to Serato Crate[/bold green]\n\n"
+            "Import a CSV playlist file into a new Serato crate.\n\n"
+            "Requirements:\n"
+            "  - CSV file with 'Artist' and 'Title' columns\n"
+            "  - Built track index (run 'Build Track Index' first)",
+            title="[bold]CSV Import[/bold]",
+            border_style="green",
+        )
+    )
 
     # Load existing index
     try:
@@ -78,20 +82,12 @@ def run_serato_csv_to_crate() -> None:
         count = index.load()
         if count == 0:
             console.print(
-                "[bold yellow]Warning:[/bold yellow] Track index is empty "
-                f"({index.index_path})"
+                "[bold yellow]Warning:[/bold yellow] Track index is empty " f"({index.index_path})"
             )
-            console.print(
-                "You may want to rebuild it with [cyan]'Build Track Index'[/cyan]."
-            )
+            console.print("You may want to rebuild it with [cyan]'Build Track Index'[/cyan].")
     except FileNotFoundError:
-        console.print(
-            "[bold red]Error:[/bold red] Track index not found."
-        )
-        console.print(
-            "\nPlease run [cyan]'Build Track Index'[/cyan] first to "
-            "create the index."
-        )
+        console.print("[bold red]Error:[/bold red] Track index not found.")
+        console.print("\nPlease run [cyan]'Build Track Index'[/cyan] first to " "create the index.")
         Prompt.ask("\nPress Enter to continue")
         return
     except Exception as e:
@@ -153,26 +149,24 @@ def run_serato_list_crates() -> None:
 
     clear_screen()
 
-    console.print(Panel(
-        "[bold green]List Serato Crates[/bold green]\n\n"
-        "View all crate files found in your Serato library.\n"
-        "Reads from the default Serato data folder at\n"
-        "[dim]~/Music/_Serato_/Subcrates/[/dim]",
-        title="[bold]Crate Browser[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]List Serato Crates[/bold green]\n\n"
+            "View all crate files found in your Serato library.\n"
+            "Reads from the default Serato data folder at\n"
+            "[dim]~/Music/_Serato_/Subcrates/[/dim]",
+            title="[bold]Crate Browser[/bold]",
+            border_style="green",
+        )
+    )
 
     try:
         manager = CrateManager()
         crates = manager.list_crate_families()
 
         if not crates:
-            console.print(
-                "\n[yellow]No crates found in Serato library.[/yellow]"
-            )
-            console.print(
-                "[dim]Expected location: ~/Music/_Serato_/Subcrates/[/dim]"
-            )
+            console.print("\n[yellow]No crates found in Serato library.[/yellow]")
+            console.print("[dim]Expected location: ~/Music/_Serato_/Subcrates/[/dim]")
         else:
             table = Table(title="Serato Crates", show_lines=False)
             table.add_column("Crate Name", style="cyan", no_wrap=False)
@@ -192,8 +186,7 @@ def run_serato_list_crates() -> None:
             console.print()
             console.print(table)
             console.print(
-                f"\n[bold]Total:[/bold] {len(crates)} crate(s), "
-                f"{total_tracks:,} track(s)"
+                f"\n[bold]Total:[/bold] {len(crates)} crate(s), " f"{total_tracks:,} track(s)"
             )
     except Exception as e:
         console.print(f"[bold red]Error listing crates:[/bold red] {e}")
@@ -206,6 +199,7 @@ def run_serato_list_crates() -> None:
 # Private helpers
 # ------------------------------------------------------------------
 
+
 def _build_index_from_directory() -> None:
     """Prompt for directory details and build the track index."""
     from src.services.serato import SeratoTrackIndex
@@ -214,9 +208,7 @@ def _build_index_from_directory() -> None:
     directory = directory.strip().strip("'\"")
 
     if not Path(directory).is_dir():
-        console.print(
-            f"[bold red]Error:[/bold red] {directory} is not a valid directory"
-        )
+        console.print(f"[bold red]Error:[/bold red] {directory} is not a valid directory")
         Prompt.ask("\nPress Enter to continue")
         return
 
@@ -271,9 +263,7 @@ def _build_index_from_crates() -> None:
         console.print(f"Saved to: {index.index_path}")
     except Exception as e:
         console.print(f"[bold red]Error building index:[/bold red] {e}")
-        logger.error(
-            "Index build from crate family failed: %s", e, exc_info=True
-        )
+        logger.error("Index build from crate family failed: %s", e, exc_info=True)
 
     Prompt.ask("\nPress Enter to continue")
 
@@ -288,9 +278,7 @@ def _display_import_results(result) -> None:
         multiple_matches lists.
     """
     # Summary line
-    console.print(
-        f"\n[bold green]Matched:[/bold green] {len(result.matched)} tracks"
-    )
+    console.print(f"\n[bold green]Matched:[/bold green] {len(result.matched)} tracks")
 
     # Matched tracks table
     if result.matched:
@@ -302,7 +290,7 @@ def _display_import_results(result) -> None:
 
         display_limit = 20
         for artist, title, match, score in result.matched[:display_limit]:
-            match_label = str(match) if not hasattr(match, 'title') else match.title
+            match_label = str(match) if not hasattr(match, "title") else match.title
             table.add_row(artist, title, match_label, f"{score}%")
 
         if len(result.matched) > display_limit:
@@ -317,17 +305,12 @@ def _display_import_results(result) -> None:
 
     # Not found
     if result.not_found:
-        console.print(
-            f"\n[bold red]Not Found:[/bold red] {len(result.not_found)} tracks"
-        )
+        console.print(f"\n[bold red]Not Found:[/bold red] {len(result.not_found)} tracks")
         display_limit = 10
         for artist, title in result.not_found[:display_limit]:
             console.print(f"  [dim]-[/dim] {artist} - {title}")
         if len(result.not_found) > display_limit:
-            console.print(
-                f"  [dim]... and {len(result.not_found) - display_limit} "
-                f"more[/dim]"
-            )
+            console.print(f"  [dim]... and {len(result.not_found) - display_limit} " f"more[/dim]")
 
     # Multiple matches
     if result.multiple_matches:
@@ -340,12 +323,9 @@ def _display_import_results(result) -> None:
             console.print(f"  [dim]-[/dim] {artist} - {title} ({len(matches)} candidates)")
         if len(result.multiple_matches) > display_limit:
             console.print(
-                f"  [dim]... and "
-                f"{len(result.multiple_matches) - display_limit} more[/dim]"
+                f"  [dim]... and " f"{len(result.multiple_matches) - display_limit} more[/dim]"
             )
 
     # Crate creation result
     if result.crate_path:
-        console.print(
-            f"\n[bold green]Crate created:[/bold green] {result.crate_path}"
-        )
+        console.print(f"\n[bold green]Crate created:[/bold green] {result.crate_path}")

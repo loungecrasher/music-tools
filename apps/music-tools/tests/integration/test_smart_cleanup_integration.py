@@ -62,23 +62,23 @@ class TestSmartCleanupWorkflowIntegration:
             scan_results = workflow.scan_for_duplicates()
 
             assert scan_results is not None
-            assert 'duplicate_groups' in scan_results
-            assert 'total_files' in scan_results
-            assert 'total_duplicates' in scan_results
+            assert "duplicate_groups" in scan_results
+            assert "total_files" in scan_results
+            assert "total_duplicates" in scan_results
 
             # Step 2: Review duplicates
             review_data = workflow.review_duplicates()
 
             assert review_data is not None
-            assert 'groups' in review_data
+            assert "groups" in review_data
 
             # Step 3: Prepare deletion (dry run)
-            with patch('builtins.input', return_value='y'):
+            with patch("builtins.input", return_value="y"):
                 delete_results = workflow.prepare_deletion(dry_run=True)
 
             assert delete_results is not None
-            assert 'files_to_delete' in delete_results
-            assert 'backup_created' in delete_results
+            assert "files_to_delete" in delete_results
+            assert "backup_created" in delete_results
 
             print("✓ Full workflow integration test passed")
 
@@ -99,19 +99,16 @@ class TestSmartCleanupWorkflowIntegration:
             # Scan with quality analysis
             scan_results = workflow.scan_for_duplicates()
 
-            if scan_results and scan_results.get('duplicate_groups'):
+            if scan_results and scan_results.get("duplicate_groups"):
                 # Analyze quality for each duplicate group
-                for group in scan_results['duplicate_groups']:
+                for group in scan_results["duplicate_groups"]:
                     quality_scores = []
-                    for file_path in group.get('files', []):
+                    for file_path in group.get("files", []):
                         score = quality_analyzer.analyze_file(file_path)
-                        quality_scores.append({
-                            'file': file_path,
-                            'score': score
-                        })
+                        quality_scores.append({"file": file_path, "score": score})
 
                     # Verify best quality file identified
-                    best = max(quality_scores, key=lambda x: x['score'])
+                    best = max(quality_scores, key=lambda x: x["score"])
                     assert best is not None
 
             print("✓ Quality analysis integration test passed")
@@ -133,9 +130,9 @@ class TestSmartCleanupWorkflowIntegration:
             # Scan and identify files
             scan_results = workflow.scan_for_duplicates()
 
-            if scan_results and scan_results.get('duplicate_groups'):
-                first_group = scan_results['duplicate_groups'][0]
-                files = first_group.get('files', [])
+            if scan_results and scan_results.get("duplicate_groups"):
+                first_group = scan_results["duplicate_groups"][0]
+                files = first_group.get("files", [])
 
                 if len(files) > 1:
                     # Test safe delete with backup
@@ -143,7 +140,7 @@ class TestSmartCleanupWorkflowIntegration:
                     result = safe_delete.delete_with_backup(file_to_delete, dry_run=True)
 
                     assert result is not None
-                    assert 'success' in result or 'would_delete' in result
+                    assert "success" in result or "would_delete" in result
 
             print("✓ Safe delete integration test passed")
 
@@ -163,7 +160,7 @@ class TestMenuIntegration:
 
             # Verify Smart Cleanup is available
             # Check if smart_cleanup method exists
-            assert hasattr(menu, 'smart_cleanup') or hasattr(menu, 'run_smart_cleanup')
+            assert hasattr(menu, "smart_cleanup") or hasattr(menu, "run_smart_cleanup")
 
             print("✓ Menu integration test passed")
 
@@ -180,18 +177,18 @@ class TestMenuIntegration:
             menu = Menu()
 
             # Capture menu display
-            with patch('builtins.print') as mock_print:
+            with patch("builtins.print") as mock_print:
                 # Try to trigger menu display
-                if hasattr(menu, 'display_options'):
+                if hasattr(menu, "display_options"):
                     menu.display_options()
-                elif hasattr(menu, 'show_menu'):
+                elif hasattr(menu, "show_menu"):
                     menu.show_menu()
 
             # Check if Smart Cleanup mentioned in any print call
             print_calls = [str(call) for call in mock_print.call_args_list]
-            menu_text = ' '.join(print_calls).lower()
+            menu_text = " ".join(print_calls).lower()
 
-            assert 'smart cleanup' in menu_text or 'cleanup' in menu_text
+            assert "smart cleanup" in menu_text or "cleanup" in menu_text
 
             print("✓ Menu display test passed")
 
@@ -208,11 +205,11 @@ class TestCLIIntegration:
             from apps.music_tools.cli import cli
 
             # Check if scan command exists
-            assert hasattr(cli, 'commands')
+            assert hasattr(cli, "commands")
 
             command_names = [cmd for cmd in cli.commands.keys()]
 
-            assert 'scan' in command_names or 'smart-cleanup' in command_names
+            assert "scan" in command_names or "smart-cleanup" in command_names
 
             print("✓ CLI scan command registration test passed")
 
@@ -228,7 +225,7 @@ class TestCLIIntegration:
 
             command_names = [cmd for cmd in cli.commands.keys()]
 
-            assert 'deduplicate' in command_names or 'dedup' in command_names
+            assert "deduplicate" in command_names or "dedup" in command_names
 
             print("✓ CLI deduplicate command test passed")
 
@@ -242,7 +239,7 @@ class TestCLIIntegration:
 
             command_names = [cmd for cmd in cli.commands.keys()]
 
-            assert 'upgrades' in command_names or 'upgrade' in command_names
+            assert "upgrades" in command_names or "upgrade" in command_names
 
             print("✓ CLI upgrades command test passed")
 
@@ -341,7 +338,7 @@ class TestReportingIntegration:
             report = workflow.generate_report()
 
             assert report is not None
-            assert 'summary' in report or 'total_files' in report
+            assert "summary" in report or "total_files" in report
 
             print("✓ Report generation test passed")
 

@@ -31,7 +31,7 @@ def sample_files():
             file_format="mp3",
             file_size=1024,
             metadata_hash="hash1",
-            file_content_hash="content1"
+            file_content_hash="content1",
         ),
         LibraryFile(
             file_path="/music/artist2/song2.mp3",
@@ -44,8 +44,8 @@ def sample_files():
             file_format="mp3",
             file_size=2048,
             metadata_hash="hash2",
-            file_content_hash="content2"
-        )
+            file_content_hash="content2",
+        ),
     ]
 
 
@@ -55,8 +55,8 @@ def test_check_files_batch_empty(checker):
         checker.check_files_batch([])
 
 
-@patch('src.library.duplicate_checker.Path')
-@patch('src.library.duplicate_checker.DuplicateChecker._extract_metadata')
+@patch("src.library.duplicate_checker.Path")
+@patch("src.library.duplicate_checker.DuplicateChecker._extract_metadata")
 def test_check_files_batch_optimization(mock_extract, mock_path, checker, sample_files, mock_db):
     """Test that batch check uses optimization (pre-fetching tracks)."""
 
@@ -87,8 +87,8 @@ def test_check_files_batch_optimization(mock_extract, mock_path, checker, sample
     mock_db.search_by_artist_title.assert_any_call(artist="Artist 2")
 
 
-@patch('src.library.duplicate_checker.Path')
-@patch('src.library.duplicate_checker.DuplicateChecker._extract_metadata')
+@patch("src.library.duplicate_checker.Path")
+@patch("src.library.duplicate_checker.DuplicateChecker._extract_metadata")
 def test_check_files_batch_fuzzy_match(mock_extract, mock_path, checker, sample_files, mock_db):
     """Test that fuzzy matching works with cached tracks."""
 
@@ -116,7 +116,7 @@ def test_check_files_batch_fuzzy_match(mock_extract, mock_path, checker, sample_
         file_format="mp3",
         file_size=1024,
         metadata_hash="hash3",
-        file_content_hash="content3"
+        file_content_hash="content3",
     )
 
     def search_side_effect(artist=None, title=None):
@@ -132,5 +132,5 @@ def test_check_files_batch_fuzzy_match(mock_extract, mock_path, checker, sample_
     # Verify result
     result = results["/music/artist1/song1.mp3"]
     assert result.is_duplicate
-    assert result.match_type == 'fuzzy_metadata'
+    assert result.match_type == "fuzzy_metadata"
     assert result.matched_file.file_path == "/existing/song1_dup.mp3"

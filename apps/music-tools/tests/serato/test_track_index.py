@@ -19,8 +19,11 @@ class TestSeratoTrackIndexPaths:
 
     def test_default_index_path(self):
         """Default index path is ~/.music-tools/serato_track_index.json."""
-        with patch.dict("sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}):
+        with patch.dict(
+            "sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}
+        ):
             from src.services.serato.track_index import SeratoTrackIndex
+
             idx = SeratoTrackIndex()
             expected = Path.home() / ".music-tools" / "serato_track_index.json"
             assert idx.index_path == expected
@@ -28,8 +31,11 @@ class TestSeratoTrackIndexPaths:
     def test_custom_index_path(self, tmp_path):
         """SeratoTrackIndex accepts a custom index_path."""
         custom = tmp_path / "custom_index.json"
-        with patch.dict("sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}):
+        with patch.dict(
+            "sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}
+        ):
             from src.services.serato.track_index import SeratoTrackIndex
+
             idx = SeratoTrackIndex(index_path=custom)
             assert idx.index_path == custom
 
@@ -60,8 +66,11 @@ class TestSeratoTrackIndexSaveLoad:
         """Loading from a nonexistent file raises FileNotFoundError."""
         nonexistent = tmp_path / "does_not_exist.json"
 
-        with patch.dict("sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}):
+        with patch.dict(
+            "sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}
+        ):
             from src.services.serato.track_index import SeratoTrackIndex
+
             idx = SeratoTrackIndex(index_path=nonexistent)
             with pytest.raises(FileNotFoundError):
                 idx.load()
@@ -71,8 +80,11 @@ class TestSeratoTrackIndexSaveLoad:
         """Saving to a nested directory creates parent directories automatically."""
         nested_path = tmp_path / "deep" / "nested" / "dir" / "index.json"
 
-        with patch.dict("sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}):
+        with patch.dict(
+            "sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}
+        ):
             from src.services.serato.track_index import SeratoTrackIndex
+
             idx = SeratoTrackIndex(index_path=nested_path)
             # Add a track so there is something to save
             tm = TrackMetadata(
@@ -123,18 +135,14 @@ class TestSeratoTrackIndexMatching:
 
     def test_find_matches_below_threshold(self, populated_index):
         """Querying with a totally unrelated string returns no match."""
-        best, all_matches, score = populated_index.find_matches(
-            "zzzzz xxxxx yyyyy", threshold=90
-        )
+        best, all_matches, score = populated_index.find_matches("zzzzz xxxxx yyyyy", threshold=90)
         assert best is None
         assert all_matches == []
         assert score == 0
 
     def test_find_matches_returns_multiple(self, populated_index):
         """When multiple candidates are above threshold, all_matches has entries."""
-        best, all_matches, score = populated_index.find_matches(
-            "artist song", threshold=40
-        )
+        best, all_matches, score = populated_index.find_matches("artist song", threshold=40)
         # Several tracks start with "Artist" so multiple should be above 40
         assert len(all_matches) >= 1
 
@@ -150,7 +158,9 @@ class TestSeratoTrackIndexBuild:
         """
         index_path = tmp_path / "build_test_index.json"
 
-        with patch.dict("sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}):
+        with patch.dict(
+            "sys.modules", {"serato_tools": MagicMock(), "serato_tools.crate": MagicMock()}
+        ):
             from src.services.serato.track_index import SeratoTrackIndex
 
             idx = SeratoTrackIndex(index_path=index_path)
@@ -162,9 +172,7 @@ class TestSeratoTrackIndexBuild:
 
             # Instead of going through crate manager, directly populate
             # using MetadataReader with fallback_to_filename=True
-            with patch(
-                "music_tools_common.metadata.reader.MetadataReader.read"
-            ) as mock_read:
+            with patch("music_tools_common.metadata.reader.MetadataReader.read") as mock_read:
                 # Return None for mutagen-based read, forcing filename fallback
                 def _filename_fallback(path, fallback_to_filename=False):
                     if fallback_to_filename:

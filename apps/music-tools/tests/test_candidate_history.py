@@ -1,6 +1,7 @@
 """
 Tests for Candidate History feature.
 """
+
 import os
 import sqlite3
 from datetime import datetime
@@ -34,6 +35,7 @@ def temp_folder(tmp_path):
     (folder / "song2.flac").touch()
     (folder / "text.txt").touch()  # Should be ignored
     return str(folder)
+
 
 # --- HistoryDatabase Tests ---
 
@@ -77,8 +79,9 @@ def test_get_stats(history_db):
     history_db.add_file("Song 2.mp3")
 
     stats = history_db.get_stats()
-    assert stats['total_files'] == 2
-    assert stats['last_added'] is not None
+    assert stats["total_files"] == 2
+    assert stats["last_added"] is not None
+
 
 # --- CandidateManager Tests ---
 
@@ -86,7 +89,7 @@ def test_get_stats(history_db):
 def test_add_folder_to_history(temp_db_path, temp_folder):
     """Test scanning a folder and adding to history."""
     # Mock the DB path in CandidateManager
-    with patch('src.library.candidate_manager.HistoryDatabase') as MockDB:
+    with patch("src.library.candidate_manager.HistoryDatabase") as MockDB:
         # Use a real DB instance but injected via mock
         real_db = HistoryDatabase(temp_db_path)
         MockDB.return_value = real_db
@@ -95,8 +98,8 @@ def test_add_folder_to_history(temp_db_path, temp_folder):
         stats = manager.add_folder_to_history(temp_folder)
 
         # Should find 2 audio files (song1.mp3, song2.flac)
-        assert stats['total'] == 2
-        assert stats['added'] == 2
+        assert stats["total"] == 2
+        assert stats["added"] == 2
 
         # Verify in DB
         assert real_db.check_file("song1.mp3") is not None
@@ -109,7 +112,7 @@ def test_check_folder_matches(temp_db_path, temp_folder):
     db = HistoryDatabase(temp_db_path)
     db.add_file("song1.mp3")
 
-    with patch('src.library.candidate_manager.HistoryDatabase') as MockDB:
+    with patch("src.library.candidate_manager.HistoryDatabase") as MockDB:
         MockDB.return_value = db
 
         manager = CandidateManager()
@@ -117,26 +120,22 @@ def test_check_folder_matches(temp_db_path, temp_folder):
 
         # Should match song1.mp3
         assert len(matches) == 1
-        assert matches[0]['file'] == "song1.mp3"
+        assert matches[0]["file"] == "song1.mp3"
 
 
-@patch('src.library.candidate_manager.Prompt.ask', return_value='d')
-@patch('src.library.candidate_manager.Confirm.ask', return_value=True)
-@patch('src.library.candidate_manager.shutil.move')
+@patch("src.library.candidate_manager.Prompt.ask", return_value="d")
+@patch("src.library.candidate_manager.Confirm.ask", return_value=True)
+@patch("src.library.candidate_manager.shutil.move")
 def test_process_matches_move_to_trash(mock_move, mock_confirm, mock_prompt):
     """Test processing matches and moving to trash."""
 
     manager = CandidateManager()
-    matches = [{
-        'file': 'song1.mp3',
-        'path': '/path/to/song1.mp3',
-        'added_at': datetime.now()
-    }]
+    matches = [{"file": "song1.mp3", "path": "/path/to/song1.mp3", "added_at": datetime.now()}]
 
     manager.process_matches(matches)
 
     # Verify move was called
     mock_move.assert_called_once()
     args, _ = mock_move.call_args
-    assert args[0] == '/path/to/song1.mp3'
-    assert 'song1.mp3' in args[1]  # Destination contains filename
+    assert args[0] == "/path/to/song1.mp3"
+    assert "song1.mp3" in args[1]  # Destination contains filename

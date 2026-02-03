@@ -35,28 +35,24 @@ class TestDeletionGroup:
     def test_deletion_group_creation(self):
         """Test basic DeletionGroup creation."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete1.mp3', '/music/delete2.mp3'],
-            reason='Keep highest quality FLAC'
+            keep_file="/music/keep.flac",
+            delete_files=["/music/delete1.mp3", "/music/delete2.mp3"],
+            reason="Keep highest quality FLAC",
         )
 
-        assert group.keep_file == '/music/keep.flac'
+        assert group.keep_file == "/music/keep.flac"
         assert len(group.delete_files) == 2
-        assert group.reason == 'Keep highest quality FLAC'
+        assert group.reason == "Keep highest quality FLAC"
         assert group.group_id is not None  # Auto-generated
 
     def test_deletion_group_auto_generates_id(self):
         """Test that group_id is auto-generated if not provided."""
         group1 = DeletionGroup(
-            keep_file='/music/song.flac',
-            delete_files=['/music/song.mp3'],
-            reason='test'
+            keep_file="/music/song.flac", delete_files=["/music/song.mp3"], reason="test"
         )
 
         group2 = DeletionGroup(
-            keep_file='/music/song.flac',
-            delete_files=['/music/song.mp3'],
-            reason='test'
+            keep_file="/music/song.flac", delete_files=["/music/song.mp3"], reason="test"
         )
 
         # IDs should be different (timestamp-based)
@@ -65,28 +61,22 @@ class TestDeletionGroup:
     def test_deletion_group_custom_id(self):
         """Test DeletionGroup with custom ID."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test',
-            group_id='custom-id-123'
+            keep_file="/music/keep.flac",
+            delete_files=["/music/delete.mp3"],
+            reason="test",
+            group_id="custom-id-123",
         )
 
-        assert group.group_id == 'custom-id-123'
+        assert group.group_id == "custom-id-123"
 
     def test_deletion_group_is_valid_no_errors(self):
         """Test is_valid returns True when no errors."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
+            keep_file="/music/keep.flac", delete_files=["/music/delete.mp3"], reason="test"
         )
 
         group.validation_results = [
-            ValidationResult(
-                level=ValidationLevel.INFO,
-                checkpoint='Test',
-                message='All good'
-            )
+            ValidationResult(level=ValidationLevel.INFO, checkpoint="Test", message="All good")
         ]
 
         assert group.is_valid() is True
@@ -94,16 +84,12 @@ class TestDeletionGroup:
     def test_deletion_group_is_valid_with_errors(self):
         """Test is_valid returns False when errors present."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
+            keep_file="/music/keep.flac", delete_files=["/music/delete.mp3"], reason="test"
         )
 
         group.validation_results = [
             ValidationResult(
-                level=ValidationLevel.ERROR,
-                checkpoint='Test',
-                message='Error occurred'
+                level=ValidationLevel.ERROR, checkpoint="Test", message="Error occurred"
             )
         ]
 
@@ -112,16 +98,14 @@ class TestDeletionGroup:
     def test_deletion_group_get_errors(self):
         """Test getting only error-level results."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
+            keep_file="/music/keep.flac", delete_files=["/music/delete.mp3"], reason="test"
         )
 
         group.validation_results = [
-            ValidationResult(level=ValidationLevel.ERROR, checkpoint='1', message='Error 1'),
-            ValidationResult(level=ValidationLevel.WARNING, checkpoint='2', message='Warning'),
-            ValidationResult(level=ValidationLevel.ERROR, checkpoint='3', message='Error 2'),
-            ValidationResult(level=ValidationLevel.INFO, checkpoint='4', message='Info'),
+            ValidationResult(level=ValidationLevel.ERROR, checkpoint="1", message="Error 1"),
+            ValidationResult(level=ValidationLevel.WARNING, checkpoint="2", message="Warning"),
+            ValidationResult(level=ValidationLevel.ERROR, checkpoint="3", message="Error 2"),
+            ValidationResult(level=ValidationLevel.INFO, checkpoint="4", message="Info"),
         ]
 
         errors = group.get_errors()
@@ -132,15 +116,13 @@ class TestDeletionGroup:
     def test_deletion_group_get_warnings(self):
         """Test getting only warning-level results."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
+            keep_file="/music/keep.flac", delete_files=["/music/delete.mp3"], reason="test"
         )
 
         group.validation_results = [
-            ValidationResult(level=ValidationLevel.WARNING, checkpoint='1', message='Warning 1'),
-            ValidationResult(level=ValidationLevel.ERROR, checkpoint='2', message='Error'),
-            ValidationResult(level=ValidationLevel.WARNING, checkpoint='3', message='Warning 2'),
+            ValidationResult(level=ValidationLevel.WARNING, checkpoint="1", message="Warning 1"),
+            ValidationResult(level=ValidationLevel.ERROR, checkpoint="2", message="Error"),
+            ValidationResult(level=ValidationLevel.WARNING, checkpoint="3", message="Warning 2"),
         ]
 
         warnings = group.get_warnings()
@@ -151,32 +133,33 @@ class TestDeletionGroup:
     def test_deletion_group_to_dict(self):
         """Test DeletionGroup serialization to dictionary."""
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='Quality upgrade',
-            group_id='test-123'
+            keep_file="/music/keep.flac",
+            delete_files=["/music/delete.mp3"],
+            reason="Quality upgrade",
+            group_id="test-123",
         )
 
         group.validation_results = [
             ValidationResult(
                 level=ValidationLevel.INFO,
-                checkpoint='Test',
-                message='Test message',
-                details={'key': 'value'}
+                checkpoint="Test",
+                message="Test message",
+                details={"key": "value"},
             )
         ]
 
         data = group.to_dict()
 
-        assert data['group_id'] == 'test-123'
-        assert data['keep_file'] == '/music/keep.flac'
-        assert len(data['delete_files']) == 1
-        assert data['reason'] == 'Quality upgrade'
-        assert len(data['validation_results']) == 1
-        assert data['validation_results'][0]['level'] == 'info'
+        assert data["group_id"] == "test-123"
+        assert data["keep_file"] == "/music/keep.flac"
+        assert len(data["delete_files"]) == 1
+        assert data["reason"] == "Quality upgrade"
+        assert len(data["validation_results"]) == 1
+        assert data["validation_results"][0]["level"] == "info"
 
 
 # ==================== DeletionValidator Tests ====================
+
 
 class TestDeletionValidator:
     """Test 7-point safety checklist validation."""
@@ -191,88 +174,74 @@ class TestDeletionValidator:
         validator = DeletionValidator()
 
         # Create a real file
-        keep_file = tmp_path / 'keep.flac'
-        keep_file.write_text('fake audio data')
+        keep_file = tmp_path / "keep.flac"
+        keep_file.write_text("fake audio data")
 
         group = DeletionGroup(
-            keep_file=str(keep_file),
-            delete_files=[str(tmp_path / 'delete.mp3')],
-            reason='test'
+            keep_file=str(keep_file), delete_files=[str(tmp_path / "delete.mp3")], reason="test"
         )
 
         result = validator._validate_keep_file_exists(group)
 
         assert result.level == ValidationLevel.INFO
-        assert 'validated' in result.message.lower()
+        assert "validated" in result.message.lower()
 
     def test_checkpoint_1_keep_file_not_exists(self):
         """Checkpoint 1: Error when keep file does not exist."""
         validator = DeletionValidator()
 
         group = DeletionGroup(
-            keep_file='/nonexistent/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
+            keep_file="/nonexistent/keep.flac", delete_files=["/music/delete.mp3"], reason="test"
         )
 
         result = validator._validate_keep_file_exists(group)
 
         assert result.level == ValidationLevel.ERROR
-        assert 'does not exist' in result.message.lower()
+        assert "does not exist" in result.message.lower()
 
     def test_checkpoint_1_keep_file_empty(self):
         """Checkpoint 1: Error when keep file path is empty."""
         validator = DeletionValidator()
 
-        group = DeletionGroup(
-            keep_file='',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
-        )
+        group = DeletionGroup(keep_file="", delete_files=["/music/delete.mp3"], reason="test")
 
         result = validator._validate_keep_file_exists(group)
 
         assert result.level == ValidationLevel.ERROR
-        assert 'empty' in result.message.lower()
+        assert "empty" in result.message.lower()
 
     def test_checkpoint_2_has_files_to_delete(self):
         """Checkpoint 2: Must have files to delete."""
         validator = DeletionValidator()
 
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/music/delete.mp3'],
-            reason='test'
+            keep_file="/music/keep.flac", delete_files=["/music/delete.mp3"], reason="test"
         )
 
         result = validator._validate_has_files_to_delete(group)
 
         assert result.level == ValidationLevel.INFO
-        assert '1 file' in result.message
+        assert "1 file" in result.message
 
     def test_checkpoint_2_no_files_to_delete(self):
         """Checkpoint 2: Error when no files to delete."""
         validator = DeletionValidator()
 
-        group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=[],  # Empty
-            reason='test'
-        )
+        group = DeletionGroup(keep_file="/music/keep.flac", delete_files=[], reason="test")  # Empty
 
         result = validator._validate_has_files_to_delete(group)
 
         assert result.level == ValidationLevel.ERROR
-        assert 'no files' in result.message.lower()
+        assert "no files" in result.message.lower()
 
     def test_checkpoint_3_quality_check_no_issues(self):
         """Checkpoint 3: No warning when deleting lower quality."""
         validator = DeletionValidator()
 
         group = DeletionGroup(
-            keep_file='/music/keep_320.mp3',  # Higher bitrate in name
-            delete_files=['/music/delete_128.mp3'],  # Lower bitrate
-            reason='test'
+            keep_file="/music/keep_320.mp3",  # Higher bitrate in name
+            delete_files=["/music/delete_128.mp3"],  # Lower bitrate
+            reason="test",
         )
 
         results = validator._validate_no_higher_quality_deletion(group)
@@ -285,30 +254,32 @@ class TestDeletionValidator:
         validator = DeletionValidator()
 
         # Create files
-        delete1 = tmp_path / 'delete1.mp3'
-        delete2 = tmp_path / 'delete2.mp3'
-        delete1.write_text('data')
-        delete2.write_text('data')
+        delete1 = tmp_path / "delete1.mp3"
+        delete2 = tmp_path / "delete2.mp3"
+        delete1.write_text("data")
+        delete2.write_text("data")
 
         group = DeletionGroup(
-            keep_file=str(tmp_path / 'keep.flac'),
+            keep_file=str(tmp_path / "keep.flac"),
             delete_files=[str(delete1), str(delete2)],
-            reason='test'
+            reason="test",
         )
 
         results = validator._validate_files_exist(group)
 
         # Should have INFO result confirming all files verified
-        assert any(r.level == ValidationLevel.INFO and 'verified' in r.message.lower() for r in results)
+        assert any(
+            r.level == ValidationLevel.INFO and "verified" in r.message.lower() for r in results
+        )
 
     def test_checkpoint_4_files_not_exist(self):
         """Checkpoint 4: Error when delete files do not exist."""
         validator = DeletionValidator()
 
         group = DeletionGroup(
-            keep_file='/music/keep.flac',
-            delete_files=['/nonexistent/file1.mp3', '/nonexistent/file2.mp3'],
-            reason='test'
+            keep_file="/music/keep.flac",
+            delete_files=["/nonexistent/file1.mp3", "/nonexistent/file2.mp3"],
+            reason="test",
         )
 
         results = validator._validate_files_exist(group)
@@ -321,89 +292,81 @@ class TestDeletionValidator:
         """Checkpoint 5: Ensure keep file is valid."""
         validator = DeletionValidator()
 
-        keep_file = tmp_path / 'keep.flac'
-        keep_file.write_text('data')
+        keep_file = tmp_path / "keep.flac"
+        keep_file.write_text("data")
 
         group = DeletionGroup(
-            keep_file=str(keep_file),
-            delete_files=[str(tmp_path / 'delete.mp3')],
-            reason='test'
+            keep_file=str(keep_file), delete_files=[str(tmp_path / "delete.mp3")], reason="test"
         )
 
         result = validator._validate_not_deleting_all_files(group)
 
         assert result.level == ValidationLevel.INFO
-        assert 'preserved' in result.message.lower()
+        assert "preserved" in result.message.lower()
 
     def test_checkpoint_5_keep_file_in_delete_list(self, tmp_path):
         """Checkpoint 5: Error when keep file is also marked for deletion."""
         validator = DeletionValidator()
 
-        same_file = tmp_path / 'file.mp3'
-        same_file.write_text('data')
+        same_file = tmp_path / "file.mp3"
+        same_file.write_text("data")
 
         group = DeletionGroup(
-            keep_file=str(same_file),
-            delete_files=[str(same_file)],  # Same file!
-            reason='test'
+            keep_file=str(same_file), delete_files=[str(same_file)], reason="test"  # Same file!
         )
 
         result = validator._validate_not_deleting_all_files(group)
 
         assert result.level == ValidationLevel.ERROR
-        assert 'also marked for deletion' in result.message.lower()
+        assert "also marked for deletion" in result.message.lower()
 
     def test_checkpoint_6_file_permissions(self, tmp_path):
         """Checkpoint 6: Check file permissions."""
         validator = DeletionValidator()
 
-        delete_file = tmp_path / 'delete.mp3'
-        delete_file.write_text('data')
+        delete_file = tmp_path / "delete.mp3"
+        delete_file.write_text("data")
 
         group = DeletionGroup(
-            keep_file=str(tmp_path / 'keep.flac'),
-            delete_files=[str(delete_file)],
-            reason='test'
+            keep_file=str(tmp_path / "keep.flac"), delete_files=[str(delete_file)], reason="test"
         )
 
         results = validator._validate_file_permissions(group)
 
         # Should have INFO result confirming permissions OK
-        assert any(r.level == ValidationLevel.INFO and 'permissions' in r.message.lower() for r in results)
+        assert any(
+            r.level == ValidationLevel.INFO and "permissions" in r.message.lower() for r in results
+        )
 
     def test_checkpoint_7_backup_space_sufficient(self, tmp_path):
         """Checkpoint 7: Check sufficient disk space for backup."""
         validator = DeletionValidator()
 
-        delete_file = tmp_path / 'delete.mp3'
-        delete_file.write_bytes(b'data' * 1000)  # Small file
+        delete_file = tmp_path / "delete.mp3"
+        delete_file.write_bytes(b"data" * 1000)  # Small file
 
         group = DeletionGroup(
-            keep_file=str(tmp_path / 'keep.flac'),
-            delete_files=[str(delete_file)],
-            reason='test'
+            keep_file=str(tmp_path / "keep.flac"), delete_files=[str(delete_file)], reason="test"
         )
 
         result = validator._validate_backup_space(group)
 
         # Should be INFO since we have plenty of space
         assert result.level == ValidationLevel.INFO
-        assert 'sufficient' in result.message.lower()
+        assert "sufficient" in result.message.lower()
 
     def test_validate_group_all_checkpoints(self, tmp_path):
         """Test running all validation checkpoints."""
         validator = DeletionValidator()
 
         # Create files
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('keep data')
-        delete_file.write_text('delete data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("keep data")
+        delete_file.write_text("delete data")
 
         group = DeletionGroup(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='test'
+            keep_file=str(keep_file), delete_files=[str(delete_file)], reason="test"
         )
 
         results = validator.validate_group(group, check_backup_space=True)
@@ -418,6 +381,7 @@ class TestDeletionValidator:
 
 # ==================== SafeDeletionPlan Tests ====================
 
+
 class TestSafeDeletionPlan:
     """Test SafeDeletionPlan functionality."""
 
@@ -429,7 +393,7 @@ class TestSafeDeletionPlan:
 
     def test_deletion_plan_with_backup_dir(self, tmp_path):
         """Test SafeDeletionPlan with backup directory."""
-        backup_dir = tmp_path / 'backup'
+        backup_dir = tmp_path / "backup"
         plan = SafeDeletionPlan(backup_dir=str(backup_dir))
 
         assert plan.backup_dir == str(backup_dir)
@@ -438,35 +402,29 @@ class TestSafeDeletionPlan:
         """Test adding deletion groups to plan."""
         plan = SafeDeletionPlan()
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('data')
-        delete_file.write_text('data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("data")
+        delete_file.write_text("data")
 
         group = plan.add_group(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='Quality upgrade'
+            keep_file=str(keep_file), delete_files=[str(delete_file)], reason="Quality upgrade"
         )
 
         assert len(plan.groups) == 1
         assert group.keep_file == str(keep_file)
-        assert group.reason == 'Quality upgrade'
+        assert group.reason == "Quality upgrade"
 
     def test_validate_plan_success(self, tmp_path):
         """Test validation of valid deletion plan."""
         plan = SafeDeletionPlan()
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('data')
-        delete_file.write_text('data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("data")
+        delete_file.write_text("data")
 
-        plan.add_group(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='test'
-        )
+        plan.add_group(keep_file=str(keep_file), delete_files=[str(delete_file)], reason="test")
 
         is_valid, errors = plan.validate(check_backup_space=False)
 
@@ -479,9 +437,9 @@ class TestSafeDeletionPlan:
 
         # Add group with non-existent files
         plan.add_group(
-            keep_file='/nonexistent/keep.flac',
-            delete_files=['/nonexistent/delete.mp3'],
-            reason='test'
+            keep_file="/nonexistent/keep.flac",
+            delete_files=["/nonexistent/delete.mp3"],
+            reason="test",
         )
 
         is_valid, errors = plan.validate(check_backup_space=False)
@@ -493,16 +451,12 @@ class TestSafeDeletionPlan:
         """Test dry-run execution (no actual deletion)."""
         plan = SafeDeletionPlan()
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('keep data')
-        delete_file.write_text('delete data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("keep data")
+        delete_file.write_text("delete data")
 
-        plan.add_group(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='test'
-        )
+        plan.add_group(keep_file=str(keep_file), delete_files=[str(delete_file)], reason="test")
 
         # Validate first
         is_valid, _ = plan.validate(check_backup_space=False)
@@ -520,16 +474,12 @@ class TestSafeDeletionPlan:
         """Test actual file deletion."""
         plan = SafeDeletionPlan()
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('keep data')
-        delete_file.write_text('delete data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("keep data")
+        delete_file.write_text("delete data")
 
-        plan.add_group(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='test'
-        )
+        plan.add_group(keep_file=str(keep_file), delete_files=[str(delete_file)], reason="test")
 
         # Validate first
         is_valid, _ = plan.validate(check_backup_space=False)
@@ -546,19 +496,15 @@ class TestSafeDeletionPlan:
 
     def test_execute_with_backup(self, tmp_path):
         """Test deletion with backup creation."""
-        backup_dir = tmp_path / 'backup'
+        backup_dir = tmp_path / "backup"
         plan = SafeDeletionPlan(backup_dir=str(backup_dir))
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('keep data')
-        delete_file.write_bytes(b'delete data' * 100)
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("keep data")
+        delete_file.write_bytes(b"delete data" * 100)
 
-        plan.add_group(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='test'
-        )
+        plan.add_group(keep_file=str(keep_file), delete_files=[str(delete_file)], reason="test")
 
         # Validate and execute
         is_valid, _ = plan.validate(check_backup_space=False)
@@ -576,7 +522,7 @@ class TestSafeDeletionPlan:
         assert backup_path.exists()
 
         # Check backup file exists
-        backup_files = list(backup_path.glob('*.mp3'))
+        backup_files = list(backup_path.glob("*.mp3"))
         assert len(backup_files) == 1
 
     def test_execute_skip_invalid_groups(self, tmp_path):
@@ -584,22 +530,18 @@ class TestSafeDeletionPlan:
         plan = SafeDeletionPlan()
 
         # Add valid group
-        keep1 = tmp_path / 'keep1.flac'
-        delete1 = tmp_path / 'delete1.mp3'
-        keep1.write_text('data')
-        delete1.write_text('data')
+        keep1 = tmp_path / "keep1.flac"
+        delete1 = tmp_path / "delete1.mp3"
+        keep1.write_text("data")
+        delete1.write_text("data")
 
-        plan.add_group(
-            keep_file=str(keep1),
-            delete_files=[str(delete1)],
-            reason='valid'
-        )
+        plan.add_group(keep_file=str(keep1), delete_files=[str(delete1)], reason="valid")
 
         # Add invalid group (non-existent files)
         plan.add_group(
-            keep_file='/nonexistent/keep2.flac',
-            delete_files=['/nonexistent/delete2.mp3'],
-            reason='invalid'
+            keep_file="/nonexistent/keep2.flac",
+            delete_files=["/nonexistent/delete2.mp3"],
+            reason="invalid",
         )
 
         # Validate
@@ -617,35 +559,34 @@ class TestSafeDeletionPlan:
         """Test exporting deletion plan to JSON."""
         plan = SafeDeletionPlan()
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('data')
-        delete_file.write_text('data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("data")
+        delete_file.write_text("data")
 
         plan.add_group(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)],
-            reason='Quality upgrade'
+            keep_file=str(keep_file), delete_files=[str(delete_file)], reason="Quality upgrade"
         )
 
         # Export to JSON
-        json_file = tmp_path / 'plan.json'
+        json_file = tmp_path / "plan.json"
         plan.export_to_json(str(json_file))
 
         # Verify JSON file exists and is valid
         assert json_file.exists()
 
-        with open(json_file, 'r') as f:
+        with open(json_file, "r") as f:
             data = json.load(f)
 
-        assert 'metadata' in data
-        assert 'groups' in data
-        assert data['metadata']['total_groups'] == 1
-        assert len(data['groups']) == 1
-        assert data['groups'][0]['reason'] == 'Quality upgrade'
+        assert "metadata" in data
+        assert "groups" in data
+        assert data["metadata"]["total_groups"] == 1
+        assert len(data["groups"]) == 1
+        assert data["groups"][0]["reason"] == "Quality upgrade"
 
 
 # ==================== DeletionStats Tests ====================
+
 
 class TestDeletionStats:
     """Test DeletionStats reporting."""
@@ -666,41 +607,39 @@ class TestDeletionStats:
             successful_deletions=4,
             failed_deletions=1,
             files_deleted=8,
-            space_freed_bytes=50_000_000
+            space_freed_bytes=50_000_000,
         )
 
         data = stats.to_dict()
 
-        assert data['total_groups'] == 5
-        assert data['successful_deletions'] == 4
-        assert data['failed_deletions'] == 1
-        assert data['space_freed_bytes'] == 50_000_000
+        assert data["total_groups"] == 5
+        assert data["successful_deletions"] == 4
+        assert data["failed_deletions"] == 1
+        assert data["space_freed_bytes"] == 50_000_000
 
     def test_deletion_stats_str_format(self):
         """Test DeletionStats string formatting."""
         stats = DeletionStats(
-            total_groups=3,
-            successful_deletions=2,
-            files_deleted=4,
-            space_freed_bytes=25_000_000
+            total_groups=3, successful_deletions=2, files_deleted=4, space_freed_bytes=25_000_000
         )
 
         output = str(stats)
 
-        assert 'Total Groups: 3' in output
-        assert 'Successful: 2' in output
-        assert 'Files Deleted: 4' in output
-        assert 'MB' in output  # Space formatted in MB
+        assert "Total Groups: 3" in output
+        assert "Successful: 2" in output
+        assert "Files Deleted: 4" in output
+        assert "MB" in output  # Space formatted in MB
 
     def test_deletion_stats_format_bytes(self):
         """Test bytes formatting helper."""
-        assert 'B' in DeletionStats._format_bytes(500)
-        assert 'KB' in DeletionStats._format_bytes(2048)
-        assert 'MB' in DeletionStats._format_bytes(5_000_000)
-        assert 'GB' in DeletionStats._format_bytes(2_000_000_000)
+        assert "B" in DeletionStats._format_bytes(500)
+        assert "KB" in DeletionStats._format_bytes(2048)
+        assert "MB" in DeletionStats._format_bytes(5_000_000)
+        assert "GB" in DeletionStats._format_bytes(2_000_000_000)
 
 
 # ==================== Convenience Functions Tests ====================
+
 
 class TestConvenienceFunctions:
     """Test convenience helper functions."""
@@ -713,7 +652,7 @@ class TestConvenienceFunctions:
 
     def test_create_deletion_plan_with_backup(self, tmp_path):
         """Test create_deletion_plan with backup directory."""
-        backup_dir = tmp_path / 'backup'
+        backup_dir = tmp_path / "backup"
         plan = create_deletion_plan(backup_dir=str(backup_dir))
 
         assert isinstance(plan, SafeDeletionPlan)
@@ -721,14 +660,13 @@ class TestConvenienceFunctions:
 
     def test_validate_deletion_valid(self, tmp_path):
         """Test validate_deletion with valid files."""
-        keep_file = tmp_path / 'keep.flac'
-        delete_file = tmp_path / 'delete.mp3'
-        keep_file.write_text('data')
-        delete_file.write_text('data')
+        keep_file = tmp_path / "keep.flac"
+        delete_file = tmp_path / "delete.mp3"
+        keep_file.write_text("data")
+        delete_file.write_text("data")
 
         is_valid, errors = validate_deletion(
-            keep_file=str(keep_file),
-            delete_files=[str(delete_file)]
+            keep_file=str(keep_file), delete_files=[str(delete_file)]
         )
 
         assert is_valid is True
@@ -737,8 +675,7 @@ class TestConvenienceFunctions:
     def test_validate_deletion_invalid(self):
         """Test validate_deletion with invalid files."""
         is_valid, errors = validate_deletion(
-            keep_file='/nonexistent/keep.flac',
-            delete_files=['/nonexistent/delete.mp3']
+            keep_file="/nonexistent/keep.flac", delete_files=["/nonexistent/delete.mp3"]
         )
 
         assert is_valid is False
@@ -746,6 +683,7 @@ class TestConvenienceFunctions:
 
 
 # ==================== Edge Cases and Error Handling ====================
+
 
 class TestEdgeCases:
     """Test edge cases and error handling."""
@@ -770,27 +708,25 @@ class TestEdgeCases:
 
     def test_backup_file_name_conflict(self, tmp_path):
         """Test backup handles filename conflicts."""
-        backup_dir = tmp_path / 'backup'
+        backup_dir = tmp_path / "backup"
         plan = SafeDeletionPlan(backup_dir=str(backup_dir))
 
         # Create files with same name in different locations
-        dir1 = tmp_path / 'dir1'
-        dir2 = tmp_path / 'dir2'
+        dir1 = tmp_path / "dir1"
+        dir2 = tmp_path / "dir2"
         dir1.mkdir()
         dir2.mkdir()
 
-        keep = dir1 / 'keep.flac'
-        delete1 = dir1 / 'song.mp3'
-        delete2 = dir2 / 'song.mp3'  # Same name!
+        keep = dir1 / "keep.flac"
+        delete1 = dir1 / "song.mp3"
+        delete2 = dir2 / "song.mp3"  # Same name!
 
-        keep.write_text('keep')
-        delete1.write_text('delete1')
-        delete2.write_text('delete2')
+        keep.write_text("keep")
+        delete1.write_text("delete1")
+        delete2.write_text("delete2")
 
         plan.add_group(
-            keep_file=str(keep),
-            delete_files=[str(delete1), str(delete2)],
-            reason='test'
+            keep_file=str(keep), delete_files=[str(delete1), str(delete2)], reason="test"
         )
 
         # Execute with backup
@@ -798,12 +734,13 @@ class TestEdgeCases:
 
         # Both files should be backed up with different names
         backup_path = Path(stats.backup_path)
-        backup_files = list(backup_path.glob('*.mp3'))
+        backup_files = list(backup_path.glob("*.mp3"))
 
         assert len(backup_files) == 2  # Both files backed up
 
 
 # ==================== Performance Benchmarks ====================
+
 
 class TestPerformance:
     """Performance benchmark tests."""
@@ -812,17 +749,15 @@ class TestPerformance:
         """Benchmark validation performance."""
         validator = DeletionValidator()
 
-        keep_file = tmp_path / 'keep.flac'
-        delete_files = [tmp_path / f'delete{i}.mp3' for i in range(10)]
+        keep_file = tmp_path / "keep.flac"
+        delete_files = [tmp_path / f"delete{i}.mp3" for i in range(10)]
 
-        keep_file.write_text('data')
+        keep_file.write_text("data")
         for f in delete_files:
-            f.write_text('data')
+            f.write_text("data")
 
         group = DeletionGroup(
-            keep_file=str(keep_file),
-            delete_files=[str(f) for f in delete_files],
-            reason='test'
+            keep_file=str(keep_file), delete_files=[str(f) for f in delete_files], reason="test"
         )
 
         # Should complete in < 10ms
@@ -835,16 +770,12 @@ class TestPerformance:
 
         # Create 10 groups
         for i in range(10):
-            keep = tmp_path / f'keep{i}.flac'
-            delete = tmp_path / f'delete{i}.mp3'
-            keep.write_text('data')
-            delete.write_text('data')
+            keep = tmp_path / f"keep{i}.flac"
+            delete = tmp_path / f"delete{i}.mp3"
+            keep.write_text("data")
+            delete.write_text("data")
 
-            plan.add_group(
-                keep_file=str(keep),
-                delete_files=[str(delete)],
-                reason=f'test {i}'
-            )
+            plan.add_group(keep_file=str(keep), delete_files=[str(delete)], reason=f"test {i}")
 
         # Validate first
         plan.validate(check_backup_space=False)
@@ -854,5 +785,5 @@ class TestPerformance:
         assert stats.total_groups == 10
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--benchmark-disable'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--benchmark-disable"])

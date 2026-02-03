@@ -14,16 +14,13 @@ from .spotify_tracks import run_collect_from_folder, run_playlist_manager, run_t
 
 __all__ = [
     # Deezer services
-    'run_deezer_playlist_checker',
-
+    "run_deezer_playlist_checker",
     # Spotify services
-    'run_playlist_manager',
-    'run_tracks_after_date',
-    'run_collect_from_folder',
-
+    "run_playlist_manager",
+    "run_tracks_after_date",
+    "run_collect_from_folder",
     # Soundiz services
-    'run_soundiz_processor',
-
+    "run_soundiz_processor",
     # External services
-    'external',
+    "external",
 ]

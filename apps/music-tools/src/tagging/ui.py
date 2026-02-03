@@ -48,6 +48,7 @@ console = Console()
 @dataclass
 class ProgressData:
     """Container for progress tracking data."""
+
     current_file: str = ""
     files_processed: int = 0
     files_total: int = 0
@@ -90,22 +91,16 @@ class ProgressTracker:
             "•",
             TimeRemainingColumn(),
             console=console,
-            refresh_per_second=4
+            refresh_per_second=4,
         )
 
         self.progress.start()
 
         # Main progress task
-        self.main_task = self.progress.add_task(
-            f"[bold blue]{self.main_title}",
-            total=total_files
-        )
+        self.main_task = self.progress.add_task(f"[bold blue]{self.main_title}", total=total_files)
 
         # Current file task
-        self.file_task = self.progress.add_task(
-            "[dim]Preparing...",
-            total=None
-        )
+        self.file_task = self.progress.add_task("[dim]Preparing...", total=None)
 
         self._running = True
 
@@ -119,7 +114,7 @@ class ProgressTracker:
                 display_name = Path(filename).name
                 if len(display_name) > 60:
                     # Keep extension visible
-                    name_parts = display_name.rsplit('.', 1)
+                    name_parts = display_name.rsplit(".", 1)
                     if len(name_parts) == 2:
                         base_name, ext = name_parts
                         max_base = 55 - len(ext)
@@ -130,8 +125,9 @@ class ProgressTracker:
                 task_desc = f"[cyan]{display_name}[/cyan]"
 
                 if progress is not None:
-                    self.progress.update(self.file_task, description=task_desc,
-                                         completed=progress, total=100)
+                    self.progress.update(
+                        self.file_task, description=task_desc, completed=progress, total=100
+                    )
                 else:
                     self.progress.update(self.file_task, description=task_desc)
 
@@ -161,14 +157,19 @@ class ProgressTracker:
                 self.progress.update(self.main_task, completed=self.data.files_processed)
 
                 # Calculate overall progress percentage
-                progress_percent = (self.data.files_processed / self.data.files_total * 100) if self.data.files_total > 0 else 0
+                progress_percent = (
+                    (self.data.files_processed / self.data.files_total * 100)
+                    if self.data.files_total > 0
+                    else 0
+                )
 
                 # Update main task description with stats
                 stats_text = f"[bold green]{progress_percent:.1f}%[/bold green]"
                 stats_text += f" • [green]{self.data.countries_found} countries[/green]"
                 if self.data.cache_hits > 0:
-                    cache_percent = (self.data.cache_hits /
-                                     (self.data.cache_hits + self.data.cache_misses)) * 100
+                    cache_percent = (
+                        self.data.cache_hits / (self.data.cache_hits + self.data.cache_misses)
+                    ) * 100
                     stats_text += f" • [blue]{cache_percent:.1f}% cached[/blue]"
 
                 if self.data.errors > 0:
@@ -190,7 +191,7 @@ class ProgressTracker:
 
                 self.progress.update(
                     self.main_task,
-                    description=f"[bold blue]{self.main_title}[/bold blue] • {stats_text} • {speed_text}"
+                    description=f"[bold blue]{self.main_title}[/bold blue] • {stats_text} • {speed_text}",
                 )
 
     def finish(self):
@@ -211,15 +212,15 @@ class ProgressTracker:
         with self._lock:
             elapsed = time.time() - self.data.start_time
             return {
-                'files_processed': self.data.files_processed,
-                'files_total': self.data.files_total,
-                'countries_found': self.data.countries_found,
-                'cache_hits': self.data.cache_hits,
-                'cache_misses': self.data.cache_misses,
-                'errors': self.data.errors,
-                'elapsed_time': elapsed,
-                'current_speed': self.data.current_speed,
-                'current_file': self.data.current_file
+                "files_processed": self.data.files_processed,
+                "files_total": self.data.files_total,
+                "countries_found": self.data.countries_found,
+                "cache_hits": self.data.cache_hits,
+                "cache_misses": self.data.cache_misses,
+                "errors": self.data.errors,
+                "elapsed_time": elapsed,
+                "current_speed": self.data.current_speed,
+                "current_file": self.data.current_file,
             }
 
 
@@ -244,7 +245,7 @@ class UIManager:
             "[dim]Configuration Wizard[/dim]\n\n"
             "Let's set up your music tagging preferences step by step.",
             border_style="blue",
-            padding=(1, 2)
+            padding=(1, 2),
         )
         self.console.print(header)
         self.console.print()
@@ -259,13 +260,15 @@ class UIManager:
 
         # Results
         summary.add_row("📁 Files Processed:", f"[bold]{results.get('total_processed', 0)}[/bold]")
-        summary.add_row("🏷️ Files Tagged:", f"[bold green]{results.get('total_tagged', 0)}[/bold green]")
+        summary.add_row(
+            "🏷️ Files Tagged:", f"[bold green]{results.get('total_tagged', 0)}[/bold green]"
+        )
 
-        if results.get('total_errors', 0) > 0:
+        if results.get("total_errors", 0) > 0:
             summary.add_row("❌ Errors:", f"[bold red]{results['total_errors']}[/bold red]")
 
         # Timing
-        elapsed = results.get('elapsed_time', 0)
+        elapsed = results.get("elapsed_time", 0)
         if elapsed > 0:
             hours, remainder = divmod(elapsed, 3600)
             minutes, seconds = divmod(remainder, 60)
@@ -280,22 +283,22 @@ class UIManager:
             summary.add_row("⏱️ Time Elapsed:", f"[dim]{time_str}[/dim]")
 
             # Speed
-            if results.get('total_processed', 0) > 0:
-                speed = results['total_processed'] / elapsed
+            if results.get("total_processed", 0) > 0:
+                speed = results["total_processed"] / elapsed
                 summary.add_row("🚀 Processing Speed:", f"[dim]{speed:.1f} files/second[/dim]")
 
         # Status
         status_style = "green"
         status_text = "✓ Scan Completed Successfully"
 
-        if results.get('interrupted', False):
+        if results.get("interrupted", False):
             status_style = "yellow"
             status_text = "⚠️ Scan Interrupted (Progress Saved)"
-        elif results.get('total_errors', 0) > 0:
+        elif results.get("total_errors", 0) > 0:
             status_style = "yellow"
             status_text = "⚠️ Scan Completed with Errors"
 
-        if results.get('dry_run', False):
+        if results.get("dry_run", False):
             status_text += " [dim](Dry Run)[/dim]"
 
         # Final panel
@@ -303,11 +306,7 @@ class UIManager:
         title.append("Scan Summary", style="bold")
 
         panel = Panel(
-            summary,
-            title=title,
-            title_align="left",
-            border_style=status_style,
-            padding=(1, 2)
+            summary, title=title, title_align="left", border_style=status_style, padding=(1, 2)
         )
 
         self.console.print()
@@ -324,8 +323,8 @@ class UIManager:
 
         # File processing stats
         stats_table.add_section()
-        total_files = stats_data.get('total_files_scanned', 0)
-        tagged_files = stats_data.get('total_files_tagged', 0)
+        total_files = stats_data.get("total_files_scanned", 0)
+        tagged_files = stats_data.get("total_files_tagged", 0)
 
         stats_table.add_row("Files Scanned", f"{total_files:,}", "Total music files processed")
         stats_table.add_row("Files Tagged", f"{tagged_files:,}", "Files with country information")
@@ -336,34 +335,38 @@ class UIManager:
 
         # Country statistics
         stats_table.add_section()
-        countries_found = stats_data.get('unique_countries', 0)
+        countries_found = stats_data.get("unique_countries", 0)
         stats_table.add_row("Countries Found", str(countries_found), "Unique countries of origin")
 
         # Performance stats
         stats_table.add_section()
-        cache_hits = stats_data.get('cache_hits', 0)
-        cache_misses = stats_data.get('cache_misses', 0)
+        cache_hits = stats_data.get("cache_hits", 0)
+        cache_misses = stats_data.get("cache_misses", 0)
         total_requests = cache_hits + cache_misses
 
         if total_requests > 0:
             cache_percent = (cache_hits / total_requests) * 100
-            stats_table.add_row("Cache Hit Rate", f"{cache_percent:.1f}%", "API requests served from cache")
+            stats_table.add_row(
+                "Cache Hit Rate", f"{cache_percent:.1f}%", "API requests served from cache"
+            )
 
-        avg_speed = stats_data.get('average_processing_speed', 0)
+        avg_speed = stats_data.get("average_processing_speed", 0)
         if avg_speed > 0:
-            stats_table.add_row("Processing Speed", f"{avg_speed:.1f}/s", "Average files per second")
+            stats_table.add_row(
+                "Processing Speed", f"{avg_speed:.1f}/s", "Average files per second"
+            )
 
         self.console.print(stats_table)
 
         # Country distribution if detailed
-        if detailed and 'country_distribution' in stats_data:
+        if detailed and "country_distribution" in stats_data:
             self.console.print()
-            self._show_country_distribution(stats_data['country_distribution'])
+            self._show_country_distribution(stats_data["country_distribution"])
 
         # Recent activity if available
-        if 'recent_activity' in stats_data:
+        if "recent_activity" in stats_data:
             self.console.print()
-            self._show_recent_activity(stats_data['recent_activity'])
+            self._show_recent_activity(stats_data["recent_activity"])
 
     def _show_country_distribution(self, distribution: Dict[str, int]):
         """Show country distribution chart."""
@@ -374,8 +377,9 @@ class UIManager:
         sorted_countries = sorted(distribution.items(), key=lambda x: x[1], reverse=True)
 
         # Create distribution table
-        dist_table = Table(title="Country Distribution (Top 20)",
-                           show_header=True, header_style="bold green")
+        dist_table = Table(
+            title="Country Distribution (Top 20)", show_header=True, header_style="bold green"
+        )
         dist_table.add_column("Rank", style="dim", width=6)
         dist_table.add_column("Country", style="cyan", width=20)
         dist_table.add_column("Files", style="white", width=10)
@@ -390,13 +394,7 @@ class UIManager:
             bar_length = int((count / max_count) * 25)
             bar = "█" * bar_length + "░" * (25 - bar_length)
 
-            dist_table.add_row(
-                str(i),
-                country,
-                f"{count:,}",
-                f"{percentage:.1f}%",
-                bar
-            )
+            dist_table.add_row(str(i), country, f"{count:,}", f"{percentage:.1f}%", bar)
 
         self.console.print(dist_table)
 
@@ -405,25 +403,26 @@ class UIManager:
         if not activity:
             return
 
-        activity_table = Table(title="Recent Activity",
-                               show_header=True, header_style="bold yellow")
+        activity_table = Table(
+            title="Recent Activity", show_header=True, header_style="bold yellow"
+        )
         activity_table.add_column("Time", style="dim", width=12)
         activity_table.add_column("Operation", style="cyan", width=15)
         activity_table.add_column("Files", style="white", width=8)
         activity_table.add_column("Status", style="green", width=10)
 
         for entry in activity[-10:]:  # Show last 10 entries
-            timestamp = datetime.fromisoformat(entry['timestamp'])
+            timestamp = datetime.fromisoformat(entry["timestamp"])
             time_str = timestamp.strftime("%H:%M:%S")
 
-            status_style = "green" if entry.get('success', True) else "red"
-            status_text = "Success" if entry.get('success', True) else "Failed"
+            status_style = "green" if entry.get("success", True) else "red"
+            status_text = "Success" if entry.get("success", True) else "Failed"
 
             activity_table.add_row(
                 time_str,
-                entry.get('operation', 'Unknown'),
-                str(entry.get('files_count', 0)),
-                f"[{status_style}]{status_text}[/{status_style}]"
+                entry.get("operation", "Unknown"),
+                str(entry.get("files_count", 0)),
+                f"[{status_style}]{status_text}[/{status_style}]",
             )
 
         self.console.print(activity_table)
@@ -431,9 +430,9 @@ class UIManager:
     def show_topic_help(self, topic: str):
         """Show help for specific topics."""
         help_content = {
-            'config': {
-                'title': '⚙️ Configuration Help',
-                'content': [
+            "config": {
+                "title": "⚙️ Configuration Help",
+                "content": [
                     "The configuration system manages all settings for the music tagger.",
                     "",
                     "[bold]Key Configuration Options:[/bold]",
@@ -450,12 +449,12 @@ class UIManager:
                     "[bold]Configuration File:[/bold]",
                     f"• Location: [dim]{Path.home() / '.music_tagger' / 'config.json'}[/dim]",
                     "• Format: JSON with validation",
-                    "• Automatic backup before changes"
-                ]
+                    "• Automatic backup before changes",
+                ],
             },
-            'scan': {
-                'title': '🎵 Scanning Help',
-                'content': [
+            "scan": {
+                "title": "🎵 Scanning Help",
+                "content": [
                     "The scan command processes your music library and adds country tags.",
                     "",
                     "[bold]Basic Usage:[/bold]",
@@ -474,12 +473,12 @@ class UIManager:
                     "2. Extracts artist information from metadata",
                     "3. Queries MusicBrainz API for artist origin",
                     "4. Updates file tags with country information",
-                    "5. Maintains progress database for resume capability"
-                ]
+                    "5. Maintains progress database for resume capability",
+                ],
             },
-            'stats': {
-                'title': '📊 Statistics Help',
-                'content': [
+            "stats": {
+                "title": "📊 Statistics Help",
+                "content": [
                     "View comprehensive statistics about your tagged music library.",
                     "",
                     "[bold]Statistics Commands:[/bold]",
@@ -496,12 +495,12 @@ class UIManager:
                     "[bold]Understanding Cache Metrics:[/bold]",
                     "• High cache hit rate means fewer API calls and faster processing",
                     "• Low cache hit rate might indicate diverse music library",
-                    "• Cache automatically expires after configured duration"
-                ]
+                    "• Cache automatically expires after configured duration",
+                ],
             },
-            'troubleshooting': {
-                'title': '🔧 Troubleshooting Help',
-                'content': [
+            "troubleshooting": {
+                "title": "🔧 Troubleshooting Help",
+                "content": [
                     "Common issues and solutions for the music tagger.",
                     "",
                     "[bold]Configuration Issues:[/bold]",
@@ -522,9 +521,9 @@ class UIManager:
                     "[bold]Getting Help:[/bold]",
                     "• Check log files in [dim]~/.music_tagger/logs/[/dim]",
                     "• Use [green]--log-level DEBUG[/green] for detailed information",
-                    "• Run [green]music-tagger stats[/green] to check system status"
-                ]
-            }
+                    "• Run [green]music-tagger stats[/green] to check system status",
+                ],
+            },
         }
 
         if topic not in help_content:
@@ -535,14 +534,11 @@ class UIManager:
 
         # Create help panel
         help_text = Text()
-        for line in help_data['content']:
+        for line in help_data["content"]:
             help_text.append(line + "\n")
 
         panel = Panel(
-            help_text.rstrip(),
-            title=help_data['title'],
-            border_style="blue",
-            padding=(1, 2)
+            help_text.rstrip(), title=help_data["title"], border_style="blue", padding=(1, 2)
         )
 
         self.console.print(panel)
@@ -560,43 +556,40 @@ class UIManager:
         """Show complete help documentation."""
         help_sections = [
             {
-                'title': '🎵 Music Library Country Tagger',
-                'content': [
+                "title": "🎵 Music Library Country Tagger",
+                "content": [
                     "Automatically tag your music files with country of origin information.",
-                    "Uses MusicBrainz database for accurate artist geographic data."
-                ]
+                    "Uses MusicBrainz database for accurate artist geographic data.",
+                ],
             },
             {
-                'title': '🚀 Quick Start',
-                'content': [
+                "title": "🚀 Quick Start",
+                "content": [
                     "1. [green]music-tagger configure[/green] - Set up your preferences",
                     "2. [green]music-tagger scan ~/Music[/green] - Scan your music library",
-                    "3. [green]music-tagger stats[/green] - View results and statistics"
-                ]
+                    "3. [green]music-tagger stats[/green] - View results and statistics",
+                ],
             },
             {
-                'title': '📋 Available Commands',
-                'content': [
+                "title": "📋 Available Commands",
+                "content": [
                     "[bold]configure[/bold] - Set up library paths and preferences",
                     "[bold]scan[/bold] - Process music files and add country tags",
                     "[bold]stats[/bold] - Display library statistics and metrics",
                     "[bold]clear-cache[/bold] - Clear cached data and progress",
-                    "[bold]help[/bold] - Show detailed help for specific topics"
-                ]
-            }
+                    "[bold]help[/bold] - Show detailed help for specific topics",
+                ],
+            },
         ]
 
         for section in help_sections:
             # Create section panel
             content_text = Text()
-            for line in section['content']:
+            for line in section["content"]:
                 content_text.append(line + "\n")
 
             panel = Panel(
-                content_text.rstrip(),
-                title=section['title'],
-                border_style="blue",
-                padding=(1, 2)
+                content_text.rstrip(), title=section["title"], border_style="blue", padding=(1, 2)
             )
 
             self.console.print(panel)
@@ -610,10 +603,7 @@ class UIManager:
         footer.append("music-tagger help --topic troubleshooting", style="green")
 
         footer_panel = Panel(
-            Align.center(footer),
-            title="Need More Help?",
-            border_style="yellow",
-            padding=(1, 2)
+            Align.center(footer), title="Need More Help?", border_style="yellow", padding=(1, 2)
         )
 
         self.console.print(footer_panel)
@@ -633,11 +623,7 @@ class UIManager:
             error_text.append(f"\n{details}", style="dim")
 
         panel = Panel(
-            error_text,
-            title=f"❌ {title}",
-            title_align="left",
-            border_style="red",
-            padding=(1, 2)
+            error_text, title=f"❌ {title}", title_align="left", border_style="red", padding=(1, 2)
         )
 
         self.console.print(panel)
@@ -651,7 +637,7 @@ class UIManager:
             title=f"⚠️ {title}",
             title_align="left",
             border_style="yellow",
-            padding=(1, 2)
+            padding=(1, 2),
         )
 
         self.console.print(panel)
@@ -665,7 +651,7 @@ class UIManager:
             title=f"✓ {title}",
             title_align="left",
             border_style="green",
-            padding=(1, 2)
+            padding=(1, 2),
         )
 
         self.console.print(panel)

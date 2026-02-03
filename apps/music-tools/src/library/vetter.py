@@ -24,7 +24,7 @@ from .models import DuplicateResult, VettingReport
 logger = logging.getLogger(__name__)
 
 # Constants
-SUPPORTED_AUDIO_FORMATS: Set[str] = {'.mp3', '.flac', '.m4a', '.wav', '.ogg', '.opus'}
+SUPPORTED_AUDIO_FORMATS: Set[str] = {".mp3", ".flac", ".m4a", ".wav", ".ogg", ".opus"}
 DEFAULT_FUZZY_THRESHOLD: float = 0.8
 MIN_FUZZY_THRESHOLD: float = 0.0
 MAX_FUZZY_THRESHOLD: float = 1.0
@@ -38,11 +38,7 @@ class ImportVetter:
 
     SUPPORTED_FORMATS: Set[str] = SUPPORTED_AUDIO_FORMATS
 
-    def __init__(
-        self,
-        library_db: LibraryDatabase,
-        console: Optional[Console] = None
-    ):
+    def __init__(self, library_db: LibraryDatabase, console: Optional[Console] = None):
         """Initialize import vetter.
 
         Args:
@@ -66,7 +62,7 @@ class ImportVetter:
         use_fuzzy: bool = True,
         use_content_hash: bool = True,
         show_progress: bool = True,
-        auto_skip_duplicates: bool = False
+        auto_skip_duplicates: bool = False,
     ) -> VettingReport:
         """Vet an import folder for duplicates.
 
@@ -121,7 +117,7 @@ class ImportVetter:
                 threshold=threshold,
                 duplicates=[],
                 new_songs=[],
-                uncertain=[]
+                uncertain=[],
             )
 
         # Check each file
@@ -133,7 +129,7 @@ class ImportVetter:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TaskProgressColumn(),
-                console=self.console
+                console=self.console,
             ) as progress:
                 task = progress.add_task("Vetting files...", total=total_files)
 
@@ -143,7 +139,7 @@ class ImportVetter:
                             str(file_path),
                             fuzzy_threshold=threshold,
                             use_fuzzy=use_fuzzy,
-                            use_content_hash=use_content_hash
+                            use_content_hash=use_content_hash,
                         )
                         results.append((str(file_path), result))
 
@@ -158,7 +154,7 @@ class ImportVetter:
                         str(file_path),
                         fuzzy_threshold=threshold,
                         use_fuzzy=use_fuzzy,
-                        use_content_hash=use_content_hash
+                        use_content_hash=use_content_hash,
                     )
                     results.append((str(file_path), result))
 
@@ -180,7 +176,7 @@ class ImportVetter:
             new_songs=new_songs,
             uncertain=uncertain,
             scan_duration=duration,
-            vetted_at=datetime.now(timezone.utc)
+            vetted_at=datetime.now(timezone.utc),
         )
 
         # Display report
@@ -194,7 +190,7 @@ class ImportVetter:
                 duplicates_found=len(duplicates),
                 new_songs=len(new_songs),
                 uncertain_matches=len(uncertain),
-                threshold_used=threshold
+                threshold_used=threshold,
             )
         except Exception as e:
             logger.error(f"Failed to save vetting result to database: {e}")
@@ -230,9 +226,7 @@ class ImportVetter:
         return sorted(music_files)
 
     def _categorize_results(
-        self,
-        results: List[Tuple[str, DuplicateResult]],
-        threshold: float
+        self, results: List[Tuple[str, DuplicateResult]], threshold: float
     ) -> Tuple[List[Tuple[str, DuplicateResult]], List[str], List[Tuple[str, DuplicateResult]]]:
         """Categorize vetting results into duplicates, new songs, and uncertain.
 
@@ -302,25 +296,25 @@ class ImportVetter:
         table.add_column("Count", style="green", justify="right")
         table.add_column("Percentage", style="yellow", justify="right")
 
-        table.add_row(
-            "✅ New Songs",
-            str(report.new_count),
-            f"{report.new_percentage:.1f}%"
-        )
+        table.add_row("✅ New Songs", str(report.new_count), f"{report.new_percentage:.1f}%")
 
         table.add_row(
             "❌ Duplicates",
             f"[red]{report.duplicate_count}[/red]",
-            f"[red]{report.duplicate_percentage:.1f}%[/red]"
+            f"[red]{report.duplicate_percentage:.1f}%[/red]",
         )
 
         if report.uncertain_count > 0:
             # Calculate percentage safely (avoid division by zero)
-            uncertain_pct = (report.uncertain_count / report.total_files * 100) if report.total_files > 0 else 0.0
+            uncertain_pct = (
+                (report.uncertain_count / report.total_files * 100)
+                if report.total_files > 0
+                else 0.0
+            )
             table.add_row(
                 "⚠️  Uncertain",
                 f"[yellow]{report.uncertain_count}[/yellow]",
-                f"[yellow]{uncertain_pct:.1f}%[/yellow]"
+                f"[yellow]{uncertain_pct:.1f}%[/yellow]",
             )
 
         self.console.print()
@@ -337,9 +331,7 @@ class ImportVetter:
         self._display_next_steps(report)
 
     def _display_duplicates(
-        self,
-        duplicates: List[Tuple[str, DuplicateResult]],
-        max_display: int = DEFAULT_MAX_DISPLAY
+        self, duplicates: List[Tuple[str, DuplicateResult]], max_display: int = DEFAULT_MAX_DISPLAY
     ) -> None:
         """Display duplicate files.
 
@@ -379,9 +371,7 @@ class ImportVetter:
         self.console.print(tree)
 
     def _display_uncertain(
-        self,
-        uncertain: List[Tuple[str, DuplicateResult]],
-        max_display: int = DEFAULT_MAX_DISPLAY
+        self, uncertain: List[Tuple[str, DuplicateResult]], max_display: int = DEFAULT_MAX_DISPLAY
     ) -> None:
         """Display uncertain matches.
 
@@ -465,7 +455,7 @@ class ImportVetter:
         if not os.access(output_path.parent, os.W_OK):
             raise PermissionError(f"Cannot write to directory: {output_path.parent}")
 
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write(f"# New Songs from {report.import_folder}\n")
             f.write(f"# Generated: {report.vetted_at}\n")
             f.write(f"# Total: {report.new_count}\n\n")
@@ -497,19 +487,23 @@ class ImportVetter:
         if not os.access(output_path.parent, os.W_OK):
             raise PermissionError(f"Cannot write to directory: {output_path.parent}")
 
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write(f"# Duplicates from {report.import_folder}\n")
             f.write(f"# Generated: {report.vetted_at}\n")
             f.write(f"# Total: {report.duplicate_count}\n\n")
 
             for file_path, result in report.duplicates:
-                matched_name = result.matched_file.display_name if result.matched_file else "Unknown"
+                matched_name = (
+                    result.matched_file.display_name if result.matched_file else "Unknown"
+                )
                 f.write(f"{file_path}\n")
                 f.write(f"  → Matches: {matched_name}\n")
                 f.write(f"  → Confidence: {result.confidence:.0%}\n")
                 f.write(f"  → Type: {result.match_type}\n\n")
 
-        self.console.print(f"[green]Exported {report.duplicate_count} duplicates to {output_file}[/green]")
+        self.console.print(
+            f"[green]Exported {report.duplicate_count} duplicates to {output_file}[/green]"
+        )
 
     def export_uncertain(self, report: VettingReport, output_file: str) -> None:
         """Export list of uncertain matches to file.
@@ -533,18 +527,22 @@ class ImportVetter:
         if not os.access(output_path.parent, os.W_OK):
             raise PermissionError(f"Cannot write to directory: {output_path.parent}")
 
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write(f"# Uncertain Matches from {report.import_folder}\n")
             f.write(f"# Generated: {report.vetted_at}\n")
             f.write(f"# Total: {report.uncertain_count}\n\n")
 
             for file_path, result in report.uncertain:
-                matched_name = result.matched_file.display_name if result.matched_file else "Unknown"
+                matched_name = (
+                    result.matched_file.display_name if result.matched_file else "Unknown"
+                )
                 f.write(f"{file_path}\n")
                 f.write(f"  → Possible Match: {matched_name}\n")
                 f.write(f"  → Confidence: {result.confidence:.0%}\n\n")
 
-        self.console.print(f"[green]Exported {report.uncertain_count} uncertain matches to {output_file}[/green]")
+        self.console.print(
+            f"[green]Exported {report.uncertain_count} uncertain matches to {output_file}[/green]"
+        )
 
     def get_vetting_history(self, limit: int = 10) -> None:
         """Get recent vetting history.
@@ -572,26 +570,23 @@ class ImportVetter:
         table.add_column("Uncertain", style="yellow", justify="right")
 
         for record in history:
-            vetted_at = datetime.fromisoformat(record['vetted_at'])
-            folder_name = Path(record['import_folder']).name
+            vetted_at = datetime.fromisoformat(record["vetted_at"])
+            folder_name = Path(record["import_folder"]).name
 
             table.add_row(
                 vetted_at.strftime("%Y-%m-%d %H:%M"),
                 folder_name,
-                str(record['total_files']),
-                str(record['new_songs']),
-                str(record['duplicates_found']),
-                str(record['uncertain_matches'])
+                str(record["total_files"]),
+                str(record["new_songs"]),
+                str(record["duplicates_found"]),
+                str(record["uncertain_matches"]),
             )
 
         self.console.print()
         self.console.print(table)
 
     def delete_duplicates(
-        self,
-        report: VettingReport,
-        confirm: bool = True,
-        dry_run: bool = False
+        self, report: VettingReport, confirm: bool = True, dry_run: bool = False
     ) -> Tuple[int, int]:
         """Delete duplicate files identified in vetting report.
 
@@ -623,7 +618,9 @@ class ImportVetter:
 
         # Show what will be deleted
         self.console.print()
-        self.console.print(f"[bold red]{'DRY RUN: ' if dry_run else ''}Files to be deleted:[/bold red]")
+        self.console.print(
+            f"[bold red]{'DRY RUN: ' if dry_run else ''}Files to be deleted:[/bold red]"
+        )
         self.console.print(f"Total: {report.duplicate_count} duplicates\n")
 
         tree = Tree("🗑️  Files to Delete")
@@ -642,9 +639,15 @@ class ImportVetter:
 
         # Confirmation prompt
         if confirm and not dry_run:
-            self.console.print("[bold yellow]⚠️  WARNING: This action cannot be undone![/bold yellow]")
-            response = input(f"\nDelete {report.duplicate_count} duplicate files? (yes/no): ").strip().lower()
-            if response not in ['yes', 'y']:
+            self.console.print(
+                "[bold yellow]⚠️  WARNING: This action cannot be undone![/bold yellow]"
+            )
+            response = (
+                input(f"\nDelete {report.duplicate_count} duplicate files? (yes/no): ")
+                .strip()
+                .lower()
+            )
+            if response not in ["yes", "y"]:
                 self.console.print("[yellow]Deletion cancelled[/yellow]")
                 return 0, 0
 
@@ -658,11 +661,11 @@ class ImportVetter:
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TaskProgressColumn(),
-            console=self.console
+            console=self.console,
         ) as progress:
             task = progress.add_task(
                 f"{'[DRY RUN] Simulating deletion' if dry_run else 'Deleting duplicates'}...",
-                total=report.duplicate_count
+                total=report.duplicate_count,
             )
 
             for file_path, result in report.duplicates:
@@ -704,7 +707,9 @@ class ImportVetter:
                 self.console.print(f"  ✗ Would fail: {failed_count} files")
         else:
             if deleted_count > 0:
-                self.console.print(f"[bold green]✓ Successfully deleted {deleted_count} duplicate files[/bold green]")
+                self.console.print(
+                    f"[bold green]✓ Successfully deleted {deleted_count} duplicate files[/bold green]"
+                )
             if failed_count > 0:
                 self.console.print(f"[bold red]✗ Failed to delete {failed_count} files[/bold red]")
 

@@ -21,12 +21,10 @@ import importlib
 import logging
 from typing import Optional, Tuple
 
-logger = logging.getLogger('music_tools.migrations')
+logger = logging.getLogger("music_tools.migrations")
 
 # Available migrations
-MIGRATIONS = {
-    '002': '002_add_quality_tables'
-}
+MIGRATIONS = {"002": "002_add_quality_tables"}
 
 
 def get_migration_module(version: str):
@@ -46,7 +44,7 @@ def get_migration_module(version: str):
         raise ImportError(f"Migration {version} not found. Available: {list(MIGRATIONS.keys())}")
 
     module_name = MIGRATIONS[version]
-    return importlib.import_module(f'.{module_name}', package=__package__)
+    return importlib.import_module(f".{module_name}", package=__package__)
 
 
 def apply_migration(version: str, db_path: str) -> Tuple[bool, str]:
@@ -69,7 +67,9 @@ def apply_migration(version: str, db_path: str) -> Tuple[bool, str]:
         return (False, error_msg)
 
 
-def rollback_migration(version: str, db_path: str, backup_path: Optional[str] = None) -> Tuple[bool, str]:
+def rollback_migration(
+    version: str, db_path: str, backup_path: Optional[str] = None
+) -> Tuple[bool, str]:
     """
     Rollback a migration by version number.
 
@@ -105,10 +105,7 @@ def get_migration_status(version: str, db_path: str) -> dict:
         module = get_migration_module(version)
         return module.get_migration_status(db_path)
     except Exception as e:
-        return {
-            'version': version,
-            'error': str(e)
-        }
+        return {"version": version, "error": str(e)}
 
 
 def list_migrations() -> dict:
@@ -122,9 +119,9 @@ def list_migrations() -> dict:
 
 
 __all__ = [
-    'apply_migration',
-    'rollback_migration',
-    'get_migration_status',
-    'list_migrations',
-    'MIGRATIONS'
+    "apply_migration",
+    "rollback_migration",
+    "get_migration_status",
+    "list_migrations",
+    "MIGRATIONS",
 ]

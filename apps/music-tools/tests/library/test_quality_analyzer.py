@@ -44,14 +44,11 @@ class TestAudioMetadata:
     def test_audio_metadata_basic_creation(self):
         """Test basic AudioMetadata creation with minimal fields."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
-            bitrate=320,
-            sample_rate=44100
+            filepath="/music/song.mp3", format="mp3", bitrate=320, sample_rate=44100
         )
 
-        assert metadata.filepath == '/music/song.mp3'
-        assert metadata.format == 'mp3'
+        assert metadata.filepath == "/music/song.mp3"
+        assert metadata.format == "mp3"
         assert metadata.bitrate == 320
         assert metadata.sample_rate == 44100
         assert metadata.is_lossless is False
@@ -59,22 +56,25 @@ class TestAudioMetadata:
 
     def test_audio_metadata_lossless_detection(self):
         """Test automatic lossless format detection."""
-        flac = AudioMetadata(filepath='/music/song.flac', format='flac', bitrate=1411, sample_rate=44100)
+        flac = AudioMetadata(
+            filepath="/music/song.flac", format="flac", bitrate=1411, sample_rate=44100
+        )
         assert flac.is_lossless is True
 
-        mp3 = AudioMetadata(filepath='/music/song.mp3', format='mp3', bitrate=320, sample_rate=44100)
+        mp3 = AudioMetadata(
+            filepath="/music/song.mp3", format="mp3", bitrate=320, sample_rate=44100
+        )
         assert mp3.is_lossless is False
 
-        alac = AudioMetadata(filepath='/music/song.m4a', format='alac', bitrate=1411, sample_rate=44100)
+        alac = AudioMetadata(
+            filepath="/music/song.m4a", format="alac", bitrate=1411, sample_rate=44100
+        )
         assert alac.is_lossless is True
 
     def test_audio_metadata_invalid_bitrate(self):
         """Test handling of invalid negative bitrate."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
-            bitrate=-320,  # Invalid
-            sample_rate=44100
+            filepath="/music/song.mp3", format="mp3", bitrate=-320, sample_rate=44100  # Invalid
         )
 
         # Should be set to None with warning
@@ -83,10 +83,7 @@ class TestAudioMetadata:
     def test_audio_metadata_invalid_sample_rate(self):
         """Test handling of invalid sample rate."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
-            bitrate=320,
-            sample_rate=-44100  # Invalid
+            filepath="/music/song.mp3", format="mp3", bitrate=320, sample_rate=-44100  # Invalid
         )
 
         assert metadata.sample_rate is None
@@ -94,11 +91,11 @@ class TestAudioMetadata:
     def test_audio_metadata_negative_duration(self):
         """Test handling of negative duration."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
+            filepath="/music/song.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
-            duration=-10.0  # Invalid
+            duration=-10.0,  # Invalid
         )
 
         assert metadata.duration is None
@@ -106,39 +103,37 @@ class TestAudioMetadata:
     def test_audio_metadata_format_from_filepath(self):
         """Test format extraction from filepath when format is empty."""
         metadata = AudioMetadata(
-            filepath='/music/song.flac',
-            format='',  # Empty
-            bitrate=1411,
-            sample_rate=44100
+            filepath="/music/song.flac", format="", bitrate=1411, sample_rate=44100  # Empty
         )
 
-        assert metadata.format == 'flac'
+        assert metadata.format == "flac"
 
     def test_audio_metadata_to_dict(self):
         """Test AudioMetadata serialization to dictionary."""
         now = datetime.now(timezone.utc)
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
+            filepath="/music/song.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
             channels=2,
             duration=225.5,
             bitrate_type=BitrateType.VBR,
             file_size=8_000_000,
-            modified_time=now
+            modified_time=now,
         )
 
         data = metadata.to_dict()
 
-        assert data['filepath'] == '/music/song.mp3'
-        assert data['format'] == 'mp3'
-        assert data['bitrate'] == 320
-        assert data['bitrate_type'] == 'vbr'
-        assert data['modified_time'] == now.isoformat()
+        assert data["filepath"] == "/music/song.mp3"
+        assert data["format"] == "mp3"
+        assert data["bitrate"] == 320
+        assert data["bitrate_type"] == "vbr"
+        assert data["modified_time"] == now.isoformat()
 
 
 # ==================== Quality Score Calculation Tests ====================
+
 
 class TestCalculateQualityScore:
     """Test quality score calculation algorithm."""
@@ -146,11 +141,11 @@ class TestCalculateQualityScore:
     def test_quality_score_flac_maximum(self):
         """Test that high-quality FLAC gets maximum score."""
         metadata = AudioMetadata(
-            filepath='/music/song.flac',
-            format='flac',
+            filepath="/music/song.flac",
+            format="flac",
             bitrate=1411,
             sample_rate=96000,  # High res
-            modified_time=datetime.now(timezone.utc)  # Recent
+            modified_time=datetime.now(timezone.utc),  # Recent
         )
 
         score = calculate_quality_score(metadata)
@@ -161,12 +156,12 @@ class TestCalculateQualityScore:
     def test_quality_score_mp3_320_cbr(self):
         """Test quality score for 320kbps CBR MP3."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
+            filepath="/music/song.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
             bitrate_type=BitrateType.CBR,
-            modified_time=datetime.now(timezone.utc) - timedelta(days=30)
+            modified_time=datetime.now(timezone.utc) - timedelta(days=30),
         )
 
         score = calculate_quality_score(metadata)
@@ -178,21 +173,21 @@ class TestCalculateQualityScore:
         """Test that VBR gets bonus points over CBR at sub-max bitrate."""
         # Use 256kbps so the +2 VBR bonus isn't capped at BITRATE_WEIGHT
         cbr_metadata = AudioMetadata(
-            filepath='/music/cbr.mp3',
-            format='mp3',
+            filepath="/music/cbr.mp3",
+            format="mp3",
             bitrate=256,
             sample_rate=44100,
             bitrate_type=BitrateType.CBR,
-            modified_time=datetime.now(timezone.utc)
+            modified_time=datetime.now(timezone.utc),
         )
 
         vbr_metadata = AudioMetadata(
-            filepath='/music/vbr.mp3',
-            format='mp3',
+            filepath="/music/vbr.mp3",
+            format="mp3",
             bitrate=256,
             sample_rate=44100,
             bitrate_type=BitrateType.VBR,
-            modified_time=datetime.now(timezone.utc)
+            modified_time=datetime.now(timezone.utc),
         )
 
         cbr_score = calculate_quality_score(cbr_metadata)
@@ -204,12 +199,12 @@ class TestCalculateQualityScore:
     def test_quality_score_low_bitrate_mp3(self):
         """Test quality score for low bitrate MP3."""
         metadata = AudioMetadata(
-            filepath='/music/low.mp3',
-            format='mp3',
+            filepath="/music/low.mp3",
+            format="mp3",
             bitrate=128,
             sample_rate=44100,
             bitrate_type=BitrateType.CBR,
-            modified_time=datetime.now(timezone.utc) - timedelta(days=2000)  # Old
+            modified_time=datetime.now(timezone.utc) - timedelta(days=2000),  # Old
         )
 
         score = calculate_quality_score(metadata)
@@ -220,15 +215,15 @@ class TestCalculateQualityScore:
     def test_quality_score_sample_rate_tiers(self):
         """Test quality score variations with different sample rates."""
         # High res (96kHz+)
-        high_res = AudioMetadata(filepath='/music/high.flac', format='flac', sample_rate=96000)
+        high_res = AudioMetadata(filepath="/music/high.flac", format="flac", sample_rate=96000)
         high_score = calculate_quality_score(high_res)
 
         # Medium (48kHz)
-        medium = AudioMetadata(filepath='/music/med.flac', format='flac', sample_rate=48000)
+        medium = AudioMetadata(filepath="/music/med.flac", format="flac", sample_rate=48000)
         medium_score = calculate_quality_score(medium)
 
         # Standard (44.1kHz)
-        standard = AudioMetadata(filepath='/music/std.flac', format='flac', sample_rate=44100)
+        standard = AudioMetadata(filepath="/music/std.flac", format="flac", sample_rate=44100)
         standard_score = calculate_quality_score(standard)
 
         # High res should score higher
@@ -240,29 +235,29 @@ class TestCalculateQualityScore:
 
         # Recent (< 1 year)
         recent = AudioMetadata(
-            filepath='/music/recent.mp3',
-            format='mp3',
+            filepath="/music/recent.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
-            modified_time=now - timedelta(days=30)
+            modified_time=now - timedelta(days=30),
         )
 
         # Moderate (1-5 years)
         moderate = AudioMetadata(
-            filepath='/music/moderate.mp3',
-            format='mp3',
+            filepath="/music/moderate.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
-            modified_time=now - timedelta(days=730)  # 2 years
+            modified_time=now - timedelta(days=730),  # 2 years
         )
 
         # Old (> 5 years)
         old = AudioMetadata(
-            filepath='/music/old.mp3',
-            format='mp3',
+            filepath="/music/old.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
-            modified_time=now - timedelta(days=2000)  # 5+ years
+            modified_time=now - timedelta(days=2000),  # 5+ years
         )
 
         recent_score = calculate_quality_score(recent)
@@ -281,10 +276,7 @@ class TestCalculateQualityScore:
     def test_quality_score_no_bitrate_info(self):
         """Test quality score when bitrate is None."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
-            bitrate=None,
-            sample_rate=44100
+            filepath="/music/song.mp3", format="mp3", bitrate=None, sample_rate=44100
         )
 
         score = calculate_quality_score(metadata)
@@ -295,43 +287,44 @@ class TestCalculateQualityScore:
 
 # ==================== Metadata Extraction Tests ====================
 
+
 class TestExtractAudioMetadata:
     """Test audio metadata extraction with mocked mutagen."""
 
     def test_extract_metadata_empty_filepath_raises(self):
         """Test that empty filepath raises ValueError."""
         with pytest.raises(ValueError, match="filepath cannot be None or empty"):
-            extract_audio_metadata('')
+            extract_audio_metadata("")
 
         with pytest.raises(ValueError, match="filepath cannot be None or empty"):
             extract_audio_metadata(None)
 
-    @patch('src.library.quality_analyzer.MutagenFile', None)
+    @patch("src.library.quality_analyzer.MutagenFile", None)
     def test_extract_metadata_no_mutagen_raises(self):
         """Test that missing mutagen raises ImportError."""
         with pytest.raises(ImportError, match="mutagen library is required"):
-            extract_audio_metadata('/music/song.mp3')
+            extract_audio_metadata("/music/song.mp3")
 
-    @patch('src.library.quality_analyzer.MutagenFile')
-    @patch('src.library.quality_analyzer.Path')
+    @patch("src.library.quality_analyzer.MutagenFile")
+    @patch("src.library.quality_analyzer.Path")
     def test_extract_metadata_file_not_exists(self, mock_path, mock_mutagen):
         """Test handling when file does not exist."""
         mock_file_path = Mock()
         mock_file_path.exists.return_value = False
         mock_path.return_value.resolve.return_value = mock_file_path
 
-        result = extract_audio_metadata('/music/nonexistent.mp3')
+        result = extract_audio_metadata("/music/nonexistent.mp3")
 
         assert result is None
 
-    @patch('src.library.quality_analyzer.MutagenFile')
-    @patch('src.library.quality_analyzer.Path')
+    @patch("src.library.quality_analyzer.MutagenFile")
+    @patch("src.library.quality_analyzer.Path")
     def test_extract_metadata_mp3_cbr(self, mock_path, mock_mutagen):
         """Test MP3 metadata extraction with CBR."""
         # Setup mock file
         mock_file_path = Mock()
         mock_file_path.exists.return_value = True
-        mock_file_path.suffix = '.mp3'
+        mock_file_path.suffix = ".mp3"
         mock_file_path.stat.return_value.st_size = 8_000_000
         mock_file_path.stat.return_value.st_mtime = datetime.now(timezone.utc).timestamp()
         mock_path.return_value.resolve.return_value = mock_file_path
@@ -347,30 +340,30 @@ class TestExtractAudioMetadata:
         mock_audio.info = mock_info
         mock_mutagen.return_value = mock_audio
 
-        result = extract_audio_metadata('/music/song.mp3')
+        result = extract_audio_metadata("/music/song.mp3")
 
         assert result is not None
-        assert result.format == 'mp3'
+        assert result.format == "mp3"
         assert result.bitrate == 320
         assert result.sample_rate == 44100
         assert result.channels == 2
         assert result.duration == 225.5
         assert result.file_size == 8_000_000
 
-    @patch('src.library.quality_analyzer.MutagenFile')
-    @patch('src.library.quality_analyzer.BitrateMode')
-    @patch('src.library.quality_analyzer.Path')
+    @patch("src.library.quality_analyzer.MutagenFile")
+    @patch("src.library.quality_analyzer.BitrateMode")
+    @patch("src.library.quality_analyzer.Path")
     def test_extract_metadata_mp3_vbr_detection(self, mock_path, mock_bitrate_mode, mock_mutagen):
         """Test VBR detection for MP3 files."""
         # Setup BitrateMode enum
-        mock_bitrate_mode.VBR = 'VBR'
-        mock_bitrate_mode.CBR = 'CBR'
-        mock_bitrate_mode.ABR = 'ABR'
+        mock_bitrate_mode.VBR = "VBR"
+        mock_bitrate_mode.CBR = "CBR"
+        mock_bitrate_mode.ABR = "ABR"
 
         # Setup mock file
         mock_file_path = Mock()
         mock_file_path.exists.return_value = True
-        mock_file_path.suffix = '.mp3'
+        mock_file_path.suffix = ".mp3"
         mock_file_path.stat.return_value.st_size = 7_000_000
         mock_file_path.stat.return_value.st_mtime = datetime.now(timezone.utc).timestamp()
         mock_path.return_value.resolve.return_value = mock_file_path
@@ -386,19 +379,19 @@ class TestExtractAudioMetadata:
         mock_audio.info = mock_info
         mock_mutagen.return_value = mock_audio
 
-        result = extract_audio_metadata('/music/vbr.mp3')
+        result = extract_audio_metadata("/music/vbr.mp3")
 
         assert result is not None
         assert result.bitrate_type == BitrateType.VBR
 
-    @patch('src.library.quality_analyzer.MutagenFile')
-    @patch('src.library.quality_analyzer.Path')
+    @patch("src.library.quality_analyzer.MutagenFile")
+    @patch("src.library.quality_analyzer.Path")
     def test_extract_metadata_flac(self, mock_path, mock_mutagen):
         """Test FLAC metadata extraction."""
         # Setup mock file
         mock_file_path = Mock()
         mock_file_path.exists.return_value = True
-        mock_file_path.suffix = '.flac'
+        mock_file_path.suffix = ".flac"
         mock_file_path.stat.return_value.st_size = 25_000_000
         mock_file_path.stat.return_value.st_mtime = datetime.now(timezone.utc).timestamp()
         mock_path.return_value.resolve.return_value = mock_file_path
@@ -413,16 +406,16 @@ class TestExtractAudioMetadata:
         mock_audio.info = mock_info
         mock_mutagen.return_value = mock_audio
 
-        result = extract_audio_metadata('/music/song.flac')
+        result = extract_audio_metadata("/music/song.flac")
 
         assert result is not None
-        assert result.format == 'flac'
+        assert result.format == "flac"
         assert result.bitrate == 1411
         assert result.sample_rate == 96000
         assert result.is_lossless is True
 
-    @patch('src.library.quality_analyzer.MutagenFile')
-    @patch('src.library.quality_analyzer.Path')
+    @patch("src.library.quality_analyzer.MutagenFile")
+    @patch("src.library.quality_analyzer.Path")
     def test_extract_metadata_mutagen_returns_none(self, mock_path, mock_mutagen):
         """Test handling when mutagen cannot read file."""
         mock_file_path = Mock()
@@ -431,12 +424,13 @@ class TestExtractAudioMetadata:
 
         mock_mutagen.return_value = None
 
-        result = extract_audio_metadata('/music/corrupt.mp3')
+        result = extract_audio_metadata("/music/corrupt.mp3")
 
         assert result is None
 
 
 # ==================== Filename Normalization Tests ====================
+
 
 class TestNormalizeFilename:
     """Test filename normalization for duplicate matching."""
@@ -461,7 +455,7 @@ class TestNormalizeFilename:
         """Test that format markers are removed."""
         result = normalize_filename("Song-320-MP3.mp3")
         assert "320" not in result
-        assert "mp3" in result.split('.')[-1]  # Extension preserved
+        assert "mp3" in result.split(".")[-1]  # Extension preserved
 
         result = normalize_filename("Track FLAC.flac")
         assert result == "track.flac"
@@ -499,10 +493,14 @@ class TestNormalizeFilename:
         assert "[" not in result
         assert "320kbps" not in result
         assert "vbr" not in result.lower() or "vbr" not in result
-        assert "daft punk around the world.mp3" == result or "daft punk around the world .mp3" == result
+        assert (
+            "daft punk around the world.mp3" == result
+            or "daft punk around the world .mp3" == result
+        )
 
 
 # ==================== Duplicate Ranking Tests ====================
+
 
 class TestRankDuplicateGroup:
     """Test duplicate file ranking algorithm."""
@@ -518,10 +516,7 @@ class TestRankDuplicateGroup:
     def test_rank_duplicate_group_single_file(self):
         """Test ranking with single file returns it as keeper."""
         metadata = AudioMetadata(
-            filepath='/music/only.mp3',
-            format='mp3',
-            bitrate=320,
-            sample_rate=44100
+            filepath="/music/only.mp3", format="mp3", bitrate=320, sample_rate=44100
         )
 
         keep, delete = rank_duplicate_group([metadata])
@@ -532,27 +527,27 @@ class TestRankDuplicateGroup:
     def test_rank_duplicate_group_quality_priority(self):
         """Test that highest quality file is kept."""
         flac = AudioMetadata(
-            filepath='/music/song.flac',
-            format='flac',
+            filepath="/music/song.flac",
+            format="flac",
             bitrate=1411,
             sample_rate=96000,
-            file_size=25_000_000
+            file_size=25_000_000,
         )
 
         mp3_320 = AudioMetadata(
-            filepath='/music/song_320.mp3',
-            format='mp3',
+            filepath="/music/song_320.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
-            file_size=8_000_000
+            file_size=8_000_000,
         )
 
         mp3_128 = AudioMetadata(
-            filepath='/music/song_128.mp3',
-            format='mp3',
+            filepath="/music/song_128.mp3",
+            format="mp3",
             bitrate=128,
             sample_rate=44100,
-            file_size=4_000_000
+            file_size=4_000_000,
         )
 
         files = [mp3_128, mp3_320, flac]  # Intentionally out of order
@@ -567,21 +562,21 @@ class TestRankDuplicateGroup:
         """Test that larger file size is used as tiebreaker."""
         # Two MP3s with same quality score but different sizes
         mp3_large = AudioMetadata(
-            filepath='/music/large.mp3',
-            format='mp3',
+            filepath="/music/large.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
             file_size=9_000_000,  # Larger
-            modified_time=datetime.now(timezone.utc)
+            modified_time=datetime.now(timezone.utc),
         )
 
         mp3_small = AudioMetadata(
-            filepath='/music/small.mp3',
-            format='mp3',
+            filepath="/music/small.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
             file_size=7_000_000,  # Smaller
-            modified_time=datetime.now(timezone.utc)
+            modified_time=datetime.now(timezone.utc),
         )
 
         # Force same quality score
@@ -598,12 +593,15 @@ class TestRankDuplicateGroup:
 
 # ==================== Quality Comparison Tests ====================
 
+
 class TestCompareAudioQuality:
     """Test audio quality comparison function."""
 
     def test_compare_audio_quality_none_raises(self):
         """Test that None arguments raise ValueError."""
-        metadata = AudioMetadata(filepath='/music/test.mp3', format='mp3', bitrate=320, sample_rate=44100)
+        metadata = AudioMetadata(
+            filepath="/music/test.mp3", format="mp3", bitrate=320, sample_rate=44100
+        )
 
         with pytest.raises(ValueError, match="Cannot compare None files"):
             compare_audio_quality(None, metadata)
@@ -613,8 +611,12 @@ class TestCompareAudioQuality:
 
     def test_compare_audio_quality_higher_score_wins(self):
         """Test that file with higher quality score wins."""
-        flac = AudioMetadata(filepath='/music/song.flac', format='flac', bitrate=1411, sample_rate=96000)
-        mp3 = AudioMetadata(filepath='/music/song.mp3', format='mp3', bitrate=320, sample_rate=44100)
+        flac = AudioMetadata(
+            filepath="/music/song.flac", format="flac", bitrate=1411, sample_rate=96000
+        )
+        mp3 = AudioMetadata(
+            filepath="/music/song.mp3", format="mp3", bitrate=320, sample_rate=44100
+        )
 
         result = compare_audio_quality(flac, mp3)
 
@@ -622,8 +624,20 @@ class TestCompareAudioQuality:
 
     def test_compare_audio_quality_same_score_size_tiebreaker(self):
         """Test that file size breaks ties."""
-        large = AudioMetadata(filepath='/music/large.mp3', format='mp3', bitrate=320, sample_rate=44100, file_size=9_000_000)
-        small = AudioMetadata(filepath='/music/small.mp3', format='mp3', bitrate=320, sample_rate=44100, file_size=7_000_000)
+        large = AudioMetadata(
+            filepath="/music/large.mp3",
+            format="mp3",
+            bitrate=320,
+            sample_rate=44100,
+            file_size=9_000_000,
+        )
+        small = AudioMetadata(
+            filepath="/music/small.mp3",
+            format="mp3",
+            bitrate=320,
+            sample_rate=44100,
+            file_size=7_000_000,
+        )
 
         # Force same score
         large.quality_score = 70
@@ -635,6 +649,7 @@ class TestCompareAudioQuality:
 
 
 # ==================== Quality Tier Tests ====================
+
 
 class TestGetQualityTier:
     """Test quality tier labeling."""
@@ -670,6 +685,7 @@ class TestGetQualityTier:
 
 # ==================== Duplicate Set Analysis Tests ====================
 
+
 class TestAnalyzeDuplicateSet:
     """Test complete duplicate set analysis."""
 
@@ -681,33 +697,46 @@ class TestAnalyzeDuplicateSet:
         with pytest.raises(ValueError, match="filepaths cannot be None or empty"):
             analyze_duplicate_set(None)
 
-    @patch('src.library.quality_analyzer.extract_audio_metadata')
+    @patch("src.library.quality_analyzer.extract_audio_metadata")
     def test_analyze_duplicate_set_success(self, mock_extract):
         """Test successful duplicate set analysis."""
         # Setup mock metadata
-        flac_meta = AudioMetadata(filepath='/music/song.flac', format='flac', bitrate=1411, sample_rate=96000, file_size=25_000_000)
-        mp3_meta = AudioMetadata(filepath='/music/song.mp3', format='mp3', bitrate=320, sample_rate=44100, file_size=8_000_000)
+        flac_meta = AudioMetadata(
+            filepath="/music/song.flac",
+            format="flac",
+            bitrate=1411,
+            sample_rate=96000,
+            file_size=25_000_000,
+        )
+        mp3_meta = AudioMetadata(
+            filepath="/music/song.mp3",
+            format="mp3",
+            bitrate=320,
+            sample_rate=44100,
+            file_size=8_000_000,
+        )
 
         mock_extract.side_effect = [flac_meta, mp3_meta]
 
-        result = analyze_duplicate_set(['/music/song.flac', '/music/song.mp3'])
+        result = analyze_duplicate_set(["/music/song.flac", "/music/song.mp3"])
 
-        assert result['total_files'] == 2
-        assert result['recommended_keep'] == flac_meta
-        assert mp3_meta in result['recommended_delete']
-        assert result['size_saved_mb'] > 0
-        assert result['lossless_count'] == 1
+        assert result["total_files"] == 2
+        assert result["recommended_keep"] == flac_meta
+        assert mp3_meta in result["recommended_delete"]
+        assert result["size_saved_mb"] > 0
+        assert result["lossless_count"] == 1
 
-    @patch('src.library.quality_analyzer.extract_audio_metadata')
+    @patch("src.library.quality_analyzer.extract_audio_metadata")
     def test_analyze_duplicate_set_no_valid_files_raises(self, mock_extract):
         """Test that no valid files raises ValueError."""
         mock_extract.return_value = None
 
         with pytest.raises(ValueError, match="No valid audio files found"):
-            analyze_duplicate_set(['/music/corrupt1.mp3', '/music/corrupt2.mp3'])
+            analyze_duplicate_set(["/music/corrupt1.mp3", "/music/corrupt2.mp3"])
 
 
 # ==================== Edge Cases and Error Handling ====================
+
 
 class TestEdgeCases:
     """Test edge cases and error handling."""
@@ -715,10 +744,7 @@ class TestEdgeCases:
     def test_quality_score_with_no_sample_rate(self):
         """Test quality score calculation with missing sample rate."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
-            bitrate=320,
-            sample_rate=None
+            filepath="/music/song.mp3", format="mp3", bitrate=320, sample_rate=None
         )
 
         score = calculate_quality_score(metadata)
@@ -729,11 +755,11 @@ class TestEdgeCases:
     def test_quality_score_with_no_modified_time(self):
         """Test quality score calculation with missing modified time."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
+            filepath="/music/song.mp3",
+            format="mp3",
             bitrate=320,
             sample_rate=44100,
-            modified_time=None
+            modified_time=None,
         )
 
         score = calculate_quality_score(metadata)
@@ -744,10 +770,7 @@ class TestEdgeCases:
     def test_quality_score_unknown_format(self):
         """Test quality score with unknown format."""
         metadata = AudioMetadata(
-            filepath='/music/song.xyz',
-            format='xyz',  # Unknown
-            bitrate=320,
-            sample_rate=44100
+            filepath="/music/song.xyz", format="xyz", bitrate=320, sample_rate=44100  # Unknown
         )
 
         score = calculate_quality_score(metadata)
@@ -758,16 +781,14 @@ class TestEdgeCases:
 
 # ==================== Performance Benchmarks ====================
 
+
 class TestPerformance:
     """Performance benchmark tests."""
 
     def test_calculate_quality_score_performance(self, benchmark):
         """Benchmark quality score calculation speed."""
         metadata = AudioMetadata(
-            filepath='/music/song.mp3',
-            format='mp3',
-            bitrate=320,
-            sample_rate=44100
+            filepath="/music/song.mp3", format="mp3", bitrate=320, sample_rate=44100
         )
 
         # Should complete in < 1ms
@@ -787,11 +808,11 @@ class TestPerformance:
         # Create 100 files
         files = [
             AudioMetadata(
-                filepath=f'/music/song{i}.mp3',
-                format='mp3',
+                filepath=f"/music/song{i}.mp3",
+                format="mp3",
                 bitrate=128 + (i * 2),  # Varying bitrates
                 sample_rate=44100,
-                file_size=4_000_000 + (i * 10000)
+                file_size=4_000_000 + (i * 10000),
             )
             for i in range(100)
         ]
@@ -802,5 +823,5 @@ class TestPerformance:
         assert len(delete) == 99
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--benchmark-disable'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--benchmark-disable"])

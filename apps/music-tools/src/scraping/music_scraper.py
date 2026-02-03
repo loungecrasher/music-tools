@@ -73,8 +73,7 @@ from .models import BlogPost, DownloadLink, ScraperConfig, ScraperResult, valida
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -91,7 +90,7 @@ class MusicBlogScraper:
         if not validate_url(base_url):
             raise ValidationError(f"Invalid base URL: {base_url}")
 
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.output_file = sanitize_filename(output_file)
         self.session = create_resilient_session()
         self.rate_limiter = ThreadSafeRateLimiter()
@@ -123,7 +122,9 @@ class MusicBlogScraper:
 
         return soup
 
-    def scrape_website(self, max_pages: int = DEFAULT_MAX_PAGES, start_date=None, end_date=None) -> List[Dict]:
+    def scrape_website(
+        self, max_pages: int = DEFAULT_MAX_PAGES, start_date=None, end_date=None
+    ) -> List[Dict]:
         """
         Main entry point to scrape the website.
 
@@ -146,12 +147,14 @@ class MusicBlogScraper:
 
         # 2. Filter/Process posts
         # Use preferred_genres if available (from subclass), otherwise use all genres
-        target_genres = getattr(self, 'preferred_genres', ALL_EDM_GENRES)
+        target_genres = getattr(self, "preferred_genres", ALL_EDM_GENRES)
 
         results = self.filter_posts_by_genre(post_urls, target_genres, start_date, end_date)
         return results
 
-    def find_blog_posts(self, max_pages: int = DEFAULT_MAX_PAGES, start_date=None, end_date=None) -> List[str]:
+    def find_blog_posts(
+        self, max_pages: int = DEFAULT_MAX_PAGES, start_date=None, end_date=None
+    ) -> List[str]:
         """
         Find blog post URLs with date-aware scanning to stop when posts get too old.
 
@@ -184,14 +187,21 @@ class MusicBlogScraper:
         if start_date:
             # Estimate pages needed: assume ~12-15 posts per page, ~1-2 posts per day
             from datetime import datetime
+
             days_to_scan = (datetime.now().date() - start_date).days
-            estimated_pages = max(DEFAULT_MAX_PAGES, min(MAX_PAGES_LIMIT, days_to_scan // 2))  # 2 days per page average
+            estimated_pages = max(
+                DEFAULT_MAX_PAGES, min(MAX_PAGES_LIMIT, days_to_scan // 2)
+            )  # 2 days per page average
             intelligent_max_pages = min(max_pages, estimated_pages)
 
             if intelligent_max_pages < max_pages:
                 logger.info(f"📅 Date range: {days_to_scan} days")
-                logger.info(f"🎯 Intelligent pagination: Using {intelligent_max_pages} pages instead of {max_pages}")
-                logger.info(f"   (Estimated {days_to_scan // 2} days per page, {days_to_scan} total days)")
+                logger.info(
+                    f"🎯 Intelligent pagination: Using {intelligent_max_pages} pages instead of {max_pages}"
+                )
+                logger.info(
+                    f"   (Estimated {days_to_scan // 2} days per page, {days_to_scan} total days)"
+                )
             else:
                 logger.info(f"📅 Date range: {days_to_scan} days")
                 logger.info(f"🎯 Using requested {max_pages} pages (within reasonable range)")
@@ -204,14 +214,16 @@ class MusicBlogScraper:
         pages_without_target_content = 0
 
         # Create progress bar for pagination
-        with tqdm(total=intelligent_max_pages, initial=1, desc="Scanning pages", unit="page") as pbar:
+        with tqdm(
+            total=intelligent_max_pages, initial=1, desc="Scanning pages", unit="page"
+        ) as pbar:
             while page_num <= intelligent_max_pages + 1:
                 logger.info(f"Scanning page {page_num}/{intelligent_max_pages + 1}...")
 
                 # Try ONLY the correct sharing-db.club format
                 pagination_urls = [
-                    f"{self.base_url}/page/{page_num}/",          # sharing-db.club format with trailing slash - FIRST!
-                    f"{self.base_url}/page/{page_num}",           # sharing-db.club format without trailing slash - SECOND!
+                    f"{self.base_url}/page/{page_num}/",  # sharing-db.club format with trailing slash - FIRST!
+                    f"{self.base_url}/page/{page_num}",  # sharing-db.club format without trailing slash - SECOND!
                 ]
 
                 page_found = False
@@ -232,7 +244,9 @@ class MusicBlogScraper:
                 if not page_found:
                     pages_without_target_content += 1
                     if pages_without_target_content >= MAX_EMPTY_PAGES:
-                        logger.info(f"No new posts found on {MAX_EMPTY_PAGES} consecutive pages, stopping search")
+                        logger.info(
+                            f"No new posts found on {MAX_EMPTY_PAGES} consecutive pages, stopping search"
+                        )
                         break
                     logger.info(f"No new posts found on page {page_num}, continuing...")
                 else:
@@ -269,7 +283,7 @@ class MusicBlogScraper:
             try:
                 links = soup.select(selector)
                 for link in links:
-                    href = link.get('href')
+                    href = link.get("href")
                     if href and self.is_blog_post_url(href):
                         full_url = urljoin(page_url, href)
                         if full_url not in found_posts:
@@ -297,9 +311,11 @@ class MusicBlogScraper:
 
         # Also check if it's a direct content URL with the base domain
         # and doesn't look like a static resource
-        if self.base_url in url and not any(skip in url.lower() for skip in ['.css', '.js', '.png', '.jpg', '.gif']):
+        if self.base_url in url and not any(
+            skip in url.lower() for skip in [".css", ".js", ".png", ".jpg", ".gif"]
+        ):
             # If it has numbers (likely dates or IDs), consider it a post
-            if re.search(r'\d{4}', url):  # Contains a 4-digit number (likely year)
+            if re.search(r"\d{4}", url):  # Contains a 4-digit number (likely year)
                 return True
 
         return False
@@ -318,29 +334,29 @@ class MusicBlogScraper:
 
         try:
             # Strategy 1: Check the URL path itself for genre indicators
-            canonical_link = soup.find('link', {'rel': 'canonical'})
+            canonical_link = soup.find("link", {"rel": "canonical"})
             if canonical_link:
-                url = canonical_link.get('href', '')
-                if '/house/' in url:
-                    genres.append('house')
-                elif '/techno/' in url:
-                    genres.append('techno')
-                elif '/trance/' in url:
-                    genres.append('trance')
-                elif '/electronic/' in url:
-                    genres.append('electronica')
+                url = canonical_link.get("href", "")
+                if "/house/" in url:
+                    genres.append("house")
+                elif "/techno/" in url:
+                    genres.append("techno")
+                elif "/trance/" in url:
+                    genres.append("trance")
+                elif "/electronic/" in url:
+                    genres.append("electronica")
 
             # Strategy 2: Get ALL text content and search aggressively
             page_content = soup.get_text()
 
             # Strategy 3: Look for explicit genre labels (sharing-db.club format)
             genre_patterns = [
-                r'Genre:\s*([^\n\r]+)',
-                r'\*\*Genre:\*\*\s*([^\n\r]+)',  # Fixed: escaped asterisks
-                r'Style:\s*([^\n\r]+)',
-                r'\*\*Style:\*\*\s*([^\n\r]+)',  # Fixed: escaped asterisks
-                r'Genre[s]?:\s*([^\n\r]+)',
-                r'posted in\s+([^\n\r]+)',  # WordPress "posted in" categories
+                r"Genre:\s*([^\n\r]+)",
+                r"\*\*Genre:\*\*\s*([^\n\r]+)",  # Fixed: escaped asterisks
+                r"Style:\s*([^\n\r]+)",
+                r"\*\*Style:\*\*\s*([^\n\r]+)",  # Fixed: escaped asterisks
+                r"Genre[s]?:\s*([^\n\r]+)",
+                r"posted in\s+([^\n\r]+)",  # WordPress "posted in" categories
             ]
 
             for pattern in genre_patterns:
@@ -351,26 +367,44 @@ class MusicBlogScraper:
             # Strategy 4: Check WordPress category links
             category_links = soup.select('a[href*="/category/"]')
             for link in category_links:
-                href = link.get('href', '')
+                href = link.get("href", "")
                 text = link.get_text().strip()
                 if text:
                     genres.extend(self.extract_genres_from_text(text))
                 # Also extract from URL path
-                if '/category/' in href:
-                    category = href.split('/category/')[-1].strip('/')
+                if "/category/" in href:
+                    category = href.split("/category/")[-1].strip("/")
                     genres.extend(self.extract_genres_from_text(category))
 
             # Strategy 5: Always extract from full content with all preferred genres
             genres.extend(self.extract_genres_from_text(page_content))
 
             # Strategy 6: If this is sharing-db.club, be more aggressive with common patterns
-            if 'sharing-db.club' in str(soup):
+            if "sharing-db.club" in str(soup):
                 # Look for any mention of our preferred genres in the content
                 preferred_genres = [
-                    'house', 'progressive house', 'melodic', 'indie dance', 'bass house',
-                    'organic house', 'drum and bass', 'uk garage', 'electro pop', 'nu disco',
-                    'funky', 'deep house', 'tech house', 'dance', 'afro house', 'brazilian',
-                    'latin', 'electronica', 'ambient', 'techno', 'trance', 'minimal'
+                    "house",
+                    "progressive house",
+                    "melodic",
+                    "indie dance",
+                    "bass house",
+                    "organic house",
+                    "drum and bass",
+                    "uk garage",
+                    "electro pop",
+                    "nu disco",
+                    "funky",
+                    "deep house",
+                    "tech house",
+                    "dance",
+                    "afro house",
+                    "brazilian",
+                    "latin",
+                    "electronica",
+                    "ambient",
+                    "techno",
+                    "trance",
+                    "minimal",
                 ]
 
                 content_lower = page_content.lower()
@@ -393,7 +427,7 @@ class MusicBlogScraper:
     def extract_genres_from_text(self, text: str) -> List[str]:
         """Extract genre keywords from text."""
         # Handle BeautifulSoup objects
-        if hasattr(text, 'get_text'):
+        if hasattr(text, "get_text"):
             text = text.get_text()
 
         if not text:
@@ -426,13 +460,16 @@ class MusicBlogScraper:
         other_links = []
 
         # Find all links on the page
-        links = soup.find_all('a', href=True)
+        links = soup.find_all("a", href=True)
 
         for link in links:
-            href = link.get('href')
+            href = link.get("href")
             if href:
                 # Skip internal site links (feeds, trackbacks, etc.)
-                if any(skip_pattern in href.lower() for skip_pattern in ['/feed/', '/trackback/', self.base_url]):
+                if any(
+                    skip_pattern in href.lower()
+                    for skip_pattern in ["/feed/", "/trackback/", self.base_url]
+                ):
                     continue
 
                 # Check if it matches download patterns using pre-compiled patterns
@@ -445,7 +482,9 @@ class MusicBlogScraper:
                             continue
 
                         # Skip if it's an internal site URL after URL joining
-                        if self.base_url in full_url and not any(host in full_url for host in VALID_HOSTS):
+                        if self.base_url in full_url and not any(
+                            host in full_url for host in VALID_HOSTS
+                        ):
                             continue
 
                         # Categorize links by quality preference
@@ -510,23 +549,23 @@ class MusicBlogScraper:
         link_text = link_element.get_text().lower()
 
         # Exclude if it contains 320 indicators
-        if '320' in link_text or '320' in url_lower:
+        if "320" in link_text or "320" in url_lower:
             return False
 
         # Check URL for FLAC indicators
-        flac_indicators = ['flac', '.flac', 'lossless']
+        flac_indicators = ["flac", ".flac", "lossless"]
         if any(indicator in url_lower for indicator in flac_indicators):
             return True
 
         # Check link text for FLAC indicators - be very specific
-        if 'download in flac' in link_text or 'download in fl' in link_text:
+        if "download in flac" in link_text or "download in fl" in link_text:
             return True
-        if link_text.strip() == 'flac' or '(flac)' in link_text or 'flac)' in link_text:
+        if link_text.strip() == "flac" or "(flac)" in link_text or "flac)" in link_text:
             return True
 
         # Check for FLAC in surrounding text (like "DOWNLOAD in FLAC")
         parent_text = link_element.parent.get_text().lower() if link_element.parent else ""
-        if 'download in flac' in parent_text and '320' not in parent_text:
+        if "download in flac" in parent_text and "320" not in parent_text:
             return True
 
         return False
@@ -537,23 +576,23 @@ class MusicBlogScraper:
         link_text = link_element.get_text().lower()
 
         # Exclude if it contains FLAC indicators
-        if 'flac' in link_text or 'flac' in url_lower:
+        if "flac" in link_text or "flac" in url_lower:
             return False
 
         # Check URL for MP3 320 indicators
-        mp3_320_indicators = ['320', '320kbps', '320 kbps', 'mp3 320']
+        mp3_320_indicators = ["320", "320kbps", "320 kbps", "mp3 320"]
         if any(indicator in url_lower for indicator in mp3_320_indicators):
             return True
 
         # Check link text for MP3 320 indicators - be specific to avoid false positives
-        if 'download in 320' in link_text or 'download in 320kbps' in link_text:
+        if "download in 320" in link_text or "download in 320kbps" in link_text:
             return True
-        if '(320kbps)' in link_text or '320kbps)' in link_text or '(320)' in link_text:
+        if "(320kbps)" in link_text or "320kbps)" in link_text or "(320)" in link_text:
             return True
 
         # Check for MP3 320 in surrounding text
         parent_text = link_element.parent.get_text().lower() if link_element.parent else ""
-        if 'download in 320' in parent_text and 'flac' not in parent_text:
+        if "download in 320" in parent_text and "flac" not in parent_text:
             return True
 
         return False
@@ -564,7 +603,7 @@ class MusicBlogScraper:
         page_text_lower = page_text.lower()
 
         # Check URL for FLAC indicators
-        flac_indicators = ['flac', '.flac', 'lossless']
+        flac_indicators = ["flac", ".flac", "lossless"]
         if any(indicator in url_lower for indicator in flac_indicators):
             return True
 
@@ -588,7 +627,7 @@ class MusicBlogScraper:
         page_text_lower = page_text.lower()
 
         # Check URL for MP3 320 indicators
-        mp3_320_indicators = ['320', '320kbps', '320 kbps', 'mp3 320']
+        mp3_320_indicators = ["320", "320kbps", "320 kbps", "mp3 320"]
         if any(indicator in url_lower for indicator in mp3_320_indicators):
             return True
 
@@ -628,8 +667,13 @@ class MusicBlogScraper:
 
         return ""
 
-    def filter_posts_by_genre(self, post_urls: List[str], target_genres: List[str],
-                              start_date: Optional[date] = None, end_date: Optional[date] = None) -> List[Dict]:
+    def filter_posts_by_genre(
+        self,
+        post_urls: List[str],
+        target_genres: List[str],
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+    ) -> List[Dict]:
         """
         Filter blog posts by genre keywords and date range.
 
@@ -646,8 +690,11 @@ class MusicBlogScraper:
 
         logger.info(f"Filtering {len(post_urls)} posts for genres: {', '.join(target_genres)}")
         if start_date or end_date:
-            date_range = f" from {start_date} to {end_date}" if start_date and end_date else \
-                        f" from {start_date}" if start_date else f" until {end_date}"
+            date_range = (
+                f" from {start_date} to {end_date}"
+                if start_date and end_date
+                else f" from {start_date}" if start_date else f" until {end_date}"
+            )
             logger.info(f"Date range: {date_range}")
 
         # Create progress bar for processing posts
@@ -666,7 +713,9 @@ class MusicBlogScraper:
                 # Check date range if specified
                 if start_date or end_date:
                     if not post_date:
-                        logger.debug(f"Could not determine post date for {post_url}, skipping date filter")
+                        logger.debug(
+                            f"Could not determine post date for {post_url}, skipping date filter"
+                        )
                     elif start_date and post_date < start_date:
                         logger.debug(f"Post date {post_date} before start date {start_date}")
                         pbar.update(1)
@@ -682,7 +731,11 @@ class MusicBlogScraper:
                 post_genres = self.extract_genre_keywords(soup)
 
                 # Check if any target genres match
-                matching_genres = [genre for genre in target_genres if genre.lower() in [g.lower() for g in post_genres]]
+                matching_genres = [
+                    genre
+                    for genre in target_genres
+                    if genre.lower() in [g.lower() for g in post_genres]
+                ]
 
                 if matching_genres:
                     # Extract download links
@@ -693,12 +746,12 @@ class MusicBlogScraper:
 
                     # Create validated BlogPost model
                     post_data = {
-                        'url': post_url,
-                        'title': title,
-                        'genres': post_genres,
-                        'matching_genres': matching_genres,
-                        'download_links': download_links,  # Pass as strings, let Pydantic handle conversion
-                        'post_date': post_date
+                        "url": post_url,
+                        "title": title,
+                        "genres": post_genres,
+                        "matching_genres": matching_genres,
+                        "download_links": download_links,  # Pass as strings, let Pydantic handle conversion
+                        "post_date": post_date,
                     }
 
                     validated_post = validate_post_data(post_data)
@@ -706,19 +759,19 @@ class MusicBlogScraper:
                         # Convert to dict and ensure download_links are strings for compatibility
                         post_dict = validated_post.to_dict()
                         # Convert DownloadLink objects (which contain HttpUrl objects) back to strings
-                        if 'download_links' in post_dict:
+                        if "download_links" in post_dict:
                             converted_links = []
-                            for link in post_dict['download_links']:
-                                if isinstance(link, dict) and 'url' in link:
+                            for link in post_dict["download_links"]:
+                                if isinstance(link, dict) and "url" in link:
                                     # DownloadLink object converted to dict
-                                    converted_links.append(str(link['url']))
-                                elif hasattr(link, 'url'):
+                                    converted_links.append(str(link["url"]))
+                                elif hasattr(link, "url"):
                                     # Direct DownloadLink object
                                     converted_links.append(str(link.url))
                                 else:
                                     # String or other format
                                     converted_links.append(str(link))
-                            post_dict['download_links'] = converted_links
+                            post_dict["download_links"] = converted_links
                         matching_posts.append(post_dict)
                         logger.debug(f"Found {len(download_links)} download links")
                     else:
@@ -757,7 +810,7 @@ class MusicBlogScraper:
         for selector in META_DATE_SELECTORS:
             element = soup.select_one(selector)
             if element:
-                date_text = element.get('content', '').strip()
+                date_text = element.get("content", "").strip()
                 parsed_date = self.parse_date_string(date_text)
                 if parsed_date:
                     return parsed_date
@@ -784,7 +837,7 @@ class MusicBlogScraper:
             return None
 
         # Clean up text (handle newlines in "Nov\n21\n2025" format)
-        date_text = re.sub(r'\s+', ' ', date_text.strip())
+        date_text = re.sub(r"\s+", " ", date_text.strip())
 
         # Use date formats from configuration
         for fmt in DATE_FORMATS:
@@ -843,21 +896,23 @@ class MusicBlogScraper:
         """Save results to text file with automatic link extraction."""
         try:
             # First, save the detailed results
-            with open(self.output_file, 'w', encoding=DEFAULT_ENCODING) as f:
-                f.write(f"EDM Music Download Links - Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            with open(self.output_file, "w", encoding=DEFAULT_ENCODING) as f:
+                f.write(
+                    f"EDM Music Download Links - Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                )
                 f.write("=" * 80 + "\n\n")
 
                 for post in matching_posts:
                     f.write(f"Title: {post['title']}\n")
                     f.write(f"URL: {post['url']}\n")
-                    if post.get('post_date'):
+                    if post.get("post_date"):
                         f.write(f"Date: {post['post_date']}\n")
                     f.write(f"Genres: {', '.join(post['genres'])}\n")
                     f.write(f"Matching Genres: {', '.join(post['matching_genres'])}\n")
                     f.write("Download Links:\n")
 
-                    if post['download_links']:
-                        for link in post['download_links']:
+                    if post["download_links"]:
+                        for link in post["download_links"]:
                             f.write(f"  - {link}\n")
                     else:
                         f.write("  No download links found\n")
@@ -867,7 +922,7 @@ class MusicBlogScraper:
             logger.info(f"Results saved to {self.output_file}")
             logger.info(f"Found {len(matching_posts)} matching posts")
 
-            total_links = sum(len(post['download_links']) for post in matching_posts)
+            total_links = sum(len(post["download_links"]) for post in matching_posts)
             logger.info(f"Total download links found: {total_links}")
 
             # Now automatically extract and append all unique links
@@ -876,20 +931,20 @@ class MusicBlogScraper:
 
                 # Collect all unique links
                 all_links = set()
-                quality_stats = {'flac': 0, 'mp3_320': 0, 'other': 0}
+                quality_stats = {"flac": 0, "mp3_320": 0, "other": 0}
 
                 for post in matching_posts:
-                    for link in post.get('download_links', []):
+                    for link in post.get("download_links", []):
                         # Handle different link formats
                         if isinstance(link, dict):
                             # If link is a dictionary, extract the URL
-                            link_url = link.get('url', '')
-                        elif hasattr(link, 'strip'):
+                            link_url = link.get("url", "")
+                        elif hasattr(link, "strip"):
                             # If link is a string-like object
-                            link_url = str(link) if link else ''
+                            link_url = str(link) if link else ""
                         else:
                             # If link is an HttpUrl or other object, convert to string
-                            link_url = str(link) if link else ''
+                            link_url = str(link) if link else ""
 
                         if link_url and link_url.strip():
                             link_url = link_url.strip()
@@ -897,18 +952,18 @@ class MusicBlogScraper:
 
                             # Track quality stats
                             link_lower = link_url.lower()
-                            if 'flac' in link_lower or '.flac' in link_lower:
-                                quality_stats['flac'] += 1
-                            elif '320' in link_lower:
-                                quality_stats['mp3_320'] += 1
+                            if "flac" in link_lower or ".flac" in link_lower:
+                                quality_stats["flac"] += 1
+                            elif "320" in link_lower:
+                                quality_stats["mp3_320"] += 1
                             else:
-                                quality_stats['other'] += 1
+                                quality_stats["other"] += 1
 
                 # Sort links for consistent output
                 unique_links = sorted(list(all_links))
 
                 # Append extracted links section to the same file
-                with open(self.output_file, 'a', encoding=DEFAULT_ENCODING) as f:
+                with open(self.output_file, "a", encoding=DEFAULT_ENCODING) as f:
                     f.write("\n\n" + "=" * 80 + "\n")
                     f.write("ALL UNIQUE DOWNLOAD LINKS (EXTRACTED)\n")
                     f.write("=" * 80 + "\n\n")
@@ -952,19 +1007,29 @@ class MusicBlogScraper:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Scrape EDM blog for music downloads by genre')
-    parser.add_argument('url', help='Base URL of the blog site')
-    parser.add_argument('--genres', nargs='+',
-                        default=DEFAULT_GENRES,
-                        help='Genre keywords to search for (default: house progressive house melodic indie dance bass house)')
-    parser.add_argument('--output', default=DEFAULT_OUTPUT_FILE,
-                        help='Output file name (default: download_links.txt)')
-    parser.add_argument('--max-pages', type=int, default=DEFAULT_MAX_PAGES,
-                        help='Maximum pages to search (default: 10)')
-    parser.add_argument('--start-date',
-                        help='Start date for filtering (YYYY-MM-DD format, inclusive)')
-    parser.add_argument('--end-date',
-                        help='End date for filtering (YYYY-MM-DD format, inclusive)')
+    parser = argparse.ArgumentParser(description="Scrape EDM blog for music downloads by genre")
+    parser.add_argument("url", help="Base URL of the blog site")
+    parser.add_argument(
+        "--genres",
+        nargs="+",
+        default=DEFAULT_GENRES,
+        help="Genre keywords to search for (default: house progressive house melodic indie dance bass house)",
+    )
+    parser.add_argument(
+        "--output",
+        default=DEFAULT_OUTPUT_FILE,
+        help="Output file name (default: download_links.txt)",
+    )
+    parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=DEFAULT_MAX_PAGES,
+        help="Maximum pages to search (default: 10)",
+    )
+    parser.add_argument(
+        "--start-date", help="Start date for filtering (YYYY-MM-DD format, inclusive)"
+    )
+    parser.add_argument("--end-date", help="End date for filtering (YYYY-MM-DD format, inclusive)")
 
     args = parser.parse_args()
 
@@ -984,14 +1049,14 @@ def main():
 
     if args.start_date:
         try:
-            start_date = datetime.strptime(args.start_date, '%Y-%m-%d').date()
+            start_date = datetime.strptime(args.start_date, "%Y-%m-%d").date()
         except ValueError:
             print("Error: Invalid start date format. Use YYYY-MM-DD (e.g., 2024-01-15)")
             return 1
 
     if args.end_date:
         try:
-            end_date = datetime.strptime(args.end_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(args.end_date, "%Y-%m-%d").date()
         except ValueError:
             print("Error: Invalid end date format. Use YYYY-MM-DD (e.g., 2024-12-31)")
             return 1
@@ -1025,7 +1090,7 @@ def main():
 
         print("✅ Scraping completed successfully!")
         print(f"   Found {len(matching_posts)} matching posts")
-        total_links = sum(len(post['download_links']) for post in matching_posts)
+        total_links = sum(len(post["download_links"]) for post in matching_posts)
         print(f"   Total download links: {total_links}")
         print(f"   Results saved to: {args.output}")
 

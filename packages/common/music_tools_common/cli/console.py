@@ -9,4 +9,4 @@ from rich.console import Console
 # Shared console instance
 console = Console()
 
-__all__ = ['console']
+__all__ = ["console"]

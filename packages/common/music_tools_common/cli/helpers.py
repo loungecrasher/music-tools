@@ -2,6 +2,7 @@
 Common CLI helper functions for Music Tools.
 Provides reusable functions for console output, user input, and progress display.
 """
+
 from typing import Optional
 
 from rich.console import Console
@@ -97,10 +98,7 @@ def prompt(message: str, default: str = "", password: bool = False) -> str:
 
 
 def show_panel(
-    content: str,
-    title: Optional[str] = None,
-    border_style: str = "blue",
-    expand: bool = True
+    content: str, title: Optional[str] = None, border_style: str = "blue", expand: bool = True
 ) -> None:
     """
     Display content in a Rich panel.
@@ -111,13 +109,15 @@ def show_panel(
         border_style: Border color/style
         expand: Whether to expand panel to full width
     """
-    console.print(Panel(
-        content,
-        title=f"[bold]{title}[/bold]" if title else None,
-        border_style=border_style,
-        expand=expand,
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            content,
+            title=f"[bold]{title}[/bold]" if title else None,
+            border_style=border_style,
+            expand=expand,
+            padding=(1, 2),
+        )
+    )
 
 
 def create_progress_bar(description: str = "Processing") -> Progress:
@@ -136,7 +136,7 @@ def create_progress_bar(description: str = "Processing") -> Progress:
         BarColumn(),
         TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
         TimeElapsedColumn(),
-        console=console
+        console=console,
     )
 
 
@@ -167,7 +167,7 @@ def clear_screen() -> None:
 
     # SECURITY FIX: Use os.system instead of subprocess with shell=True
     # to avoid command injection vulnerabilities
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def print_header(title: str, subtitle: Optional[str] = None) -> None:
@@ -184,11 +184,7 @@ def print_header(title: str, subtitle: Optional[str] = None) -> None:
     if subtitle:
         header_text.append(f"\n{subtitle}", style="dim")
 
-    console.print(Panel(
-        header_text,
-        border_style="cyan",
-        padding=(1, 2)
-    ))
+    console.print(Panel(header_text, border_style="cyan", padding=(1, 2)))
 
 
 def format_error_details(exception: Exception) -> str:
@@ -202,4 +198,5 @@ def format_error_details(exception: Exception) -> str:
         Formatted error string
     """
     import traceback
+
     return f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"

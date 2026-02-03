@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_date(
-    date_str: str,
-    formats: Optional[list[str]] = None
+    date_str: str, formats: Optional[list[str]] = None
 ) -> Tuple[bool, Optional[datetime], str]:
     """
     Parse a date string using multiple format attempts.
@@ -40,19 +39,19 @@ def parse_date(
     # Default formats to try
     if formats is None:
         formats = [
-            '%Y-%m-%d',           # 2024-03-15
-            '%Y/%m/%d',           # 2024/03/15
-            '%d-%m-%Y',           # 15-03-2024
-            '%d/%m/%Y',           # 15/03/2024
-            '%Y-%m-%d %H:%M:%S',  # 2024-03-15 14:30:00
-            '%Y-%m-%dT%H:%M:%S',  # 2024-03-15T14:30:00 (ISO 8601)
-            '%Y-%m-%dT%H:%M:%SZ',  # 2024-03-15T14:30:00Z (ISO 8601 UTC)
-            '%Y',                 # 2024 (year only)
-            '%Y-%m',              # 2024-03 (year-month)
-            '%B %d, %Y',          # March 15, 2024
-            '%b %d, %Y',          # Mar 15, 2024
-            '%d %B %Y',           # 15 March 2024
-            '%d %b %Y',           # 15 Mar 2024
+            "%Y-%m-%d",  # 2024-03-15
+            "%Y/%m/%d",  # 2024/03/15
+            "%d-%m-%Y",  # 15-03-2024
+            "%d/%m/%Y",  # 15/03/2024
+            "%Y-%m-%d %H:%M:%S",  # 2024-03-15 14:30:00
+            "%Y-%m-%dT%H:%M:%S",  # 2024-03-15T14:30:00 (ISO 8601)
+            "%Y-%m-%dT%H:%M:%SZ",  # 2024-03-15T14:30:00Z (ISO 8601 UTC)
+            "%Y",  # 2024 (year only)
+            "%Y-%m",  # 2024-03 (year-month)
+            "%B %d, %Y",  # March 15, 2024
+            "%b %d, %Y",  # Mar 15, 2024
+            "%d %B %Y",  # 15 March 2024
+            "%d %b %Y",  # 15 Mar 2024
         ]
 
     # Try each format
@@ -66,7 +65,7 @@ def parse_date(
     # Try ISO format parsing (handles fractional seconds)
     try:
         # Remove 'Z' and replace with '+00:00' for UTC
-        normalized = date_str.strip().replace('Z', '+00:00')
+        normalized = date_str.strip().replace("Z", "+00:00")
         dt = datetime.fromisoformat(normalized)
         return True, dt, ""
     except ValueError:
@@ -77,10 +76,7 @@ def parse_date(
     return False, None, error_msg
 
 
-def format_date(
-    date_obj: Union[datetime, date, str],
-    format_str: str = '%Y-%m-%d'
-) -> str:
+def format_date(date_obj: Union[datetime, date, str], format_str: str = "%Y-%m-%d") -> str:
     """
     Format a date object or string to a specific format.
 
@@ -112,10 +108,7 @@ def format_date(
         return str(date_obj)
 
 
-def normalize_date(
-    date_str: str,
-    output_format: str = '%Y-%m-%d'
-) -> str:
+def normalize_date(date_str: str, output_format: str = "%Y-%m-%d") -> str:
     """
     Normalize a date string to a consistent format.
 
@@ -152,9 +145,9 @@ def normalize_date(
             pass
 
     # Handle year-month (7 characters: YYYY-MM or YYYY/MM)
-    if len(date_str) == 7 and (date_str[4] in ['-', '/']):
+    if len(date_str) == 7 and (date_str[4] in ["-", "/"]):
         try:
-            parts = date_str.replace('/', '-').split('-')
+            parts = date_str.replace("/", "-").split("-")
             if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
                 year = int(parts[0])
                 month = int(parts[1])
@@ -199,7 +192,8 @@ def get_year_from_date(date_str: str) -> Optional[int]:
 
     # If parsing fails, try to extract 4-digit year
     import re
-    match = re.search(r'\b(19|20)\d{2}\b', date_str)
+
+    match = re.search(r"\b(19|20)\d{2}\b", date_str)
     if match:
         try:
             return int(match.group(0))
@@ -209,11 +203,7 @@ def get_year_from_date(date_str: str) -> Optional[int]:
     return None
 
 
-def is_valid_date(
-    date_str: str,
-    min_year: int = 1900,
-    max_year: Optional[int] = None
-) -> bool:
+def is_valid_date(date_str: str, min_year: int = 1900, max_year: Optional[int] = None) -> bool:
     """
     Check if a date string is valid and within a reasonable range.
 
@@ -318,7 +308,7 @@ def parse_duration(duration_str: str) -> Optional[int]:
         pass
 
     # Try to parse as time format
-    parts = duration_str.split(':')
+    parts = duration_str.split(":")
 
     try:
         if len(parts) == 2:
@@ -357,9 +347,11 @@ def get_relative_time(dt: datetime) -> str:
     # Handle timezone-aware datetimes
     if dt.tzinfo is not None and now.tzinfo is None:
         from datetime import timezone
+
         now = now.replace(tzinfo=timezone.utc)
     elif dt.tzinfo is None and now.tzinfo is not None:
         from datetime import timezone
+
         dt = dt.replace(tzinfo=timezone.utc)
 
     diff = now - dt
@@ -374,28 +366,25 @@ def get_relative_time(dt: datetime) -> str:
 
     # Calculate time units
     intervals = [
-        ('year', 31536000),    # 365 days
-        ('month', 2592000),    # 30 days
-        ('week', 604800),      # 7 days
-        ('day', 86400),
-        ('hour', 3600),
-        ('minute', 60),
-        ('second', 1),
+        ("year", 31536000),  # 365 days
+        ("month", 2592000),  # 30 days
+        ("week", 604800),  # 7 days
+        ("day", 86400),
+        ("hour", 3600),
+        ("minute", 60),
+        ("second", 1),
     ]
 
     for name, count in intervals:
         value = int(seconds // count)
         if value > 0:
-            plural = 's' if value > 1 else ''
+            plural = "s" if value > 1 else ""
             return f"{value} {name}{plural} {suffix}"
 
     return "just now"
 
 
-def is_recent_date(
-    date_obj: Union[datetime, date, str],
-    days: int = 30
-) -> bool:
+def is_recent_date(date_obj: Union[datetime, date, str], days: int = 30) -> bool:
     """
     Check if a date is within the last N days.
 
@@ -425,6 +414,7 @@ def is_recent_date(
     now = datetime.now()
     if date_obj.tzinfo is not None and now.tzinfo is None:
         from datetime import timezone
+
         now = now.replace(tzinfo=timezone.utc)
 
     delta = now - date_obj

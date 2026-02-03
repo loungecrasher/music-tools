@@ -2,6 +2,7 @@
 Database manager for the Candidate History feature.
 Manages a separate SQLite database to track listened/vetted filenames.
 """
+
 import logging
 import os
 import sqlite3
@@ -31,10 +32,12 @@ class HistoryDatabase:
             # We want to go up 4 levels to root, then into data
             # .../apps/music-tools/src/library/history_db.py
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
-            data_dir = os.path.join(project_root, 'data')
+            project_root = os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+            )
+            data_dir = os.path.join(project_root, "data")
             os.makedirs(data_dir, exist_ok=True)
-            self.db_path = os.path.join(data_dir, 'candidate_history.db')
+            self.db_path = os.path.join(data_dir, "candidate_history.db")
         else:
             self.db_path = db_path
 
@@ -51,19 +54,19 @@ class HistoryDatabase:
 
                 # Create history table
                 # We use filename as the unique identifier as requested
-                cursor.execute('''
+                cursor.execute("""
                 CREATE TABLE IF NOT EXISTS history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     filename TEXT NOT NULL UNIQUE,
                     added_at TIMESTAMP NOT NULL,
                     source_path TEXT
                 )
-                ''')
+                """)
 
                 # Create index on filename for fast lookups
-                cursor.execute('''
+                cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_filename ON history(filename)
-                ''')
+                """)
 
                 conn.commit()
         except Exception as e:
@@ -86,7 +89,7 @@ class HistoryDatabase:
                 cursor = conn.cursor()
                 cursor.execute(
                     "INSERT INTO history (filename, added_at, source_path) VALUES (?, ?, ?)",
-                    (filename, datetime.now(), source_path)
+                    (filename, datetime.now(), source_path),
                 )
                 conn.commit()
                 return True
@@ -110,10 +113,7 @@ class HistoryDatabase:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT added_at FROM history WHERE filename = ?",
-                    (filename,)
-                )
+                cursor.execute("SELECT added_at FROM history WHERE filename = ?", (filename,))
                 result = cursor.fetchone()
 
                 if result:
@@ -140,10 +140,7 @@ class HistoryDatabase:
                 cursor.execute("SELECT MAX(added_at) FROM history")
                 last_added = cursor.fetchone()[0]
 
-                return {
-                    "total_files": count,
-                    "last_added": last_added
-                }
+                return {"total_files": count, "last_added": last_added}
         except Exception as e:
             logger.error(f"Error getting stats: {e}")
             return {"total_files": 0, "last_added": None}

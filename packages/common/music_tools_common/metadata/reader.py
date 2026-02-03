@@ -1,13 +1,14 @@
 """
 Metadata reader for music files.
 """
+
 import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from mutagen import File
 
-logger = logging.getLogger('music_tools_common.metadata')
+logger = logging.getLogger("music_tools_common.metadata")
 
 
 class MetadataReader:
@@ -30,20 +31,20 @@ class MetadataReader:
                 return None
 
             result = {
-                'title': audio.get('title', [''])[0],
-                'artist': audio.get('artist', [''])[0],
-                'album': audio.get('album', [''])[0],
-                'date': audio.get('date', [''])[0],
-                'genre': audio.get('genre', [''])[0],
+                "title": audio.get("title", [""])[0],
+                "artist": audio.get("artist", [""])[0],
+                "album": audio.get("album", [""])[0],
+                "date": audio.get("date", [""])[0],
+                "genre": audio.get("genre", [""])[0],
             }
 
-            if fallback_to_filename and (not result.get('artist') or not result.get('title')):
+            if fallback_to_filename and (not result.get("artist") or not result.get("title")):
                 parsed = MetadataReader._parse_filename(filepath)
                 if parsed:
-                    if not result['artist']:
-                        result['artist'] = parsed.get('artist', '')
-                    if not result['title']:
-                        result['title'] = parsed.get('title', '')
+                    if not result["artist"]:
+                        result["artist"] = parsed.get("artist", "")
+                    if not result["title"]:
+                        result["title"] = parsed.get("title", "")
 
             return result
         except Exception as e:
@@ -58,25 +59,25 @@ class MetadataReader:
         try:
             filename = Path(filepath).stem
 
-            if ' - ' in filename:
-                parts = filename.split(' - ', 1)
+            if " - " in filename:
+                parts = filename.split(" - ", 1)
                 if len(parts) == 2:
                     return {
-                        'artist': parts[0].strip(),
-                        'title': parts[1].strip(),
-                        'album': '',
-                        'date': '',
-                        'genre': '',
+                        "artist": parts[0].strip(),
+                        "title": parts[1].strip(),
+                        "album": "",
+                        "date": "",
+                        "genre": "",
                     }
-            elif '-' in filename:
-                parts = filename.split('-', 1)
+            elif "-" in filename:
+                parts = filename.split("-", 1)
                 if len(parts) == 2:
                     return {
-                        'artist': parts[0].strip(),
-                        'title': parts[1].strip(),
-                        'album': '',
-                        'date': '',
-                        'genre': '',
+                        "artist": parts[0].strip(),
+                        "title": parts[1].strip(),
+                        "album": "",
+                        "date": "",
+                        "genre": "",
                     }
             return None
         except Exception:

@@ -18,7 +18,9 @@ class SecurityValidator:
     """Centralized security validation for the application."""
 
     @staticmethod
-    def validate_file_path(file_path: str, base_directory: Optional[str] = None) -> Tuple[bool, str]:
+    def validate_file_path(
+        file_path: str, base_directory: Optional[str] = None
+    ) -> Tuple[bool, str]:
         """
         Validate a file path to prevent directory traversal attacks.
 
@@ -35,11 +37,11 @@ class SecurityValidator:
             real_path = os.path.realpath(absolute_path)
 
             # Check for null bytes (common injection technique)
-            if '\x00' in file_path:
+            if "\x00" in file_path:
                 return False, "Invalid path: contains null bytes"
 
             # Check for directory traversal patterns
-            if '..' in file_path or file_path.startswith('~'):
+            if ".." in file_path or file_path.startswith("~"):
                 # Resolve the path safely
                 try:
                     resolved_path = Path(file_path).resolve()
@@ -78,10 +80,10 @@ class SecurityValidator:
         """
         # Remove control characters and limit special characters
         # Allow: alphanumeric, spaces, hyphens, periods, parentheses, commas, apostrophes
-        sanitized = re.sub(r'[^\w\s\-\.\(\)\,\'\&]', '', artist_name)
+        sanitized = re.sub(r"[^\w\s\-\.\(\)\,\'\&]", "", artist_name)
 
         # Remove multiple spaces
-        sanitized = ' '.join(sanitized.split())
+        sanitized = " ".join(sanitized.split())
 
         # Limit length to prevent buffer overflow
         sanitized = sanitized[:max_length]
@@ -101,14 +103,14 @@ class SecurityValidator:
             Sanitized argument safe for command execution
         """
         # Remove shell metacharacters
-        dangerous_chars = ['|', '&', ';', '$', '`', '\\', '"', "'", '\n', '\r', '\t']
+        dangerous_chars = ["|", "&", ";", "$", "`", "\\", '"', "'", "\n", "\r", "\t"]
         sanitized = argument
 
         for char in dangerous_chars:
-            sanitized = sanitized.replace(char, '')
+            sanitized = sanitized.replace(char, "")
 
         # Escape remaining special characters
-        sanitized = re.sub(r'[<>(){}[\]*?!]', '', sanitized)
+        sanitized = re.sub(r"[<>(){}[\]*?!]", "", sanitized)
 
         return sanitized
 
@@ -131,7 +133,7 @@ class SecurityValidator:
             return False, "API key has invalid length"
 
         # Check for valid characters (alphanumeric plus common separators)
-        if not re.match(r'^[a-zA-Z0-9\-_]+$', api_key):
+        if not re.match(r"^[a-zA-Z0-9\-_]+$", api_key):
             return False, "API key contains invalid characters"
 
         # Don't log the actual key for security
@@ -151,20 +153,32 @@ class SecurityValidator:
             Sanitized message safe for logging
         """
         # Remove line breaks to prevent log injection
-        sanitized = message.replace('\n', '\\n').replace('\r', '\\r')
+        sanitized = message.replace("\n", "\\n").replace("\r", "\\r")
 
         # Mask potential sensitive data patterns
         # Mask API keys (common patterns)
-        sanitized = re.sub(r'(api[_\-]?key["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
-                           r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(
+            r'(api[_\-]?key["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
+            r"\1***REDACTED***",
+            sanitized,
+            flags=re.IGNORECASE,
+        )
 
         # Mask tokens
-        sanitized = re.sub(r'(token["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
-                           r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(
+            r'(token["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
+            r"\1***REDACTED***",
+            sanitized,
+            flags=re.IGNORECASE,
+        )
 
         # Mask passwords
-        sanitized = re.sub(r'(password["\']?\s*[:=]\s*["\']?)([^\s"\']+)',
-                           r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(
+            r'(password["\']?\s*[:=]\s*["\']?)([^\s"\']+)',
+            r"\1***REDACTED***",
+            sanitized,
+            flags=re.IGNORECASE,
+        )
 
         return sanitized
 
@@ -211,7 +225,9 @@ class SecurityValidator:
             return False, 60
 
         if timeout > max_timeout:
-            logger.warning(f"Timeout {timeout}s exceeds maximum {max_timeout}s, using {max_timeout}s")
+            logger.warning(
+                f"Timeout {timeout}s exceeds maximum {max_timeout}s, using {max_timeout}s"
+            )
             return True, max_timeout
 
         return True, int(timeout)
@@ -247,7 +263,7 @@ class SecureFileHandler:
             return False, None, safe_path  # safe_path contains error message
 
         try:
-            with open(safe_path, 'r', encoding='utf-8') as f:
+            with open(safe_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return True, content, ""
         except Exception as e:
@@ -278,7 +294,7 @@ class SecureFileHandler:
                 os.makedirs(parent_dir, mode=0o755)
 
             # Write with restricted permissions
-            with open(safe_path, 'w', encoding='utf-8') as f:
+            with open(safe_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             # Set appropriate file permissions (readable by owner/group, not others)

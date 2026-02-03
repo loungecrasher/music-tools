@@ -34,7 +34,13 @@ def test_claude_with_websearch():
     """Test Claude CLI with WebSearch tool."""
     print("\nTesting Claude CLI with WebSearch...")
     try:
-        cmd = ["claude", "--allowed-tools", "WebSearch", "--print", "What year was Python released? Use web search to verify."]
+        cmd = [
+            "claude",
+            "--allowed-tools",
+            "WebSearch",
+            "--print",
+            "What year was Python released? Use web search to verify.",
+        ]
         print(f"Running command: {' '.join(cmd[:5])}...")
         start_time = time.time()
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -103,7 +109,7 @@ if __name__ == "__main__":
     tests = [
         ("Basic Claude", test_basic_claude),
         ("Claude with WebSearch", test_claude_with_websearch),
-        ("Batch Research", test_batch_research)
+        ("Batch Research", test_batch_research),
     ]
 
     results = []

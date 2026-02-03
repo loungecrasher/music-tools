@@ -11,17 +11,14 @@ def example_config():
     print("=== Configuration Example ===")
 
     # Load configuration
-    spotify_config = config_manager.load_config('spotify')
+    spotify_config = config_manager.load_config("spotify")
     print(f"Spotify config loaded: {list(spotify_config.keys())}")
 
     # Save configuration (non-sensitive data only)
-    config_manager.save_config('myapp', {
-        'theme': 'dark',
-        'language': 'en'
-    })
+    config_manager.save_config("myapp", {"theme": "dark", "language": "en"})
 
     # Validate configuration
-    errors = config_manager.validate_config('spotify')
+    errors = config_manager.validate_config("spotify")
     if errors:
         print(f"Configuration errors: {errors}")
     else:
@@ -40,24 +37,24 @@ def example_database():
 
     # Create a playlist
     playlist = Playlist(
-        id='example_123',
-        name='Example Playlist',
-        url='https://example.com/playlist/123',
-        owner='user',
+        id="example_123",
+        name="Example Playlist",
+        url="https://example.com/playlist/123",
+        owner="user",
         tracks_count=10,
-        service='spotify'
+        service="spotify",
     )
 
     # Add to database
-    db.add_playlist(playlist.to_dict(), 'spotify')
+    db.add_playlist(playlist.to_dict(), "spotify")
     print(f"✓ Added playlist: {playlist.name}")
 
     # Get playlists
-    playlists = db.get_playlists(service='spotify')
+    playlists = db.get_playlists(service="spotify")
     print(f"✓ Found {len(playlists)} playlists")
 
     # Clean up
-    db.delete_playlist('example_123')
+    db.delete_playlist("example_123")
 
 
 def example_cache():
@@ -70,19 +67,15 @@ def example_cache():
     cache = get_cache(ttl=3600)
 
     # Set cache value
-    cache.set('user_data', {
-        'id': '123',
-        'name': 'Example User',
-        'preferences': {'theme': 'dark'}
-    })
+    cache.set("user_data", {"id": "123", "name": "Example User", "preferences": {"theme": "dark"}})
     print("✓ Cached user data")
 
     # Get cache value
-    user_data = cache.get('user_data')
+    user_data = cache.get("user_data")
     print(f"✓ Retrieved from cache: {user_data['name']}")
 
     # Clear cache
-    cache.delete('user_data')
+    cache.delete("user_data")
     print("✓ Cleared cache")
 
 
@@ -147,6 +140,7 @@ def example_utils():
     @retry(max_attempts=3, delay=0.1)
     def flaky_function():
         import random
+
         if random.random() < 0.3:  # 30% success rate
             return "Success!"
         raise Exception("Failed")
@@ -159,8 +153,8 @@ def example_utils():
     print(f"✓ URL valid: {validate_url('https://example.com')}")
 
     # File operations
-    test_file = os.path.join(tempfile.gettempdir(), 'test.json')
-    data = {'example': 'data', 'numbers': [1, 2, 3]}
+    test_file = os.path.join(tempfile.gettempdir(), "test.json")
+    data = {"example": "data", "numbers": [1, 2, 3]}
 
     safe_write_json(data, test_file)
     print(f"✓ Wrote JSON to {test_file}")
@@ -204,5 +198,5 @@ def main():
     print("Examples completed!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 """Tests for HistoryDatabase - candidate history tracking."""
 
-
 import pytest
 from src.library.history_db import HistoryDatabase
 
@@ -15,6 +14,7 @@ class TestHistoryDatabaseInit:
 
     def test_creates_table(self, tmp_path):
         import sqlite3
+
         db_path = str(tmp_path / "test_history.db")
         HistoryDatabase(db_path=db_path)
 
@@ -75,7 +75,7 @@ class TestGetStats:
     def test_empty_database_stats(self, tmp_path):
         db = HistoryDatabase(db_path=str(tmp_path / "h.db"))
         stats = db.get_stats()
-        assert stats['total_files'] == 0
+        assert stats["total_files"] == 0
 
     def test_stats_after_adds(self, tmp_path):
         db = HistoryDatabase(db_path=str(tmp_path / "h.db"))
@@ -83,12 +83,12 @@ class TestGetStats:
         db.add_file("song2.mp3")
         db.add_file("song3.mp3")
         stats = db.get_stats()
-        assert stats['total_files'] == 3
-        assert stats['last_added'] is not None
+        assert stats["total_files"] == 3
+        assert stats["last_added"] is not None
 
     def test_stats_skips_duplicate_count(self, tmp_path):
         db = HistoryDatabase(db_path=str(tmp_path / "h.db"))
         db.add_file("song.mp3")
         db.add_file("song.mp3")  # duplicate, not added
         stats = db.get_stats()
-        assert stats['total_files'] == 1
+        assert stats["total_files"] == 1

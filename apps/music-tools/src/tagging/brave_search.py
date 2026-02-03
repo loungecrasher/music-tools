@@ -29,6 +29,7 @@ DEFAULT_BACKOFF_MULTIPLIER = 2.0  # exponential backoff multiplier
 @dataclass
 class SearchResult:
     """Represents a single search result from Brave."""
+
     title: str
     url: str
     description: str
@@ -46,7 +47,7 @@ class BraveSearchClient:
         delay_between_requests: float = DEFAULT_DELAY_BETWEEN_REQUESTS,
         max_retries: int = DEFAULT_MAX_RETRIES,
         initial_backoff: float = DEFAULT_INITIAL_BACKOFF,
-        backoff_multiplier: float = DEFAULT_BACKOFF_MULTIPLIER
+        backoff_multiplier: float = DEFAULT_BACKOFF_MULTIPLIER,
     ):
         """
         Initialize Brave Search client with rate limiting.
@@ -63,7 +64,7 @@ class BraveSearchClient:
         self.headers = {
             "Accept": "application/json",
             "Accept-Encoding": "gzip",
-            "X-Subscription-Token": api_key
+            "X-Subscription-Token": api_key,
         }
 
         # Rate limiting configuration
@@ -79,15 +80,17 @@ class BraveSearchClient:
         self.failed_queries: List[str] = []
 
         # Persistent storage for failed queries (retry later)
-        self.failed_queries_file = Path(os.path.expanduser("~/.music-tools/brave_failed_queries.json"))
+        self.failed_queries_file = Path(
+            os.path.expanduser("~/.music-tools/brave_failed_queries.json")
+        )
         self.failed_queries_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Statistics
         self.stats = {
-            'total_requests': 0,
-            'successful_requests': 0,
-            'rate_limited_requests': 0,
-            'failed_after_retries': 0
+            "total_requests": 0,
+            "successful_requests": 0,
+            "rate_limited_requests": 0,
+            "failed_after_retries": 0,
         }
 
         # Load any previously failed queries from disk
@@ -114,19 +117,14 @@ class BraveSearchClient:
             Response JSON data or None on failure
         """
         try:
-            response = requests.get(
-                self.base_url,
-                headers=self.headers,
-                params=params,
-                timeout=15
-            )
+            response = requests.get(self.base_url, headers=self.headers, params=params, timeout=15)
 
             # Handle rate limiting (429)
             if response.status_code == 429:
-                self.stats['rate_limited_requests'] += 1
+                self.stats["rate_limited_requests"] += 1
                 if retry_count < self.max_retries:
                     # Calculate backoff delay - exponential: 2s, 4s, 8s, 16s, 32s
-                    backoff_delay = self.initial_backoff * (self.backoff_multiplier ** retry_count)
+                    backoff_delay = self.initial_backoff * (self.backoff_multiplier**retry_count)
                     logger.warning(
                         f"Brave API rate limit hit (429). "
                         f"Retry {retry_count + 1}/{self.max_retries} after {backoff_delay:.1f}s"
@@ -134,9 +132,9 @@ class BraveSearchClient:
                     time.sleep(backoff_delay)
                     return self._make_request(params, retry_count + 1)
                 else:
-                    self.stats['failed_after_retries'] += 1
+                    self.stats["failed_after_retries"] += 1
                     # Track the failed query and persist for later retry
-                    query = params.get('q', 'unknown')
+                    query = params.get("q", "unknown")
                     self.add_failed_query(query)  # Persists to disk
                     logger.error(
                         f"Brave API rate limit exceeded after {self.max_retries} retries. "
@@ -168,22 +166,19 @@ class BraveSearchClient:
         # Wait for rate limit if needed
         self._wait_for_rate_limit()
 
-        params = {
-            "q": query,
-            "count": min(count, 20)  # Brave API max is 20
-        }
+        params = {"q": query, "count": min(count, 20)}  # Brave API max is 20
 
         logger.debug(f"Brave search query: {query}")
 
         # Update stats and last request time
-        self.stats['total_requests'] += 1
+        self.stats["total_requests"] += 1
         self._last_request_time = time.time()
 
         # Make request with retry logic
         data = self._make_request(params)
 
         if data is not None:
-            self.stats['successful_requests'] += 1
+            self.stats["successful_requests"] += 1
 
         if data is None:
             return []
@@ -191,20 +186,19 @@ class BraveSearchClient:
         results = []
         if "web" in data and "results" in data["web"]:
             for item in data["web"]["results"]:
-                results.append(SearchResult(
-                    title=item.get("title", ""),
-                    url=item.get("url", ""),
-                    description=item.get("description", "")
-                ))
+                results.append(
+                    SearchResult(
+                        title=item.get("title", ""),
+                        url=item.get("url", ""),
+                        description=item.get("description", ""),
+                    )
+                )
 
         logger.info(f"Brave search returned {len(results)} results for: {query}")
         return results
 
     def search_batch_staggered(
-        self,
-        queries: List[str],
-        count: int = 5,
-        extra_delay: float = 0.5
+        self, queries: List[str], count: int = 5, extra_delay: float = 0.5
     ) -> Dict[str, List[SearchResult]]:
         """
         Perform multiple searches with staggered delays to avoid rate limits.
@@ -293,11 +287,13 @@ class BraveSearchClient:
         """Load failed queries from persistent storage."""
         try:
             if self.failed_queries_file.exists():
-                with open(self.failed_queries_file, 'r') as f:
+                with open(self.failed_queries_file, "r") as f:
                     data = json.load(f)
-                    self.failed_queries = data.get('queries', [])
+                    self.failed_queries = data.get("queries", [])
                     if self.failed_queries:
-                        logger.info(f"Loaded {len(self.failed_queries)} failed queries from previous session")
+                        logger.info(
+                            f"Loaded {len(self.failed_queries)} failed queries from previous session"
+                        )
         except Exception as e:
             logger.warning(f"Could not load failed queries: {e}")
             self.failed_queries = []
@@ -306,14 +302,16 @@ class BraveSearchClient:
         """Save failed queries to persistent storage for later retry."""
         try:
             data = {
-                'queries': self.failed_queries,
-                'last_updated': datetime.now().isoformat(),
-                'count': len(self.failed_queries)
+                "queries": self.failed_queries,
+                "last_updated": datetime.now().isoformat(),
+                "count": len(self.failed_queries),
             }
-            with open(self.failed_queries_file, 'w') as f:
+            with open(self.failed_queries_file, "w") as f:
                 json.dump(data, f, indent=2)
             if self.failed_queries:
-                logger.info(f"Saved {len(self.failed_queries)} failed queries to {self.failed_queries_file}")
+                logger.info(
+                    f"Saved {len(self.failed_queries)} failed queries to {self.failed_queries_file}"
+                )
         except Exception as e:
             logger.error(f"Could not save failed queries: {e}")
 
@@ -323,7 +321,9 @@ class BraveSearchClient:
             self.failed_queries.append(query)
             self._save_failed_queries()
 
-    def retry_failed_queries(self, count: int = 5, max_to_retry: int = 10) -> Dict[str, List[SearchResult]]:
+    def retry_failed_queries(
+        self, count: int = 5, max_to_retry: int = 10
+    ) -> Dict[str, List[SearchResult]]:
         """
         Retry previously failed queries with extra delays (rotation-based).
 
@@ -344,7 +344,9 @@ class BraveSearchClient:
         queries_to_retry = self.failed_queries[:max_to_retry]
         remaining_queries = self.failed_queries[max_to_retry:]
 
-        logger.info(f"Retry rotation: Attempting {len(queries_to_retry)} of {len(self.failed_queries)} failed queries...")
+        logger.info(
+            f"Retry rotation: Attempting {len(queries_to_retry)} of {len(self.failed_queries)} failed queries..."
+        )
 
         # Use longer delays for retry (2s to be very safe)
         original_delay = self.delay_between_requests
@@ -370,7 +372,9 @@ class BraveSearchClient:
         self.failed_queries = remaining_queries + still_failed
         self._save_failed_queries()  # Persist updated queue
 
-        logger.info(f"Retry rotation complete: {len(results)} succeeded, {len(still_failed)} still failed")
+        logger.info(
+            f"Retry rotation complete: {len(results)} succeeded, {len(still_failed)} still failed"
+        )
         logger.info(f"Failed queries remaining in queue: {len(self.failed_queries)}")
 
         return results
@@ -378,10 +382,10 @@ class BraveSearchClient:
     def get_failed_queries_info(self) -> Dict:
         """Get information about failed queries queue."""
         return {
-            'count': len(self.failed_queries),
-            'file': str(self.failed_queries_file),
-            'queries': self.failed_queries[:5],  # Preview first 5
-            'has_more': len(self.failed_queries) > 5
+            "count": len(self.failed_queries),
+            "file": str(self.failed_queries_file),
+            "queries": self.failed_queries[:5],  # Preview first 5
+            "has_more": len(self.failed_queries) > 5,
         }
 
     def format_results_for_prompt(self, results: List[SearchResult]) -> str:

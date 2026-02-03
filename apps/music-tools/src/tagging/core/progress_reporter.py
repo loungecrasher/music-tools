@@ -81,11 +81,7 @@ class ProgressTracker:
     """Individual progress tracker for a specific operation."""
 
     def __init__(
-        self,
-        operation_id: str,
-        total: int,
-        reporter: 'ProgressReporter',
-        description: str = ""
+        self, operation_id: str, total: int, reporter: "ProgressReporter", description: str = ""
     ):
         self.operation_id = operation_id
         self.total = total
@@ -209,11 +205,11 @@ class ProgressTracker:
             message=message,
             percentage=self.get_percentage(),
             metadata={
-                'start_time': self.start_time,
-                'elapsed': self.last_update_time - self.start_time,
-                'rate': self.get_rate(),
-                'eta': self.get_eta()
-            }
+                "start_time": self.start_time,
+                "elapsed": self.last_update_time - self.start_time,
+                "rate": self.get_rate(),
+                "eta": self.get_eta(),
+            },
         )
         self.reporter.emit_event(event)
 
@@ -239,10 +235,7 @@ class ProgressReporter:
                 self.listeners.remove(listener)
 
     def create_tracker(
-        self,
-        operation_id: str,
-        total: int,
-        description: str = ""
+        self, operation_id: str, total: int, description: str = ""
     ) -> ProgressTracker:
         """Create a new progress tracker."""
         with self._lock:
@@ -278,7 +271,7 @@ class ProgressReporter:
         if event.event_type in (
             ProgressEventType.COMPLETED,
             ProgressEventType.CANCELLED,
-            ProgressEventType.ERROR
+            ProgressEventType.ERROR,
         ):
             # Don't remove immediately - let it exist for a bit for final status checks
             pass
@@ -289,14 +282,14 @@ class ProgressReporter:
             result = {}
             for op_id, tracker in self.active_operations.items():
                 result[op_id] = {
-                    'current': tracker.current,
-                    'total': tracker.total,
-                    'percentage': tracker.get_percentage(),
-                    'rate': tracker.get_rate(),
-                    'eta': tracker.get_eta(),
-                    'completed': tracker.completed,
-                    'cancelled': tracker.cancelled,
-                    'description': tracker.description
+                    "current": tracker.current,
+                    "total": tracker.total,
+                    "percentage": tracker.get_percentage(),
+                    "rate": tracker.get_rate(),
+                    "eta": tracker.get_eta(),
+                    "completed": tracker.completed,
+                    "cancelled": tracker.cancelled,
+                    "description": tracker.description,
                 }
             return result
 
@@ -314,7 +307,7 @@ class ProgressReporter:
 
         with self._lock:
             for op_id, tracker in self.active_operations.items():
-                if (tracker.completed or tracker.cancelled):
+                if tracker.completed or tracker.cancelled:
                     age = current_time - tracker.last_update_time
                     if age > max_age_seconds:
                         to_remove.append(op_id)
@@ -328,7 +321,9 @@ progress_reporter = ProgressReporter()
 
 
 # Convenience functions
-def create_progress_tracker(operation_id: str, total: int, description: str = "") -> ProgressTracker:
+def create_progress_tracker(
+    operation_id: str, total: int, description: str = ""
+) -> ProgressTracker:
     """Create a new progress tracker."""
     return progress_reporter.create_tracker(operation_id, total, description)
 

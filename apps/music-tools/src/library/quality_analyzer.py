@@ -34,47 +34,48 @@ RECENCY_WEIGHT = 10
 
 # Format quality scores (out of FORMAT_WEIGHT points)
 FORMAT_SCORES = {
-    'flac': 40,    # Lossless, widely supported
-    'alac': 40,    # Lossless, Apple ecosystem
-    'wav': 38,     # Lossless, uncompressed, no metadata
-    'aiff': 38,    # Lossless, uncompressed, no metadata
-    'ape': 37,     # Lossless, less common
-    'wv': 37,      # WavPack lossless
-    'tta': 37,     # True Audio lossless
-    'dsd': 36,     # DSD audio (special case)
-    'dsf': 36,     # DSD audio
-    'aac': 22,     # Lossy, good quality
-    'm4a': 22,     # AAC container
-    'mp3': 20,     # Lossy, ubiquitous
-    'ogg': 18,     # Lossy, Vorbis
-    'opus': 18,    # Lossy, modern codec
-    'wma': 15,     # Lossy, Windows format
+    "flac": 40,  # Lossless, widely supported
+    "alac": 40,  # Lossless, Apple ecosystem
+    "wav": 38,  # Lossless, uncompressed, no metadata
+    "aiff": 38,  # Lossless, uncompressed, no metadata
+    "ape": 37,  # Lossless, less common
+    "wv": 37,  # WavPack lossless
+    "tta": 37,  # True Audio lossless
+    "dsd": 36,  # DSD audio (special case)
+    "dsf": 36,  # DSD audio
+    "aac": 22,  # Lossy, good quality
+    "m4a": 22,  # AAC container
+    "mp3": 20,  # Lossy, ubiquitous
+    "ogg": 18,  # Lossy, Vorbis
+    "opus": 18,  # Lossy, modern codec
+    "wma": 15,  # Lossy, Windows format
 }
 
 # Sample rate quality thresholds
-SAMPLE_RATE_HIGH = 96000      # 96kHz+ = 20pts
-SAMPLE_RATE_MEDIUM = 48000    # 48kHz = 15pts
+SAMPLE_RATE_HIGH = 96000  # 96kHz+ = 20pts
+SAMPLE_RATE_MEDIUM = 48000  # 48kHz = 15pts
 SAMPLE_RATE_STANDARD = 44100  # 44.1kHz = 10pts
 
 # Bitrate quality threshold for lossy formats (kbps)
 BITRATE_REFERENCE = 320  # 320kbps = max points for lossy
 
 # Recency thresholds (days)
-RECENCY_RECENT = 365      # < 1 year = 10pts
-RECENCY_MODERATE = 1825   # 1-5 years = 5pts
+RECENCY_RECENT = 365  # < 1 year = 10pts
+RECENCY_MODERATE = 1825  # 1-5 years = 5pts
 
 # File naming normalization patterns
 NORMALIZATION_PATTERNS = [
-    (r'\s+', ' '),                          # Multiple spaces to single
-    (r'[\[\(].*?[\]\)]', ''),              # Remove brackets and contents
-    (r'[_-]+', ' '),                        # Underscores/hyphens to spaces
-    (r'(?i)(320|v0|vbr|cbr|flac|mp3)', ''),  # Remove format/bitrate markers
-    (r'\s+', ' '),                          # Clean up spaces again
+    (r"\s+", " "),  # Multiple spaces to single
+    (r"[\[\(].*?[\]\)]", ""),  # Remove brackets and contents
+    (r"[_-]+", " "),  # Underscores/hyphens to spaces
+    (r"(?i)(320|v0|vbr|cbr|flac|mp3)", ""),  # Remove format/bitrate markers
+    (r"\s+", " "),  # Clean up spaces again
 ]
 
 
 class BitrateType(Enum):
     """Audio bitrate encoding type."""
+
     CBR = "cbr"  # Constant Bitrate
     VBR = "vbr"  # Variable Bitrate
     ABR = "abr"  # Average Bitrate
@@ -115,10 +116,10 @@ class AudioMetadata:
         """Validate and derive properties after initialization."""
         # Validate format
         if not self.format:
-            self.format = Path(self.filepath).suffix.lower().lstrip('.')
+            self.format = Path(self.filepath).suffix.lower().lstrip(".")
 
         # Determine if lossless
-        lossless_formats = {'flac', 'alac', 'wav', 'aiff', 'ape', 'wv', 'tta', 'dsd', 'dsf'}
+        lossless_formats = {"flac", "alac", "wav", "aiff", "ape", "wv", "tta", "dsd", "dsf"}
         self.is_lossless = self.format.lower() in lossless_formats
 
         # Validate bitrate (must be positive or None)
@@ -128,7 +129,9 @@ class AudioMetadata:
 
         # Validate sample rate
         if self.sample_rate is not None and self.sample_rate <= 0:
-            logger.warning(f"Invalid sample_rate {self.sample_rate} for {self.filepath}, setting to None")
+            logger.warning(
+                f"Invalid sample_rate {self.sample_rate} for {self.filepath}, setting to None"
+            )
             self.sample_rate = None
 
         # Validate duration
@@ -143,17 +146,17 @@ class AudioMetadata:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            'filepath': self.filepath,
-            'format': self.format,
-            'bitrate': self.bitrate,
-            'sample_rate': self.sample_rate,
-            'channels': self.channels,
-            'duration': self.duration,
-            'bitrate_type': self.bitrate_type.value,
-            'file_size': self.file_size,
-            'modified_time': self.modified_time.isoformat() if self.modified_time else None,
-            'is_lossless': self.is_lossless,
-            'quality_score': self.quality_score,
+            "filepath": self.filepath,
+            "format": self.format,
+            "bitrate": self.bitrate,
+            "sample_rate": self.sample_rate,
+            "channels": self.channels,
+            "duration": self.duration,
+            "bitrate_type": self.bitrate_type.value,
+            "file_size": self.file_size,
+            "modified_time": self.modified_time.isoformat() if self.modified_time else None,
+            "is_lossless": self.is_lossless,
+            "quality_score": self.quality_score,
         }
 
 
@@ -197,12 +200,12 @@ def extract_audio_metadata(filepath: str) -> Optional[AudioMetadata]:
         # Extract metadata using mutagen
         audio = MutagenFile(str(file_path))
 
-        if audio is None or not hasattr(audio, 'info'):
+        if audio is None or not hasattr(audio, "info"):
             logger.warning(f"Could not read audio info from {filepath}")
             return None
 
         # Extract format
-        file_format = file_path.suffix.lower().lstrip('.')
+        file_format = file_path.suffix.lower().lstrip(".")
 
         # Extract basic audio properties
         bitrate = None
@@ -214,22 +217,22 @@ def extract_audio_metadata(filepath: str) -> Optional[AudioMetadata]:
         # Get audio info
         info = audio.info
 
-        if hasattr(info, 'bitrate') and info.bitrate:
+        if hasattr(info, "bitrate") and info.bitrate:
             bitrate = int(info.bitrate / 1000)  # Convert to kbps
 
-        if hasattr(info, 'sample_rate') and info.sample_rate:
+        if hasattr(info, "sample_rate") and info.sample_rate:
             sample_rate = int(info.sample_rate)
 
-        if hasattr(info, 'channels') and info.channels:
+        if hasattr(info, "channels") and info.channels:
             channels = int(info.channels)
 
-        if hasattr(info, 'length') and info.length:
+        if hasattr(info, "length") and info.length:
             duration = float(info.length)
 
         # VBR detection for MP3 files
-        if file_format == 'mp3' and BitrateMode is not None:
+        if file_format == "mp3" and BitrateMode is not None:
             try:
-                if hasattr(info, 'bitrate_mode'):
+                if hasattr(info, "bitrate_mode"):
                     mode = info.bitrate_mode
                     if mode == BitrateMode.CBR:
                         bitrate_type = BitrateType.CBR
@@ -248,7 +251,7 @@ def extract_audio_metadata(filepath: str) -> Optional[AudioMetadata]:
         else:
             # For lossless formats, bitrate type is not applicable
             # For other lossy formats, assume CBR unless we can detect otherwise
-            if file_format in {'flac', 'alac', 'wav', 'aiff', 'ape', 'wv', 'tta'}:
+            if file_format in {"flac", "alac", "wav", "aiff", "ape", "wv", "tta"}:
                 bitrate_type = BitrateType.UNKNOWN  # Not applicable
             else:
                 bitrate_type = BitrateType.CBR  # Default assumption
@@ -381,7 +384,7 @@ def normalize_filename(filename: str) -> str:
         return ""
 
     # Separate extension from stem to avoid stripping it
-    name_part, _, ext = filename.rpartition('.')
+    name_part, _, ext = filename.rpartition(".")
     if not name_part:
         # No extension found (no dot), normalize the whole thing
         name_part = filename
@@ -395,7 +398,7 @@ def normalize_filename(filename: str) -> str:
         normalized = re.sub(pattern, replacement, normalized)
 
     # Final cleanup: strip and remove multiple spaces
-    normalized = ' '.join(normalized.split())
+    normalized = " ".join(normalized.split())
 
     # Reattach extension
     if ext:
@@ -435,11 +438,7 @@ def rank_duplicate_group(files: List[AudioMetadata]) -> Tuple[AudioMetadata, Lis
         return files[0], []
 
     # Sort by quality score (descending), then by file size (descending)
-    sorted_files = sorted(
-        files,
-        key=lambda f: (f.quality_score, f.file_size),
-        reverse=True
-    )
+    sorted_files = sorted(files, key=lambda f: (f.quality_score, f.file_size), reverse=True)
 
     # First file is the keeper, rest are to delete
     file_to_keep = sorted_files[0]
@@ -554,12 +553,12 @@ def analyze_duplicate_set(filepaths: List[str]) -> Dict[str, Any]:
     size_saved_mb = size_saved_bytes / (1024 * 1024)
 
     return {
-        'files': files_metadata,
-        'recommended_keep': keep,
-        'recommended_delete': delete,
-        'quality_range': quality_range,
-        'size_saved_mb': size_saved_mb,
-        'total_files': len(files_metadata),
-        'lossless_count': sum(1 for f in files_metadata if f.is_lossless),
-        'vbr_count': sum(1 for f in files_metadata if f.bitrate_type == BitrateType.VBR),
+        "files": files_metadata,
+        "recommended_keep": keep,
+        "recommended_delete": delete,
+        "quality_range": quality_range,
+        "size_saved_mb": size_saved_mb,
+        "total_files": len(files_metadata),
+        "lossless_count": sum(1 for f in files_metadata if f.is_lossless),
+        "vbr_count": sum(1 for f in files_metadata if f.bitrate_type == BitrateType.VBR),
     }

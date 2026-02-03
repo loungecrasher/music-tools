@@ -67,65 +67,58 @@ from .validation import validate_email, validate_url
 
 __all__ = [
     # Fuzzy matching
-    'find_best_match',
-    'similarity_score',
-
+    "find_best_match",
+    "similarity_score",
     # Decorators
-    'handle_errors',
-    'retry_decorator',
-    'log_execution',
-    'validate_args',
-
+    "handle_errors",
+    "retry_decorator",
+    "log_execution",
+    "validate_args",
     # Retry
-    'retry',
-    'safe_request',
-    'setup_logger',
-
+    "retry",
+    "safe_request",
+    "setup_logger",
     # Validation
-    'validate_email',
-    'validate_url',
-
+    "validate_email",
+    "validate_url",
     # File
-    'safe_write_json',
-    'safe_read_json',
-
+    "safe_write_json",
+    "safe_read_json",
     # Date
-    'parse_date',
-    'format_date',
-    'normalize_date',
-    'get_year_from_date',
-    'is_valid_date',
-    'format_duration',
-    'parse_duration',
-    'get_relative_time',
-    'is_recent_date',
-
+    "parse_date",
+    "format_date",
+    "normalize_date",
+    "get_year_from_date",
+    "is_valid_date",
+    "format_duration",
+    "parse_duration",
+    "get_relative_time",
+    "is_recent_date",
     # HTTP
-    'get_random_user_agent',
-    'create_resilient_session',
-    'safe_request',
-    'handle_rate_limit',
-    'get_json',
-    'post_json',
-    'check_url_accessible',
-    'get_domain_from_url',
-    'RateLimiter',
-    'make_request',
-
+    "get_random_user_agent",
+    "create_resilient_session",
+    "safe_request",
+    "handle_rate_limit",
+    "get_json",
+    "post_json",
+    "check_url_accessible",
+    "get_domain_from_url",
+    "RateLimiter",
+    "make_request",
     # Security
-    'security_validate_file_path',
-    'sanitize_artist_name',
-    'sanitize_command_argument',
-    'mask_sensitive_value',
-    'sanitize_log_message',
-    'secure_permissions',
-    'security_validate_batch_size',
-    'validate_timeout',
-    'is_safe_filename',
-    'escape_html',
-    'validate_port',
-    'check_path_traversal',
-    'SecureFileHandler',
+    "security_validate_file_path",
+    "sanitize_artist_name",
+    "sanitize_command_argument",
+    "mask_sensitive_value",
+    "sanitize_log_message",
+    "secure_permissions",
+    "security_validate_batch_size",
+    "validate_timeout",
+    "is_safe_filename",
+    "escape_html",
+    "validate_port",
+    "check_path_traversal",
+    "SecureFileHandler",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

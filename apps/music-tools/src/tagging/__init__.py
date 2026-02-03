@@ -14,9 +14,4 @@ __email__ = "developer@musiclibrarytagger.com"
 __description__ = "Automatically tag music files with country of origin information"
 
 # Package metadata
-__all__ = [
-    '__version__',
-    '__author__',
-    '__email__',
-    '__description__'
-]
+__all__ = ["__version__", "__author__", "__email__", "__description__"]

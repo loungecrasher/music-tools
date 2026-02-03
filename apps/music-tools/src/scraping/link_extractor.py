@@ -23,7 +23,7 @@ from .error_handling import (
 from .models import LinkExtractionResult
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -61,26 +61,26 @@ class LinkExtractor:
             all_links = set()
             posts_processed = 0
             genre_stats = {}
-            quality_stats = {'flac': 0, 'mp3_320': 0, 'other': 0}
+            quality_stats = {"flac": 0, "mp3_320": 0, "other": 0}
 
             # Extract from posts array
-            for post in data.get('posts', []):
-                download_links = post.get('download_links', [])
+            for post in data.get("posts", []):
+                download_links = post.get("download_links", [])
                 for link in download_links:
                     if link and link.strip():
                         all_links.add(link.strip())
 
                         # Track quality stats
                         link_lower = link.lower()
-                        if 'flac' in link_lower or '.flac' in link_lower:
-                            quality_stats['flac'] += 1
-                        elif '320' in link_lower:
-                            quality_stats['mp3_320'] += 1
+                        if "flac" in link_lower or ".flac" in link_lower:
+                            quality_stats["flac"] += 1
+                        elif "320" in link_lower:
+                            quality_stats["mp3_320"] += 1
                         else:
-                            quality_stats['other'] += 1
+                            quality_stats["other"] += 1
 
                 # Track genre stats
-                for genre in post.get('matching_genres', []):
+                for genre in post.get("matching_genres", []):
                     genre_stats[genre] = genre_stats.get(genre, 0) + 1
 
                 posts_processed += 1
@@ -89,12 +89,12 @@ class LinkExtractor:
             unique_links = sorted(list(all_links))
 
             return {
-                'links': unique_links,
-                'total_links': len(unique_links),
-                'posts_processed': posts_processed,
-                'genre_stats': genre_stats,
-                'quality_stats': quality_stats,
-                'metadata': data.get('metadata', {})
+                "links": unique_links,
+                "total_links": len(unique_links),
+                "posts_processed": posts_processed,
+                "genre_stats": genre_stats,
+                "quality_stats": quality_stats,
+                "metadata": data.get("metadata", {}),
             }
 
         except FileNotFoundError:
@@ -130,7 +130,7 @@ class LinkExtractor:
                 raise ScrapingError(f"Could not read file: {text_file_path}")
 
             all_links = set()
-            quality_stats = {'flac': 0, 'mp3_320': 0, 'other': 0}
+            quality_stats = {"flac": 0, "mp3_320": 0, "other": 0}
 
             # Find all links matching our patterns
             for pattern in self.download_patterns:
@@ -142,18 +142,18 @@ class LinkExtractor:
 
                         # Track quality stats
                         link_lower = link.lower()
-                        if 'flac' in link_lower or '.flac' in link_lower:
-                            quality_stats['flac'] += 1
-                        elif '320' in link_lower:
-                            quality_stats['mp3_320'] += 1
+                        if "flac" in link_lower or ".flac" in link_lower:
+                            quality_stats["flac"] += 1
+                        elif "320" in link_lower:
+                            quality_stats["mp3_320"] += 1
                         else:
-                            quality_stats['other'] += 1
+                            quality_stats["other"] += 1
 
             # Also look for lines that start with "- " (common in our output format)
-            lines = content.split('\n')
+            lines = content.split("\n")
             for line in lines:
                 line = line.strip()
-                if line.startswith('- ') or line.startswith('• '):
+                if line.startswith("- ") or line.startswith("• "):
                     potential_link = line[2:].strip()
                     if any(pattern.search(potential_link) for pattern in self.download_patterns):
                         all_links.add(potential_link)
@@ -163,16 +163,18 @@ class LinkExtractor:
 
             # Try to extract metadata from text file
             metadata = {}
-            if 'Generated on' in content:
-                date_match = re.search(r'Generated on (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', content)
+            if "Generated on" in content:
+                date_match = re.search(
+                    r"Generated on (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", content
+                )
                 if date_match:
-                    metadata['generated_at'] = date_match.group(1)
+                    metadata["generated_at"] = date_match.group(1)
 
             return {
-                'links': unique_links,
-                'total_links': len(unique_links),
-                'quality_stats': quality_stats,
-                'metadata': metadata
+                "links": unique_links,
+                "total_links": len(unique_links),
+                "quality_stats": quality_stats,
+                "metadata": metadata,
             }
 
         except FileNotFoundError:
@@ -182,8 +184,14 @@ class LinkExtractor:
             logger.error(f"Error extracting from text: {e}")
             raise
 
-    def save_links(self, links: List[str], output_file: str, group_size: int = GROUP_SIZE,
-                   include_stats: bool = True, stats: Optional[Dict] = None):
+    def save_links(
+        self,
+        links: List[str],
+        output_file: str,
+        group_size: int = GROUP_SIZE,
+        include_stats: bool = True,
+        stats: Optional[Dict] = None,
+    ):
         """
         Save extracted links to a file with optional grouping and statistics.
 
@@ -204,9 +212,11 @@ class LinkExtractor:
 
             logger.info(f"Writing {len(links)} unique links to: {output_file}")
 
-            with open(output_file, 'w', encoding=DEFAULT_ENCODING) as f:
+            with open(output_file, "w", encoding=DEFAULT_ENCODING) as f:
                 # Write header
-                f.write(f"EDM Music Download Links - Extracted on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(
+                    f"EDM Music Download Links - Extracted on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                )
                 f.write("=" * 80 + "\n\n")
 
                 # Write statistics if requested
@@ -214,22 +224,23 @@ class LinkExtractor:
                     f.write("EXTRACTION STATISTICS\n")
                     f.write("-" * 20 + "\n")
 
-                    if 'posts_processed' in stats:
+                    if "posts_processed" in stats:
                         f.write(f"Posts processed: {stats['posts_processed']}\n")
 
                     f.write(f"Total unique links: {len(links)}\n")
 
-                    if 'quality_stats' in stats:
-                        q_stats = stats['quality_stats']
+                    if "quality_stats" in stats:
+                        q_stats = stats["quality_stats"]
                         f.write("\nQuality breakdown:\n")
                         f.write(f"  FLAC/Lossless: {q_stats.get('flac', 0)}\n")
                         f.write(f"  MP3 320kbps: {q_stats.get('mp3_320', 0)}\n")
                         f.write(f"  Other: {q_stats.get('other', 0)}\n")
 
-                    if 'genre_stats' in stats:
+                    if "genre_stats" in stats:
                         f.write("\nTop genres:\n")
-                        sorted_genres = sorted(stats['genre_stats'].items(),
-                                               key=lambda x: x[1], reverse=True)[:10]
+                        sorted_genres = sorted(
+                            stats["genre_stats"].items(), key=lambda x: x[1], reverse=True
+                        )[:10]
                         for genre, count in sorted_genres:
                             f.write(f"  {genre}: {count} posts\n")
 
@@ -260,8 +271,13 @@ class LinkExtractor:
             logger.error(f"Error saving links: {e}")
             raise
 
-    def extract_and_save(self, input_file: str, output_file: str = None,
-                         group_size: int = GROUP_SIZE, include_stats: bool = True) -> Dict:
+    def extract_and_save(
+        self,
+        input_file: str,
+        output_file: str = None,
+        group_size: int = GROUP_SIZE,
+        include_stats: bool = True,
+    ) -> Dict:
         """
         Extract links from input file and save to output file.
 
@@ -281,7 +297,7 @@ class LinkExtractor:
             raise FileNotFoundError(f"Input file not found: {input_file}")
 
         # Extract based on file type
-        if input_path.suffix.lower() == '.json':
+        if input_path.suffix.lower() == ".json":
             results = self.extract_from_json(input_file)
         else:
             results = self.extract_from_text(input_file)
@@ -293,11 +309,11 @@ class LinkExtractor:
 
         # Save the links
         self.save_links(
-            results['links'],
+            results["links"],
             output_file,
             group_size=group_size,
             include_stats=include_stats,
-            stats=results
+            stats=results,
         )
 
         # Print summary
@@ -314,14 +330,18 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Extract download links from EDM scraper output files'
+        description="Extract download links from EDM scraper output files"
     )
-    parser.add_argument('input_file', help='Input file (JSON or text)')
-    parser.add_argument('-o', '--output', help='Output file (default: auto-generated)')
-    parser.add_argument('-g', '--group-size', type=int, default=GROUP_SIZE,
-                        help='Number of links per group (0 for no grouping)')
-    parser.add_argument('--no-stats', action='store_true',
-                        help='Exclude statistics from output')
+    parser.add_argument("input_file", help="Input file (JSON or text)")
+    parser.add_argument("-o", "--output", help="Output file (default: auto-generated)")
+    parser.add_argument(
+        "-g",
+        "--group-size",
+        type=int,
+        default=GROUP_SIZE,
+        help="Number of links per group (0 for no grouping)",
+    )
+    parser.add_argument("--no-stats", action="store_true", help="Exclude statistics from output")
 
     args = parser.parse_args()
 
@@ -341,7 +361,7 @@ def main():
             args.input_file,
             args.output,
             group_size=args.group_size,
-            include_stats=not args.no_stats
+            include_stats=not args.no_stats,
         )
 
         print(f"\n🎉 Successfully extracted {results['total_links']} unique links!")

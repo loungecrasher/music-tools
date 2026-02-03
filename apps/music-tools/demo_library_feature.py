@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from datetime import datetime, timezone
 
@@ -54,7 +54,7 @@ def demo_1_create_sample_library():
             file_size=5_000_000,
             metadata_hash="hash1",
             file_content_hash="content1",
-            file_mtime=datetime.now(timezone.utc)
+            file_mtime=datetime.now(timezone.utc),
         ),
         LibraryFile(
             file_path="/library/artist2_song1.mp3",
@@ -68,7 +68,7 @@ def demo_1_create_sample_library():
             file_size=9_000_000,
             metadata_hash="hash2",
             file_content_hash="content2",
-            file_mtime=datetime.now(timezone.utc)
+            file_mtime=datetime.now(timezone.utc),
         ),
         LibraryFile(
             file_path="/library/artist3_song1.mp3",
@@ -82,7 +82,7 @@ def demo_1_create_sample_library():
             file_size=11_000_000,
             metadata_hash="hash3",
             file_content_hash="content3",
-            file_mtime=datetime.now(timezone.utc)
+            file_mtime=datetime.now(timezone.utc),
         ),
     ]
 
@@ -112,12 +112,32 @@ def demo_2_import_folder():
 
     # Import folder files (some duplicates, some new)
     import_songs = [
-        ("the_beatles_yesterday.mp3", "The Beatles", "Yesterday", "DUPLICATE - Exact metadata match"),
-        ("pink_floyd_comfortably_numb_live.mp3", "Pink Floyd", "Comfortably Numb (Live)", "UNCERTAIN - Similar but different version"),
+        (
+            "the_beatles_yesterday.mp3",
+            "The Beatles",
+            "Yesterday",
+            "DUPLICATE - Exact metadata match",
+        ),
+        (
+            "pink_floyd_comfortably_numb_live.mp3",
+            "Pink Floyd",
+            "Comfortably Numb (Live)",
+            "UNCERTAIN - Similar but different version",
+        ),
         ("queen_bohemian_rhapsody.mp3", "Queen", "Bohemian Rhapsody", "NEW - Not in library"),
-        ("led_zeppelin_stairway.mp3", "Led Zeppelin", "Stairway to Heaven", "DUPLICATE - Same file content"),
+        (
+            "led_zeppelin_stairway.mp3",
+            "Led Zeppelin",
+            "Stairway to Heaven",
+            "DUPLICATE - Same file content",
+        ),
         ("david_bowie_heroes.mp3", "David Bowie", "Heroes", "NEW - Not in library"),
-        ("the_beatles_yesterday_remaster.mp3", "The Beatles", "Yesterday (2009 Remaster)", "UNCERTAIN - Similar title"),
+        (
+            "the_beatles_yesterday_remaster.mp3",
+            "The Beatles",
+            "Yesterday (2009 Remaster)",
+            "UNCERTAIN - Similar title",
+        ),
         ("radiohead_creep.mp3", "Radiohead", "Creep", "NEW - Not in library"),
     ]
 
@@ -151,23 +171,10 @@ def demo_3_duplicate_detection():
     table.add_column("Speed", style="yellow")
     table.add_column("Confidence", style="magenta")
 
+    table.add_row("1️⃣ Exact Metadata", "MD5 hash of 'artist|title'", "<1ms per file", "100%")
+    table.add_row("2️⃣ File Content", "MD5 hash of audio (64KB samples)", "~10ms per file", "100%")
     table.add_row(
-        "1️⃣ Exact Metadata",
-        "MD5 hash of 'artist|title'",
-        "<1ms per file",
-        "100%"
-    )
-    table.add_row(
-        "2️⃣ File Content",
-        "MD5 hash of audio (64KB samples)",
-        "~10ms per file",
-        "100%"
-    )
-    table.add_row(
-        "3️⃣ Fuzzy Match",
-        "Similarity algorithm on metadata",
-        "~100ms per file",
-        "70-95%"
+        "3️⃣ Fuzzy Match", "Similarity algorithm on metadata", "~100ms per file", "70-95%"
     )
 
     console.print(table)
@@ -217,7 +224,7 @@ def demo_4_vetting_results():
 [bold]Threshold:[/bold] 80%
 [bold]Scan Duration:[/bold] 0.23s""",
         title="Vetting Summary",
-        border_style="cyan"
+        border_style="cyan",
     )
     console.print(summary_panel)
     console.print()
@@ -229,24 +236,9 @@ def demo_4_vetting_results():
     results_table.add_column("Percentage", justify="right", style="yellow")
     results_table.add_column("Action", style="magenta")
 
-    results_table.add_row(
-        "✅ New Songs",
-        "3",
-        "42.9%",
-        "[green]IMPORT these[/green]"
-    )
-    results_table.add_row(
-        "❌ Duplicates",
-        "2",
-        "28.6%",
-        "[red]SKIP these[/red]"
-    )
-    results_table.add_row(
-        "⚠️  Uncertain",
-        "2",
-        "28.6%",
-        "[yellow]REVIEW manually[/yellow]"
-    )
+    results_table.add_row("✅ New Songs", "3", "42.9%", "[green]IMPORT these[/green]")
+    results_table.add_row("❌ Duplicates", "2", "28.6%", "[red]SKIP these[/red]")
+    results_table.add_row("⚠️  Uncertain", "2", "28.6%", "[yellow]REVIEW manually[/yellow]")
 
     console.print(results_table)
     console.print()
@@ -283,21 +275,9 @@ def demo_5_export_files():
     table.add_column("Contents", style="green")
     table.add_column("Use Case", style="yellow")
 
-    table.add_row(
-        "new_songs.txt",
-        "3 files",
-        "Batch import to library"
-    )
-    table.add_row(
-        "duplicates.txt",
-        "2 files",
-        "Batch delete or move"
-    )
-    table.add_row(
-        "uncertain.txt",
-        "2 files",
-        "Manual review list"
-    )
+    table.add_row("new_songs.txt", "3 files", "Batch import to library")
+    table.add_row("duplicates.txt", "2 files", "Batch delete or move")
+    table.add_row("uncertain.txt", "2 files", "Manual review list")
 
     console.print(table)
     console.print()
@@ -317,8 +297,8 @@ def demo_5_export_files():
     console.print("[bold cyan]Automation Example:[/bold cyan]")
     console.print("[dim]# Copy only new songs to library[/dim]")
     console.print("while IFS= read -r file; do")
-    console.print("  [[ \"$file\" =~ ^# ]] && continue")
-    console.print("  cp \"$file\" ~/Music/")
+    console.print('  [[ "$file" =~ ^# ]] && continue')
+    console.print('  cp "$file" ~/Music/')
     console.print("done < new_songs.txt")
 
 
@@ -336,24 +316,9 @@ def demo_6_time_savings():
     table.add_column("Automated", justify="right", style="green")
     table.add_column("Savings", justify="right", style="yellow")
 
-    table.add_row(
-        "Check 1,000 songs",
-        "~7 hours",
-        "~20 seconds",
-        "6h 59m 40s"
-    )
-    table.add_row(
-        "Weekly batch (2,000)",
-        "~14 hours",
-        "~40 seconds",
-        "13h 59m 20s"
-    )
-    table.add_row(
-        "Monthly total (8,000)",
-        "~56 hours",
-        "~3 minutes",
-        "55h 57m"
-    )
+    table.add_row("Check 1,000 songs", "~7 hours", "~20 seconds", "6h 59m 40s")
+    table.add_row("Weekly batch (2,000)", "~14 hours", "~40 seconds", "13h 59m 20s")
+    table.add_row("Monthly total (8,000)", "~56 hours", "~3 minutes", "55h 57m")
 
     console.print(table)
     console.print()
@@ -369,12 +334,14 @@ def demo_6_time_savings():
 def main():
     """Run the complete demo."""
     console.print()
-    console.print(Panel(
-        "[bold cyan]Library Duplicate Detection Demo[/bold cyan]\n"
-        "[dim]Understanding how the new feature works[/dim]",
-        border_style="cyan",
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            "[bold cyan]Library Duplicate Detection Demo[/bold cyan]\n"
+            "[dim]Understanding how the new feature works[/dim]",
+            border_style="cyan",
+            padding=(1, 2),
+        )
+    )
 
     # Run all demos
     demo_1_create_sample_library()
@@ -396,17 +363,19 @@ def main():
 
     # Final summary
     console.print()
-    console.print(Panel(
-        "[bold green]🎉 Demo Complete![/bold green]\n\n"
-        "You now understand how the library duplicate detection works.\n\n"
-        "[cyan]Next Steps:[/cyan]\n"
-        "1. Read QUICK_START_GUIDE.md for detailed instructions\n"
-        "2. Index your library: [yellow]library index --path ~/Music[/yellow]\n"
-        "3. Vet your next import: [yellow]library vet --folder ~/Downloads[/yellow]\n\n"
-        "[dim]The system will save you hours of manual work every week![/dim]",
-        border_style="green",
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            "[bold green]🎉 Demo Complete![/bold green]\n\n"
+            "You now understand how the library duplicate detection works.\n\n"
+            "[cyan]Next Steps:[/cyan]\n"
+            "1. Read QUICK_START_GUIDE.md for detailed instructions\n"
+            "2. Index your library: [yellow]library index --path ~/Music[/yellow]\n"
+            "3. Vet your next import: [yellow]library vet --folder ~/Downloads[/yellow]\n\n"
+            "[dim]The system will save you hours of manual work every week![/dim]",
+            border_style="green",
+            padding=(1, 2),
+        )
+    )
 
 
 if __name__ == "__main__":

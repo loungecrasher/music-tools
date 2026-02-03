@@ -2,6 +2,7 @@
 Utility functions for Music Tools.
 Provides common functionality used across different tools.
 """
+
 import functools
 import json
 import logging
@@ -14,21 +15,22 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Un
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger('music_tools.utils')
+logger = logging.getLogger("music_tools.utils")
 
 # Type variables for generic functions
-T = TypeVar('T')
-R = TypeVar('R')
+T = TypeVar("T")
+R = TypeVar("R")
 
 
 class RetryError(Exception):
     """Exception raised when maximum retry attempts are exceeded."""
 
 
-def setup_logger(name: str, log_file: Optional[str] = None, level: int = logging.INFO) -> logging.Logger:
+def setup_logger(
+    name: str, log_file: Optional[str] = None, level: int = logging.INFO
+) -> logging.Logger:
     """Set up a logger with the specified name and configuration.
 
     Args:
@@ -43,7 +45,7 @@ def setup_logger(name: str, log_file: Optional[str] = None, level: int = logging
     logger.setLevel(level)
 
     # Create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     # Create console handler
     console_handler = logging.StreamHandler()
@@ -65,7 +67,7 @@ def exponential_backoff(
     base_delay: float = 1.0,
     backoff: float = 2.0,
     max_delay: Optional[float] = None,
-    jitter: bool = False
+    jitter: bool = False,
 ) -> float:
     """
     Calculate exponential backoff delay for retry attempts.
@@ -130,7 +132,7 @@ def retry(
     backoff: float = 2.0,
     max_delay: Optional[float] = None,
     exceptions: Tuple[Type[Exception], ...] = (Exception,),
-    on_retry: Optional[Callable[[int, Exception, float], None]] = None
+    on_retry: Optional[Callable[[int, Exception, float], None]] = None,
 ) -> Callable:
     """
     Retry decorator with exponential backoff and advanced features.
@@ -200,9 +202,7 @@ def retry(
                     time.sleep(wait_time)
 
             # Should never reach here due to raise in except block
-            raise RetryError(
-                "Unexpected error in retry decorator"
-            ) from last_exception
+            raise RetryError("Unexpected error in retry decorator") from last_exception
 
         return wrapper
 
@@ -241,8 +241,8 @@ def format_date(date_str: str) -> str:
     else:
         try:
             # Try to parse with datetime
-            dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-            return dt.strftime('%Y-%m-%d')
+            dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+            return dt.strftime("%Y-%m-%d")
         except ValueError:
             logger.warning(f"Could not parse date: {date_str}")
             return date_str
@@ -260,7 +260,7 @@ def save_json(data: Any, file_path: str) -> bool:
     """
     try:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         return True
     except Exception as e:
@@ -282,7 +282,7 @@ def load_json(file_path: str) -> Optional[Any]:
             logger.warning(f"File not found: {file_path}")
             return None
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
     except json.JSONDecodeError:
         logger.error(f"Invalid JSON in file: {file_path}")
@@ -302,13 +302,13 @@ def confirm_action(prompt: str, default: bool = False) -> bool:
     Returns:
         True if confirmed, False otherwise
     """
-    default_str = 'Y/n' if default else 'y/N'
+    default_str = "Y/n" if default else "y/N"
     response = input(f"{prompt} [{default_str}]: ").strip().lower()
 
     if not response:
         return default
 
-    return response.startswith('y')
+    return response.startswith("y")
 
 
 def create_directory_if_not_exists(directory: str) -> bool:
@@ -337,7 +337,7 @@ def get_file_extension(file_path: str) -> str:
     Returns:
         File extension (lowercase, without the dot)
     """
-    return os.path.splitext(file_path)[1].lower().lstrip('.')
+    return os.path.splitext(file_path)[1].lower().lstrip(".")
 
 
 def is_valid_file(file_path: str, allowed_extensions: List[str] = None) -> bool:
@@ -360,7 +360,7 @@ def is_valid_file(file_path: str, allowed_extensions: List[str] = None) -> bool:
     return True
 
 
-def truncate_string(s: str, max_length: int = 50, suffix: str = '...') -> str:
+def truncate_string(s: str, max_length: int = 50, suffix: str = "...") -> str:
     """Truncate a string to a maximum length.
 
     Args:
@@ -374,11 +374,12 @@ def truncate_string(s: str, max_length: int = 50, suffix: str = '...') -> str:
     if len(s) <= max_length:
         return s
 
-    return s[:max_length - len(suffix)] + suffix
+    return s[: max_length - len(suffix)] + suffix
 
 
-def print_table(data: List[Dict[str, Any]], columns: List[str],
-                widths: Dict[str, int] = None, title: str = None) -> None:
+def print_table(
+    data: List[Dict[str, Any]], columns: List[str], widths: Dict[str, int] = None, title: str = None
+) -> None:
     """Print a table of data.
 
     Args:
@@ -396,24 +397,19 @@ def print_table(data: List[Dict[str, Any]], columns: List[str],
         widths = {}
         for col in columns:
             # Width is the maximum of the column name length and the longest value
-            widths[col] = max(
-                len(col),
-                max(len(str(item.get(col, ''))) for item in data)
-            )
+            widths[col] = max(len(col), max(len(str(item.get(col, ""))) for item in data))
 
     # Print title if provided
     if title:
         print(f"\n{title}")
-        print('=' * sum(widths.values() + len(columns) + 1))
+        print("=" * sum(widths.values() + len(columns) + 1))
 
     # Print header
-    header = ' | '.join(col.ljust(widths[col]) for col in columns)
+    header = " | ".join(col.ljust(widths[col]) for col in columns)
     print(header)
-    print('-' * len(header))
+    print("-" * len(header))
 
     # Print data
     for item in data:
-        row = ' | '.join(
-            str(item.get(col, '')).ljust(widths[col]) for col in columns
-        )
+        row = " | ".join(str(item.get(col, "")).ljust(widths[col]) for col in columns)
         print(row)

@@ -26,7 +26,9 @@ MAX_FILE_SIZE_FOR_HASHING: int = 10 * 1024 * 1024 * 1024  # 10GB
 MIDDLE_CHUNK_THRESHOLD: int = DEFAULT_CHUNK_SIZE * 4  # 256KB - files larger get middle chunk
 
 
-def calculate_metadata_hash(artist: Optional[str], title: Optional[str], filename: Optional[str] = None) -> str:
+def calculate_metadata_hash(
+    artist: Optional[str], title: Optional[str], filename: Optional[str] = None
+) -> str:
     """Calculate MD5 hash of normalized metadata.
 
     Args:
@@ -54,8 +56,8 @@ def calculate_metadata_hash(artist: Optional[str], title: Optional[str], filenam
         'NO_METADATA_HASH'
     """
     # Input validation and normalization
-    artist_norm = (artist or '').strip().lower()
-    title_norm = (title or '').strip().lower()
+    artist_norm = (artist or "").strip().lower()
+    title_norm = (title or "").strip().lower()
 
     # If both empty, use filename to generate unique hash to prevent false matches
     if not artist_norm and not title_norm:
@@ -64,13 +66,13 @@ def calculate_metadata_hash(artist: Optional[str], title: Optional[str], filenam
             # This prevents all untagged files from matching each other
             filename_stem = Path(filename).stem.lower()
             metadata_key = f"NO_METADATA:{filename_stem}"
-            return hashlib.md5(metadata_key.encode('utf-8')).hexdigest()
+            return hashlib.md5(metadata_key.encode("utf-8")).hexdigest()
         else:
             # Fallback if no filename provided
             return NO_METADATA_HASH_MARKER
 
     metadata_key = f"{artist_norm}|{title_norm}"
-    return hashlib.md5(metadata_key.encode('utf-8')).hexdigest()
+    return hashlib.md5(metadata_key.encode("utf-8")).hexdigest()
 
 
 def calculate_file_hash(file_path: Path, chunk_size: int = DEFAULT_CHUNK_SIZE) -> Optional[str]:
@@ -129,17 +131,19 @@ def calculate_file_hash(file_path: Path, chunk_size: int = DEFAULT_CHUNK_SIZE) -
 
     # Check if file is too large to hash (memory protection)
     if file_size > MAX_FILE_SIZE_FOR_HASHING:
-        logger.warning(f"File too large to hash: {file_path} ({file_size} bytes, max {MAX_FILE_SIZE_FOR_HASHING})")
+        logger.warning(
+            f"File too large to hash: {file_path} ({file_size} bytes, max {MAX_FILE_SIZE_FOR_HASHING})"
+        )
         return f"{file_size}_FILE_TOO_LARGE"
 
     # Use SHA-256 for better collision resistance
     hasher = hashlib.sha256()
 
     # Include file size in hash for additional collision resistance
-    hasher.update(str(file_size).encode('utf-8'))
+    hasher.update(str(file_size).encode("utf-8"))
 
     try:
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             # Hash first chunk
             first_chunk = f.read(chunk_size)
             hasher.update(first_chunk)

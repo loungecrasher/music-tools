@@ -2,6 +2,7 @@
 """
 Automatically fix missing imports in Python files.
 """
+
 import ast
 import re
 from collections import defaultdict
@@ -11,57 +12,54 @@ from typing import Dict, List, Set, Tuple
 # Map of common undefined names to their import statements
 IMPORT_MAP = {
     # Standard library - basic
-    'os': 'import os',
-    'sys': 'import sys',
-    'json': 'import json',
-    're': 'import re',
-    'time': 'import time',
-    'datetime': 'from datetime import datetime',
-    'timedelta': 'from datetime import timedelta',
-    'Path': 'from pathlib import Path',
-    'defaultdict': 'from collections import defaultdict',
-    'Counter': 'from collections import Counter',
-    'OrderedDict': 'from collections import OrderedDict',
-    'argparse': 'import argparse',
-    'subprocess': 'import subprocess',
-    'shutil': 'import shutil',
-    'glob': 'import glob',
-    'csv': 'import csv',
-    'traceback': 'import traceback',
-    'logging': 'import logging',
-    'sqlite3': 'import sqlite3',
-    'importlib': 'import importlib',
-
+    "os": "import os",
+    "sys": "import sys",
+    "json": "import json",
+    "re": "import re",
+    "time": "import time",
+    "datetime": "from datetime import datetime",
+    "timedelta": "from datetime import timedelta",
+    "Path": "from pathlib import Path",
+    "defaultdict": "from collections import defaultdict",
+    "Counter": "from collections import Counter",
+    "OrderedDict": "from collections import OrderedDict",
+    "argparse": "import argparse",
+    "subprocess": "import subprocess",
+    "shutil": "import shutil",
+    "glob": "import glob",
+    "csv": "import csv",
+    "traceback": "import traceback",
+    "logging": "import logging",
+    "sqlite3": "import sqlite3",
+    "importlib": "import importlib",
     # Typing imports
-    'Dict': 'from typing import Dict',
-    'List': 'from typing import List',
-    'Set': 'from typing import Set',
-    'Tuple': 'from typing import Tuple',
-    'Optional': 'from typing import Optional',
-    'Any': 'from typing import Any',
-    'Union': 'from typing import Union',
-    'Callable': 'from typing import Callable',
-    'TypeVar': 'from typing import TypeVar',
-    'Iterable': 'from typing import Iterable',
-
+    "Dict": "from typing import Dict",
+    "List": "from typing import List",
+    "Set": "from typing import Set",
+    "Tuple": "from typing import Tuple",
+    "Optional": "from typing import Optional",
+    "Any": "from typing import Any",
+    "Union": "from typing import Union",
+    "Callable": "from typing import Callable",
+    "TypeVar": "from typing import TypeVar",
+    "Iterable": "from typing import Iterable",
     # Third-party
-    'requests': 'import requests',
-    'spotipy': 'import spotipy',
-    'dotenv': 'from dotenv import load_dotenv',
-    'load_dotenv': 'from dotenv import load_dotenv',
-    'pytest': 'import pytest',
-    'BeautifulSoup': 'from bs4 import BeautifulSoup',
-    'mutagen': 'import mutagen',
-    'click': 'import click',
-
+    "requests": "import requests",
+    "spotipy": "import spotipy",
+    "dotenv": "from dotenv import load_dotenv",
+    "load_dotenv": "from dotenv import load_dotenv",
+    "pytest": "import pytest",
+    "BeautifulSoup": "from bs4 import BeautifulSoup",
+    "mutagen": "import mutagen",
+    "click": "import click",
     # Error types
-    'ConnectionError': '',  # Built-in
-    'TimeoutError': '',  # Built-in
-    'PermissionError': '',  # Built-in
-    'FileNotFoundError': '',  # Built-in
-    'NotADirectoryError': '',  # Built-in
-    'UnicodeDecodeError': '',  # Built-in
-    'UnicodeError': '',  # Built-in
+    "ConnectionError": "",  # Built-in
+    "TimeoutError": "",  # Built-in
+    "PermissionError": "",  # Built-in
+    "FileNotFoundError": "",  # Built-in
+    "NotADirectoryError": "",  # Built-in
+    "UnicodeDecodeError": "",  # Built-in
+    "UnicodeError": "",  # Built-in
 }
 
 
@@ -70,7 +68,7 @@ class ImportFixer:
 
     def __init__(self, file_path: str):
         self.file_path = file_path
-        self.content = ''
+        self.content = ""
         self.lines = []
         self.imports = set()
         self.from_imports = defaultdict(set)
@@ -78,9 +76,9 @@ class ImportFixer:
 
     def read_file(self):
         """Read the file content."""
-        with open(self.file_path, 'r', encoding='utf-8') as f:
+        with open(self.file_path, "r", encoding="utf-8") as f:
             self.content = f.read()
-            self.lines = self.content.split('\n')
+            self.lines = self.content.split("\n")
 
     def analyze_imports(self):
         """Analyze existing imports."""
@@ -94,7 +92,7 @@ class ImportFixer:
                         self.imports.add(name)
 
                 elif isinstance(node, ast.ImportFrom):
-                    module = node.module or ''
+                    module = node.module or ""
                     for alias in node.names:
                         name = alias.asname if alias.asname else alias.name
                         self.from_imports[module].add(name)
@@ -110,23 +108,23 @@ class ImportFixer:
 
         # Check for common patterns that need imports
         patterns = {
-            r'\bos\.': 'os',
-            r'\bsys\.': 'sys',
-            r'\bjson\.': 'json',
-            r'\bre\.': 're',
-            r'\btime\.': 'time',
-            r'\bPath\(': 'Path',
-            r'\bdatetime\.': 'datetime',
-            r'\bdefaultdict\(': 'defaultdict',
-            r'\bargparse\.': 'argparse',
-            r'\bsubprocess\.': 'subprocess',
-            r'\blogging\.': 'logging',
-            r'\bsqlite3\.': 'sqlite3',
-            r'\brequests\.': 'requests',
-            r'\bspotipy\.': 'spotipy',
-            r'\bcsv\.': 'csv',
-            r'\btraceback\.': 'traceback',
-            r'\bimportlib\.': 'importlib',
+            r"\bos\.": "os",
+            r"\bsys\.": "sys",
+            r"\bjson\.": "json",
+            r"\bre\.": "re",
+            r"\btime\.": "time",
+            r"\bPath\(": "Path",
+            r"\bdatetime\.": "datetime",
+            r"\bdefaultdict\(": "defaultdict",
+            r"\bargparse\.": "argparse",
+            r"\bsubprocess\.": "subprocess",
+            r"\blogging\.": "logging",
+            r"\bsqlite3\.": "sqlite3",
+            r"\brequests\.": "requests",
+            r"\bspotipy\.": "spotipy",
+            r"\bcsv\.": "csv",
+            r"\btraceback\.": "traceback",
+            r"\bimportlib\.": "importlib",
         }
 
         for pattern, module in patterns.items():
@@ -155,12 +153,14 @@ class ImportFixer:
             stripped = line.strip()
 
             # Skip shebang
-            if i == 0 and stripped.startswith('#!'):
+            if i == 0 and stripped.startswith("#!"):
                 shebang_line = True
                 continue
 
             # Skip module docstring
-            if i == (1 if shebang_line else 0) and (stripped.startswith('"""') or stripped.startswith("'''")):
+            if i == (1 if shebang_line else 0) and (
+                stripped.startswith('"""') or stripped.startswith("'''")
+            ):
                 in_docstring = True
                 continue
 
@@ -170,16 +170,16 @@ class ImportFixer:
                 continue
 
             # Skip comments and blank lines at the top
-            if stripped.startswith('#') or not stripped:
+            if stripped.startswith("#") or not stripped:
                 continue
 
             # Found first non-comment, non-blank line
-            if not stripped.startswith('import') and not stripped.startswith('from'):
+            if not stripped.startswith("import") and not stripped.startswith("from"):
                 insert_pos = i
                 break
 
             # If we're already in imports, find the end
-            if stripped.startswith('import') or stripped.startswith('from'):
+            if stripped.startswith("import") or stripped.startswith("from"):
                 insert_pos = i + 1
 
         # Check if import already exists
@@ -208,8 +208,8 @@ class ImportFixer:
 
         if added:
             # Write the fixed content
-            new_content = '\n'.join(self.lines)
-            with open(self.file_path, 'w', encoding='utf-8') as f:
+            new_content = "\n".join(self.lines)
+            with open(self.file_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
             return True, added
 
@@ -237,11 +237,7 @@ def main():
     """Main function."""
     base_dir = Path("/home/claude-flow/projects/ActiveProjects/Music Tools/Music Tools Dev")
 
-    directories = [
-        "Music Tools",
-        "Tag Country Origin Editor",
-        "EDM Sharing Site Web Scrapper"
-    ]
+    directories = ["Music Tools", "Tag Country Origin Editor", "EDM Sharing Site Web Scrapper"]
 
     all_results = {}
 
@@ -252,7 +248,7 @@ def main():
 
         print(f"\n{'='*60}")
         print(f"Fixing: {directory}")
-        print('='*60)
+        print("=" * 60)
 
         results = fix_directory(dir_path)
 
@@ -267,7 +263,7 @@ def main():
 
     print(f"\n\n{'='*60}")
     print("SUMMARY")
-    print('='*60)
+    print("=" * 60)
     print(f"Total files fixed: {len(all_results)}")
 
     if all_results:

@@ -34,8 +34,7 @@ class ScraperRunner:
         # Initialize the appropriate scraper
         if settings.scraper_type == "specialized":
             scraper = PreferredGenresScraper(
-                base_url=settings.url,
-                preferred_genres=settings.genres
+                base_url=settings.url, preferred_genres=settings.genres
             )
         else:
             scraper = MusicBlogScraper(base_url=settings.url)
@@ -45,7 +44,7 @@ class ScraperRunner:
             self.results = scraper.scrape_website(
                 max_pages=settings.max_pages,
                 start_date=settings.start_date,
-                end_date=settings.end_date
+                end_date=settings.end_date,
             )
         except Exception as e:
             self.errors.append(str(e))
@@ -54,10 +53,10 @@ class ScraperRunner:
         duration = (end_time - start_time).total_seconds()
 
         return {
-            'results': self.results,
-            'count': len(self.results),
-            'duration': duration,
-            'errors': self.errors
+            "results": self.results,
+            "count": len(self.results),
+            "duration": duration,
+            "errors": self.errors,
         }
 
     async def run_async(self, settings: ScraperSettings) -> Dict[str, Any]:
@@ -74,14 +73,14 @@ class ScraperRunner:
 
         scraper = AsyncMusicBlogScraper(
             base_url=settings.url,
-            preferred_genres=settings.genres if settings.scraper_type == "specialized" else None
+            preferred_genres=settings.genres if settings.scraper_type == "specialized" else None,
         )
 
         try:
             self.results = await scraper.scrape_website(
                 max_pages=settings.max_pages,
                 start_date=settings.start_date,
-                end_date=settings.end_date
+                end_date=settings.end_date,
             )
         except Exception as e:
             self.errors.append(str(e))
@@ -90,10 +89,10 @@ class ScraperRunner:
         duration = (end_time - start_time).total_seconds()
 
         return {
-            'results': self.results,
-            'count': len(self.results),
-            'duration': duration,
-            'errors': self.errors
+            "results": self.results,
+            "count": len(self.results),
+            "duration": duration,
+            "errors": self.errors,
         }
 
     def save_results(self, settings: ScraperSettings, results: List[Dict]) -> str:
@@ -106,7 +105,7 @@ class ScraperRunner:
         saved_files = []
 
         # Save as text
-        with open(settings.output_filename, 'w', encoding='utf-8') as f:
+        with open(settings.output_filename, "w", encoding="utf-8") as f:
             f.write(f"Scrape Results for {settings.url}\n")
             f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"Settings: {settings.scraper_type}, {len(results)} items found\n")
@@ -119,7 +118,7 @@ class ScraperRunner:
                 f.write(f"Matching Genres: {', '.join(item.get('matching_genres', []))}\n")
                 f.write(f"Date: {item.get('post_date', 'N/A')}\n")
 
-                download_links = item.get('download_links', [])
+                download_links = item.get("download_links", [])
                 if download_links:
                     f.write("Download Links:\n")
                     for link in download_links:
@@ -134,20 +133,21 @@ class ScraperRunner:
         # Save as JSON if requested
         if settings.save_json:
             import json
-            json_filename = settings.output_filename.rsplit('.', 1)[0] + '.json'
-            with open(json_filename, 'w', encoding='utf-8') as f:
+
+            json_filename = settings.output_filename.rsplit(".", 1)[0] + ".json"
+            with open(json_filename, "w", encoding="utf-8") as f:
                 json.dump(results, f, indent=4, default=str)
             saved_files.append(json_filename)
 
         # Append aggregated links to the text file
-        total_links = sum(len(item.get('download_links', [])) for item in results)
+        total_links = sum(len(item.get("download_links", [])) for item in results)
         if total_links > 0:
             # Collect all unique links
             all_links = set()
-            quality_stats = {'flac': 0, 'mp3_320': 0, 'other': 0}
+            quality_stats = {"flac": 0, "mp3_320": 0, "other": 0}
 
             for item in results:
-                for link in item.get('download_links', []):
+                for link in item.get("download_links", []):
                     # Handle different link formats
                     link_url = str(link).strip()
                     if link_url:
@@ -155,18 +155,18 @@ class ScraperRunner:
 
                         # Track quality stats
                         link_lower = link_url.lower()
-                        if 'flac' in link_lower or '.flac' in link_lower:
-                            quality_stats['flac'] += 1
-                        elif '320' in link_lower:
-                            quality_stats['mp3_320'] += 1
+                        if "flac" in link_lower or ".flac" in link_lower:
+                            quality_stats["flac"] += 1
+                        elif "320" in link_lower:
+                            quality_stats["mp3_320"] += 1
                         else:
-                            quality_stats['other'] += 1
+                            quality_stats["other"] += 1
 
             # Sort links for consistent output
             unique_links = sorted(list(all_links))
             GROUP_SIZE = 20
 
-            with open(settings.output_filename, 'a', encoding='utf-8') as f:
+            with open(settings.output_filename, "a", encoding="utf-8") as f:
                 f.write("\n\n" + "=" * 80 + "\n")
                 f.write("ALL UNIQUE DOWNLOAD LINKS (EXTRACTED)\n")
                 f.write("=" * 80 + "\n\n")

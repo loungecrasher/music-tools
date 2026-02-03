@@ -2,6 +2,7 @@
 Candidate Manager logic.
 Handles scanning folders, adding to history, and processing matches.
 """
+
 import logging
 import os
 import shutil
@@ -35,7 +36,7 @@ class CandidateManager:
         Returns:
             Dictionary with stats: {'added': int, 'skipped': int, 'total': int}
         """
-        stats = {'added': 0, 'skipped': 0, 'total': 0}
+        stats = {"added": 0, "skipped": 0, "total": 0}
 
         if not os.path.exists(folder_path):
             logger.error(f"Folder not found: {folder_path}")
@@ -46,21 +47,21 @@ class CandidateManager:
         for root, _, files in os.walk(folder_path):
             for file in files:
                 # Skip hidden files
-                if file.startswith('.'):
+                if file.startswith("."):
                     continue
 
                 # Only process audio files (optional, but good practice)
-                if not file.lower().endswith(('.mp3', '.flac', '.wav', '.m4a', '.aiff', '.ogg')):
+                if not file.lower().endswith((".mp3", ".flac", ".wav", ".m4a", ".aiff", ".ogg")):
                     continue
 
-                stats['total'] += 1
+                stats["total"] += 1
                 full_path = os.path.join(root, file)
 
                 if self.db.add_file(file, full_path):
-                    stats['added'] += 1
+                    stats["added"] += 1
                     logger.debug(f"Added to history: {file}")
                 else:
-                    stats['skipped'] += 1
+                    stats["skipped"] += 1
                     logger.debug(f"Already in history: {file}")
 
         return stats
@@ -85,16 +86,14 @@ class CandidateManager:
 
         for root, _, files in os.walk(folder_path):
             for file in files:
-                if file.startswith('.'):
+                if file.startswith("."):
                     continue
 
                 added_at = self.db.check_file(file)
                 if added_at:
-                    matches.append({
-                        'file': file,
-                        'path': os.path.join(root, file),
-                        'added_at': added_at
-                    })
+                    matches.append(
+                        {"file": file, "path": os.path.join(root, file), "added_at": added_at}
+                    )
 
         return matches
 
@@ -120,16 +119,16 @@ class CandidateManager:
 
         action = Prompt.ask("Choose action", choices=["d", "i", "q"], default="i")
 
-        if action == 'q':
+        if action == "q":
             console.print("[yellow]Aborted.[/yellow]")
             return
 
-        delete_all = (action == 'd')
+        delete_all = action == "d"
 
         for match in matches:
-            file_name = match['file']
-            file_path = match['path']
-            added_at = match['added_at']
+            file_name = match["file"]
+            file_path = match["path"]
+            added_at = match["added_at"]
 
             should_delete = False
 
@@ -142,19 +141,17 @@ class CandidateManager:
                 console.print(f"  Previously listened on: {added_at}")
 
                 choice = Prompt.ask(
-                    f"Move '{file_name}' to Trash?",
-                    choices=["y", "n", "a", "q"],
-                    default="y"
+                    f"Move '{file_name}' to Trash?", choices=["y", "n", "a", "q"], default="y"
                 )
 
-                if choice == 'a':
+                if choice == "a":
                     delete_all = True
                     should_delete = True
                     console.print("[yellow]Deleting all remaining matches...[/yellow]")
-                elif choice == 'q':
+                elif choice == "q":
                     console.print("[yellow]Aborted.[/yellow]")
                     return
-                elif choice == 'y':
+                elif choice == "y":
                     should_delete = True
                 else:  # 'n'
                     should_delete = False

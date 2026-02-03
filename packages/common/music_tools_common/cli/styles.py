@@ -13,22 +13,22 @@ class Colors:
     """ANSI color codes for terminal output."""
 
     # Basic colors
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    DIM = '\033[2m'
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    DIM = "\033[2m"
 
     # Compound styles
-    SUCCESS = '\033[92m\033[1m'  # Bold Green
-    ERROR = '\033[91m\033[1m'    # Bold Red
-    WARNING = '\033[93m\033[1m'  # Bold Yellow
-    INFO = '\033[96m\033[1m'     # Bold Cyan
+    SUCCESS = "\033[92m\033[1m"  # Bold Green
+    ERROR = "\033[91m\033[1m"  # Bold Red
+    WARNING = "\033[93m\033[1m"  # Bold Yellow
+    INFO = "\033[96m\033[1m"  # Bold Cyan
 
     @classmethod
     def wrap(cls, text: str, color: str) -> str:

@@ -74,6 +74,7 @@ def make_track_metadata():
 
 # ==================== CSV Fixtures ====================
 
+
 @pytest.fixture
 def sample_csv(tmp_path) -> Path:
     """Write a CSV file with Artist,Title columns and 5 test rows.
@@ -93,6 +94,7 @@ def sample_csv(tmp_path) -> Path:
 
 
 # ==================== Track Index Fixtures ====================
+
 
 @pytest.fixture
 def populated_index(tmp_path):
@@ -137,6 +139,7 @@ def populated_index(tmp_path):
     # Implement find_matches() using the real fuzzy module
     def _find_matches(query, threshold=75):
         from music_tools_common.utils.fuzzy import find_best_match
+
         return find_best_match(query, tracks, threshold=threshold)
 
     index.find_matches = _find_matches
@@ -145,6 +148,7 @@ def populated_index(tmp_path):
 
 
 # ==================== Mock Audio Directory ====================
+
 
 @pytest.fixture
 def mock_audio_dir(tmp_path) -> Path:

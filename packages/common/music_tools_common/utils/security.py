@@ -15,10 +15,7 @@ from typing import Optional, Tuple
 logger = logging.getLogger(__name__)
 
 
-def validate_file_path(
-    file_path: str,
-    base_directory: Optional[str] = None
-) -> Tuple[bool, str]:
+def validate_file_path(file_path: str, base_directory: Optional[str] = None) -> Tuple[bool, str]:
     """
     Validate a file path to prevent directory traversal attacks.
 
@@ -41,11 +38,11 @@ def validate_file_path(
         real_path = os.path.realpath(absolute_path)
 
         # Check for null bytes (common injection technique)
-        if '\x00' in file_path:
+        if "\x00" in file_path:
             return False, "Invalid path: contains null bytes"
 
         # Check for directory traversal patterns
-        if '..' in file_path or file_path.startswith('~'):
+        if ".." in file_path or file_path.startswith("~"):
             # Resolve the path safely
             try:
                 resolved_path = Path(file_path).resolve()
@@ -71,10 +68,7 @@ def validate_file_path(
         return False, f"Path validation failed: {e}"
 
 
-def sanitize_artist_name(
-    artist_name: str,
-    max_length: int = 100
-) -> str:
+def sanitize_artist_name(artist_name: str, max_length: int = 100) -> str:
     """
     Sanitize artist name to prevent injection attacks.
 
@@ -91,10 +85,10 @@ def sanitize_artist_name(
     """
     # Remove control characters and limit special characters
     # Allow: alphanumeric, spaces, hyphens, periods, parentheses, commas, apostrophes, ampersands
-    sanitized = re.sub(r'[^\w\s\-\.\(\)\,\'\&]', '', artist_name)
+    sanitized = re.sub(r"[^\w\s\-\.\(\)\,\'\&]", "", artist_name)
 
     # Remove multiple spaces
-    sanitized = ' '.join(sanitized.split())
+    sanitized = " ".join(sanitized.split())
 
     # Limit length to prevent buffer overflow
     sanitized = sanitized[:max_length]
@@ -118,23 +112,19 @@ def sanitize_command_argument(argument: str) -> str:
         'file.txt rm -rf '
     """
     # Remove shell metacharacters
-    dangerous_chars = ['|', '&', ';', '$', '`', '\\', '"', "'", '\n', '\r', '\t']
+    dangerous_chars = ["|", "&", ";", "$", "`", "\\", '"', "'", "\n", "\r", "\t"]
     sanitized = argument
 
     for char in dangerous_chars:
-        sanitized = sanitized.replace(char, '')
+        sanitized = sanitized.replace(char, "")
 
     # Escape remaining special characters
-    sanitized = re.sub(r'[<>(){}[\]*?!]', '', sanitized)
+    sanitized = re.sub(r"[<>(){}[\]*?!]", "", sanitized)
 
     return sanitized
 
 
-def mask_sensitive_value(
-    value: str,
-    visible_chars: int = 4,
-    mask_char: str = '*'
-) -> str:
+def mask_sensitive_value(value: str, visible_chars: int = 4, mask_char: str = "*") -> str:
     """
     Mask a sensitive value for logging/display.
 
@@ -155,7 +145,7 @@ def mask_sensitive_value(
         'my***'
     """
     if not value:
-        return ''
+        return ""
 
     if len(value) <= visible_chars:
         return mask_char * len(value)
@@ -180,39 +170,36 @@ def sanitize_log_message(message: str) -> str:
         'User logged in\\nADMIN: DELETE DATABASE'
     """
     # Remove line breaks to prevent log injection
-    sanitized = message.replace('\n', '\\n').replace('\r', '\\r')
+    sanitized = message.replace("\n", "\\n").replace("\r", "\\r")
 
     # Mask potential sensitive data patterns
     # Mask API keys (common patterns)
     sanitized = re.sub(
         r'(api[_\-]?key["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
-        r'\1***REDACTED***',
+        r"\1***REDACTED***",
         sanitized,
-        flags=re.IGNORECASE
+        flags=re.IGNORECASE,
     )
 
     # Mask tokens
     sanitized = re.sub(
         r'(token["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
-        r'\1***REDACTED***',
+        r"\1***REDACTED***",
         sanitized,
-        flags=re.IGNORECASE
+        flags=re.IGNORECASE,
     )
 
     # Mask passwords
     sanitized = re.sub(
         r'(password["\']?\s*[:=]\s*["\']?)([^\s"\']+)',
-        r'\1***REDACTED***',
+        r"\1***REDACTED***",
         sanitized,
-        flags=re.IGNORECASE
+        flags=re.IGNORECASE,
     )
 
     # Mask Bearer tokens
     sanitized = re.sub(
-        r'(Bearer\s+)([a-zA-Z0-9\-_\.]+)',
-        r'\1***REDACTED***',
-        sanitized,
-        flags=re.IGNORECASE
+        r"(Bearer\s+)([a-zA-Z0-9\-_\.]+)", r"\1***REDACTED***", sanitized, flags=re.IGNORECASE
     )
 
     return sanitized
@@ -253,10 +240,7 @@ def secure_permissions(file_path: Path | str, mode: int = 0o644) -> Tuple[bool, 
         return False, error_msg
 
 
-def validate_batch_size(
-    size: int,
-    max_size: int = 1000
-) -> Tuple[bool, int]:
+def validate_batch_size(size: int, max_size: int = 1000) -> Tuple[bool, int]:
     """
     Validate batch size to prevent memory exhaustion.
 
@@ -285,10 +269,7 @@ def validate_batch_size(
     return True, size
 
 
-def validate_timeout(
-    timeout: int | float,
-    max_timeout: int = 3600
-) -> Tuple[bool, int]:
+def validate_timeout(timeout: int | float, max_timeout: int = 3600) -> Tuple[bool, int]:
     """
     Validate timeout value to prevent DoS.
 
@@ -337,11 +318,11 @@ def is_safe_filename(filename: str) -> bool:
         return False
 
     # Check for path traversal
-    if '..' in filename or '/' in filename or '\\' in filename:
+    if ".." in filename or "/" in filename or "\\" in filename:
         return False
 
     # Check for null bytes
-    if '\x00' in filename:
+    if "\x00" in filename:
         return False
 
     # Check for control characters
@@ -350,9 +331,28 @@ def is_safe_filename(filename: str) -> bool:
 
     # Check for reserved Windows filenames
     reserved_names = {
-        'CON', 'PRN', 'AUX', 'NUL',
-        'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-        'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
+        "COM1",
+        "COM2",
+        "COM3",
+        "COM4",
+        "COM5",
+        "COM6",
+        "COM7",
+        "COM8",
+        "COM9",
+        "LPT1",
+        "LPT2",
+        "LPT3",
+        "LPT4",
+        "LPT5",
+        "LPT6",
+        "LPT7",
+        "LPT8",
+        "LPT9",
     }
 
     name_without_ext = os.path.splitext(filename)[0].upper()
@@ -377,18 +377,18 @@ def escape_html(text: str) -> str:
         '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
     """
     if not text:
-        return ''
+        return ""
 
     html_escape_table = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        '/': '&#x2F;',
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#x27;",
+        "/": "&#x2F;",
     }
 
-    return ''.join(html_escape_table.get(c, c) for c in text)
+    return "".join(html_escape_table.get(c, c) for c in text)
 
 
 def validate_port(port: int | str) -> Tuple[bool, Optional[int], str]:
@@ -439,13 +439,13 @@ def check_path_traversal(path: str) -> bool:
     """
     # Check for common traversal patterns
     traversal_patterns = [
-        '..',
-        '%2e%2e',
-        '%252e%252e',
-        '..%2f',
-        '..%5c',
-        '%2e%2e/',
-        '%2e%2e\\',
+        "..",
+        "%2e%2e",
+        "%252e%252e",
+        "..%2f",
+        "..%5c",
+        "%2e%2e/",
+        "%2e%2e\\",
     ]
 
     path_lower = path.lower()
@@ -489,7 +489,7 @@ class SecureFileHandler:
             return False, None, safe_path  # safe_path contains error message
 
         try:
-            with open(safe_path, 'r', encoding='utf-8') as f:
+            with open(safe_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return True, content, ""
         except Exception as e:
@@ -520,7 +520,7 @@ class SecureFileHandler:
                 os.makedirs(parent_dir, mode=0o755)
 
             # Write with restricted permissions
-            with open(safe_path, 'w', encoding='utf-8') as f:
+            with open(safe_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             # Set appropriate file permissions (readable by owner/group, not others)

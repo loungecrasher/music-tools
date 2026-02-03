@@ -27,21 +27,27 @@ def main():
 
     console = Console()
 
-    console.print(Panel.fit(
-        "[bold cyan]Music Tools Configuration Setup[/bold cyan]\n"
-        "Interactive configuration wizard example",
-        title="Setup Wizard"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Music Tools Configuration Setup[/bold cyan]\n"
+            "Interactive configuration wizard example",
+            title="Setup Wizard",
+        )
+    )
 
     # Initialize the configuration manager
     manager = ConfigManager(app_name="music_tools_example")
 
     console.print("\n[bold]Configuration directory:[/bold]", manager.config_dir)
-    console.print("\n[yellow]Note: Sensitive data (API keys, secrets) should be stored in .env file[/yellow]")
-    console.print("[yellow]Create a .env file in the config directory with your credentials[/yellow]\n")
+    console.print(
+        "\n[yellow]Note: Sensitive data (API keys, secrets) should be stored in .env file[/yellow]"
+    )
+    console.print(
+        "[yellow]Create a .env file in the config directory with your credentials[/yellow]\n"
+    )
 
     # Run interactive setup for each service
-    services = ['spotify', 'deezer', 'anthropic']
+    services = ["spotify", "deezer", "anthropic"]
 
     for service in services:
         console.print(f"\n[bold blue]Setting up {service}...[/bold blue]")
@@ -61,5 +67,5 @@ def main():
     console.print("=" * 60 + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

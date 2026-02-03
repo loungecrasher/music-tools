@@ -2,6 +2,7 @@
 Database module for Music Tools.
 Provides a SQLite database interface for storing and retrieving data.
 """
+
 import json
 import logging
 import os
@@ -11,10 +12,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger('music_tools.database')
+logger = logging.getLogger("music_tools.database")
 
 
 class Database:
@@ -28,9 +28,9 @@ class Database:
         """
         if db_path is None:
             # Default to data directory in the project root
-            data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
             os.makedirs(data_dir, exist_ok=True)
-            self.db_path = os.path.join(data_dir, 'music_tools.db')
+            self.db_path = os.path.join(data_dir, "music_tools.db")
         else:
             self.db_path = db_path
 
@@ -80,7 +80,7 @@ class Database:
     def _create_tables(self) -> None:
         """Create database tables if they don't exist."""
         # Playlists table
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS playlists (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -92,10 +92,10 @@ class Database:
             added_on TEXT NOT NULL,
             last_updated TEXT NOT NULL
         )
-        ''')
+        """)
 
         # Tracks table
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS tracks (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -108,10 +108,10 @@ class Database:
             added_on TEXT NOT NULL,
             last_updated TEXT NOT NULL
         )
-        ''')
+        """)
 
         # Playlist tracks table (many-to-many relationship)
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS playlist_tracks (
             playlist_id TEXT,
             track_id TEXT,
@@ -121,71 +121,71 @@ class Database:
             FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
             FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
         )
-        ''')
+        """)
 
         # Settings table
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
             key TEXT PRIMARY KEY,
             value TEXT,
             updated_at TEXT NOT NULL
         )
-        ''')
+        """)
 
         # Create high-impact composite indexes for performance optimization
 
         # Playlist indexes - optimize filtered queries by service and type
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_playlists_service_algorithmic
         ON playlists(service, is_algorithmic)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_playlists_service_name
         ON playlists(service, name)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_playlists_last_updated
         ON playlists(last_updated DESC)
-        ''')
+        """)
 
         # Track indexes - optimize searches by artist, service, and release date
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_tracks_artist_name
         ON tracks(artist, name)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_tracks_service_release
         ON tracks(service, release_date)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_tracks_isrc
         ON tracks(isrc)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_tracks_artist
         ON tracks(artist)
-        ''')
+        """)
 
         # Playlist tracks indexes - optimize ordered retrieval and lookups
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_playlist_tracks_position
         ON playlist_tracks(playlist_id, position)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_playlist_tracks_track
         ON playlist_tracks(track_id)
-        ''')
+        """)
 
-        self.cursor.execute('''
+        self.cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_playlist_tracks_added
         ON playlist_tracks(added_at DESC)
-        ''')
+        """)
 
         # Commit changes
         self.conn.commit()
@@ -220,21 +220,24 @@ class Database:
         try:
             now = datetime.now().isoformat()
 
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             INSERT OR REPLACE INTO playlists (
                 id, name, url, owner, tracks_count, service, is_algorithmic, added_on, last_updated
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                playlist['id'],
-                playlist['name'],
-                playlist.get('url', f"https://open.spotify.com/playlist/{playlist['id']}"),
-                playlist.get('owner', 'unknown'),
-                playlist.get('tracks', 0),
-                service,
-                1 if playlist.get('algorithmic', False) else 0,
-                playlist.get('added_on', now),
-                now
-            ))
+            """,
+                (
+                    playlist["id"],
+                    playlist["name"],
+                    playlist.get("url", f"https://open.spotify.com/playlist/{playlist['id']}"),
+                    playlist.get("owner", "unknown"),
+                    playlist.get("tracks", 0),
+                    service,
+                    1 if playlist.get("algorithmic", False) else 0,
+                    playlist.get("added_on", now),
+                    now,
+                ),
+            )
 
             self.conn.commit()
             return True
@@ -253,9 +256,12 @@ class Database:
             Playlist data or None if not found
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             SELECT * FROM playlists WHERE id = ?
-            ''', (playlist_id,))
+            """,
+                (playlist_id,),
+            )
 
             row = self.cursor.fetchone()
             if row:
@@ -265,7 +271,9 @@ class Database:
             logger.error(f"Error getting playlist: {str(e)}")
             return None
 
-    def get_playlists(self, service: str = None, algorithmic_only: bool = False) -> List[Dict[str, Any]]:
+    def get_playlists(
+        self, service: str = None, algorithmic_only: bool = False
+    ) -> List[Dict[str, Any]]:
         """Get playlists from the database.
 
         Args:
@@ -309,9 +317,12 @@ class Database:
             True if successful, False otherwise
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             DELETE FROM playlists WHERE id = ?
-            ''', (playlist_id,))
+            """,
+                (playlist_id,),
+            )
 
             self.conn.commit()
             return True
@@ -337,14 +348,14 @@ class Database:
                 return False
 
             # Add last_updated field
-            updates['last_updated'] = datetime.now().isoformat()
+            updates["last_updated"] = datetime.now().isoformat()
 
             # Build update query
             fields = []
             values = []
 
             for key, value in updates.items():
-                if key in ['id', 'added_on']:  # Don't update these fields
+                if key in ["id", "added_on"]:  # Don't update these fields
                     continue
                 fields.append(f"{key} = ?")
                 values.append(value)
@@ -381,22 +392,25 @@ class Database:
         try:
             now = datetime.now().isoformat()
 
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             INSERT OR REPLACE INTO tracks (
                 id, name, artist, album, duration, release_date, isrc, service, added_on, last_updated
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                track['id'],
-                track['name'],
-                track.get('artist', 'Unknown Artist'),
-                track.get('album', ''),
-                track.get('duration', 0),
-                track.get('release_date', ''),
-                track.get('isrc', ''),
-                service,
-                track.get('added_on', now),
-                now
-            ))
+            """,
+                (
+                    track["id"],
+                    track["name"],
+                    track.get("artist", "Unknown Artist"),
+                    track.get("album", ""),
+                    track.get("duration", 0),
+                    track.get("release_date", ""),
+                    track.get("isrc", ""),
+                    service,
+                    track.get("added_on", now),
+                    now,
+                ),
+            )
 
             self.conn.commit()
             return True
@@ -415,9 +429,12 @@ class Database:
             Track data or None if not found
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             SELECT * FROM tracks WHERE id = ?
-            ''', (track_id,))
+            """,
+                (track_id,),
+            )
 
             row = self.cursor.fetchone()
             if row:
@@ -464,7 +481,9 @@ class Database:
 
     # Playlist track methods
 
-    def add_track_to_playlist(self, playlist_id: str, track_id: str, added_at: str = None, position: int = None) -> bool:
+    def add_track_to_playlist(
+        self, playlist_id: str, track_id: str, added_at: str = None, position: int = None
+    ) -> bool:
         """Add a track to a playlist.
 
         Args:
@@ -480,25 +499,26 @@ class Database:
             if added_at is None:
                 added_at = datetime.now().isoformat()
 
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             INSERT OR REPLACE INTO playlist_tracks (
                 playlist_id, track_id, added_at, position
             ) VALUES (?, ?, ?, ?)
-            ''', (
-                playlist_id,
-                track_id,
-                added_at,
-                position
-            ))
+            """,
+                (playlist_id, track_id, added_at, position),
+            )
 
             # Update tracks_count in playlists table
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             UPDATE playlists
             SET tracks_count = (
                 SELECT COUNT(*) FROM playlist_tracks WHERE playlist_id = ?
             )
             WHERE id = ?
-            ''', (playlist_id, playlist_id))
+            """,
+                (playlist_id, playlist_id),
+            )
 
             self.conn.commit()
             return True
@@ -517,13 +537,16 @@ class Database:
             List of track data with added_at and position
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             SELECT t.*, pt.added_at, pt.position
             FROM tracks t
             JOIN playlist_tracks pt ON t.id = pt.track_id
             WHERE pt.playlist_id = ?
             ORDER BY pt.position
-            ''', (playlist_id,))
+            """,
+                (playlist_id,),
+            )
 
             return [dict(row) for row in self.cursor.fetchall()]
         except Exception as e:
@@ -541,19 +564,25 @@ class Database:
             True if successful, False otherwise
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             DELETE FROM playlist_tracks
             WHERE playlist_id = ? AND track_id = ?
-            ''', (playlist_id, track_id))
+            """,
+                (playlist_id, track_id),
+            )
 
             # Update tracks_count in playlists table
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             UPDATE playlists
             SET tracks_count = (
                 SELECT COUNT(*) FROM playlist_tracks WHERE playlist_id = ?
             )
             WHERE id = ?
-            ''', (playlist_id, playlist_id))
+            """,
+                (playlist_id, playlist_id),
+            )
 
             self.conn.commit()
             return True
@@ -572,17 +601,23 @@ class Database:
             True if successful, False otherwise
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             DELETE FROM playlist_tracks
             WHERE playlist_id = ?
-            ''', (playlist_id,))
+            """,
+                (playlist_id,),
+            )
 
             # Update tracks_count in playlists table
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             UPDATE playlists
             SET tracks_count = 0
             WHERE id = ?
-            ''', (playlist_id,))
+            """,
+                (playlist_id,),
+            )
 
             self.conn.commit()
             return True
@@ -610,15 +645,14 @@ class Database:
             if not isinstance(value, str):
                 value = json.dumps(value)
 
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             INSERT OR REPLACE INTO settings (
                 key, value, updated_at
             ) VALUES (?, ?, ?)
-            ''', (
-                key,
-                value,
-                now
-            ))
+            """,
+                (key, value, now),
+            )
 
             self.conn.commit()
             return True
@@ -638,13 +672,16 @@ class Database:
             Setting value (converted from JSON if possible)
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             SELECT value FROM settings WHERE key = ?
-            ''', (key,))
+            """,
+                (key,),
+            )
 
             row = self.cursor.fetchone()
             if row:
-                value = row['value']
+                value = row["value"]
                 try:
                     # Try to parse as JSON
                     return json.loads(value)
@@ -667,9 +704,12 @@ class Database:
             True if successful, False otherwise
         """
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
             DELETE FROM settings WHERE key = ?
-            ''', (key,))
+            """,
+                (key,),
+            )
 
             self.conn.commit()
             return True
@@ -695,7 +735,7 @@ class Database:
                 logger.error(f"JSON file not found: {json_file}")
                 return (0, 0)
 
-            with open(json_file, 'r') as f:
+            with open(json_file, "r") as f:
                 data = json.load(f)
 
             success_count = 0
@@ -706,14 +746,14 @@ class Database:
 
             if isinstance(data, dict):
                 # Format: {'algorithmic': [...], 'user': [...]}
-                if 'algorithmic' in data:
-                    for playlist in data['algorithmic']:
-                        playlist['algorithmic'] = True
+                if "algorithmic" in data:
+                    for playlist in data["algorithmic"]:
+                        playlist["algorithmic"] = True
                         playlists.append(playlist)
 
-                if 'user' in data:
-                    for playlist in data['user']:
-                        playlist['algorithmic'] = False
+                if "user" in data:
+                    for playlist in data["user"]:
+                        playlist["algorithmic"] = False
                         playlists.append(playlist)
 
             elif isinstance(data, list):
@@ -735,7 +775,7 @@ class Database:
 
 # Lazy-initialized global instance (thread-safe singleton pattern)
 _db_instance: Optional[Database] = None
-_db_lock = __import__('threading').Lock()
+_db_lock = __import__("threading").Lock()
 
 
 def get_database(db_path: str = None) -> Database:

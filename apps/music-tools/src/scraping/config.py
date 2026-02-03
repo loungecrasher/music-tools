@@ -25,15 +25,24 @@ MAX_CONCURRENT_REQUESTS_PER_HOST = 3
 CHUNK_SIZE = 8192
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 USER_AGENTS = [
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 ]
 VALID_HOSTS = [
-    'sharing-db.club', 'edmblog.com', 'nfile.cc', 'novafile.org',
-    'mediafire.com', 'mega.nz', 'dropbox.com', 'google.com',
-    'drive.google.com', 'zippyshare.com', 'rapidshare.com',
-    'depositfiles.com', 'soundcloud.com'
+    "sharing-db.club",
+    "edmblog.com",
+    "nfile.cc",
+    "novafile.org",
+    "mediafire.com",
+    "mega.nz",
+    "dropbox.com",
+    "google.com",
+    "drive.google.com",
+    "zippyshare.com",
+    "rapidshare.com",
+    "depositfiles.com",
+    "soundcloud.com",
 ]
 
 # Pagination & Limits
@@ -50,147 +59,221 @@ GROUP_SIZE = 20
 
 # Genres
 DEFAULT_GENRES = [
-    'house', 'progressive house', 'melodic', 'indie dance', 'bass house',
-    'organic house', 'drum and bass', 'uk garage', 'electro pop', 'nu disco',
-    'funky', 'deep house', 'tech house', 'dance', 'afro house', 'brazilian',
-    'latin', 'electronica', 'ambient'
+    "house",
+    "progressive house",
+    "melodic",
+    "indie dance",
+    "bass house",
+    "organic house",
+    "drum and bass",
+    "uk garage",
+    "electro pop",
+    "nu disco",
+    "funky",
+    "deep house",
+    "tech house",
+    "dance",
+    "afro house",
+    "brazilian",
+    "latin",
+    "electronica",
+    "ambient",
 ]
-ALL_EDM_GENRES = DEFAULT_GENRES + ['techno', 'trance', 'minimal', 'dubstep', 'trap', 'hardstyle']
+ALL_EDM_GENRES = DEFAULT_GENRES + ["techno", "trance", "minimal", "dubstep", "trap", "hardstyle"]
 
 # CSS selectors for finding blog posts
 BLOG_POST_SELECTORS = [
     'article a[href*="/"]',
-    '.post-title a',
-    '.entry-title a',
-    'h2 a',
-    'h3 a',
-    '.blog-post a',
-    '.post a',
+    ".post-title a",
+    ".entry-title a",
+    "h2 a",
+    "h3 a",
+    ".blog-post a",
+    ".post a",
     'a[href*="/20"]',  # Links with year
     'a[href*="/post"]',
     'a[href*="/article"]',
     'a[href*="/blog"]',
-    '.title a',
-    '.headline a',
-    'div.post h2 a',  # Specific for sharing-db.club
+    ".title a",
+    ".headline a",
+    "div.post h2 a",  # Specific for sharing-db.club
 ]
 
 # CSS selectors for finding genre information
 GENRE_SELECTORS = [
-    '.genre', '.tags', '.categories', '.post-tags',
-    '.entry-tags', '.post-categories', '.meta-categories',
-    '[class*="genre"]', '[class*="tag"]', '[class*="category"]',
-    '.post-meta', '.entry-meta', '.meta',
-    '.cat-links', '.tags-links', '.postmeta', '.metadata'
+    ".genre",
+    ".tags",
+    ".categories",
+    ".post-tags",
+    ".entry-tags",
+    ".post-categories",
+    ".meta-categories",
+    '[class*="genre"]',
+    '[class*="tag"]',
+    '[class*="category"]',
+    ".post-meta",
+    ".entry-meta",
+    ".meta",
+    ".cat-links",
+    ".tags-links",
+    ".postmeta",
+    ".metadata",
 ]
 
 # CSS selectors for finding post titles
 TITLE_SELECTORS = [
-    '.post-title', '.entry-title', '.title',
-    '[class*="title"]', '.headline',
-    'h2.title', 'h2.entry-title', 'h3.post-title',
-    'div.post h2',  # Specific for sharing-db.club
-    'h2', 'h1', 'title'
+    ".post-title",
+    ".entry-title",
+    ".title",
+    '[class*="title"]',
+    ".headline",
+    "h2.title",
+    "h2.entry-title",
+    "h3.post-title",
+    "div.post h2",  # Specific for sharing-db.club
+    "h2",
+    "h1",
+    "title",
 ]
 
 # Date extraction settings
 DATE_SELECTORS = [
-    '.post-date', '.entry-date', '.date', '.published',
-    '.post-meta .date', '.entry-meta .date', '.meta .date',
-    '[class*="date"]', '[class*="time"]', 'time',
-    '.post-info .date', '.article-date', '.blog-date'
+    ".post-date",
+    ".entry-date",
+    ".date",
+    ".published",
+    ".post-meta .date",
+    ".entry-meta .date",
+    ".meta .date",
+    '[class*="date"]',
+    '[class*="time"]',
+    "time",
+    ".post-info .date",
+    ".article-date",
+    ".blog-date",
 ]
 
 META_DATE_SELECTORS = [
     'meta[property="article:published_time"]',
     'meta[name="date"]',
     'meta[name="publish_date"]',
-    'meta[property="og:updated_time"]'
+    'meta[property="og:updated_time"]',
 ]
 
 # Date patterns to search for in page text
 DATE_PATTERNS = [
-    re.compile(r'(\d{4}-\d{2}-\d{2})'),  # YYYY-MM-DD
-    re.compile(r'(\d{2}/\d{2}/\d{4})'),  # MM/DD/YYYY
-    re.compile(r'(\d{2}-\d{2}-\d{4})'),  # MM-DD-YYYY
-    re.compile(r'(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4})', re.IGNORECASE),  # DD Month YYYY
-    re.compile(r'((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4})', re.IGNORECASE),  # Month DD, YYYY
+    re.compile(r"(\d{4}-\d{2}-\d{2})"),  # YYYY-MM-DD
+    re.compile(r"(\d{2}/\d{2}/\d{4})"),  # MM/DD/YYYY
+    re.compile(r"(\d{2}-\d{2}-\d{4})"),  # MM-DD-YYYY
+    re.compile(
+        r"(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4})",
+        re.IGNORECASE,
+    ),  # DD Month YYYY
+    re.compile(
+        r"((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4})",
+        re.IGNORECASE,
+    ),  # Month DD, YYYY
 ]
 
 # URL date patterns
 URL_DATE_PATTERNS = [
-    re.compile(r'/(\d{4})/(\d{2})/(\d{2})/'),  # /2024/01/15/
-    re.compile(r'/(\d{4})-(\d{2})-(\d{2})/'),  # /2024-01-15/
-    re.compile(r'/(\d{4})_(\d{2})_(\d{2})/'),  # /2024_01_15/
-    re.compile(r'(\d{4})(\d{2})(\d{2})'),      # 20240115
+    re.compile(r"/(\d{4})/(\d{2})/(\d{2})/"),  # /2024/01/15/
+    re.compile(r"/(\d{4})-(\d{2})-(\d{2})/"),  # /2024-01-15/
+    re.compile(r"/(\d{4})_(\d{2})_(\d{2})/"),  # /2024_01_15/
+    re.compile(r"(\d{4})(\d{2})(\d{2})"),  # 20240115
 ]
 
 # Date formats to try when parsing
 DATE_FORMATS = [
-    '%Y-%m-%d',           # 2024-01-15
-    '%Y/%m/%d',           # 2024/01/15
-    '%m/%d/%Y',           # 01/15/2024
-    '%d/%m/%Y',           # 15/01/2024
-    '%m-%d-%Y',           # 01-15-2024
-    '%d-%m-%Y',           # 15-01-2024
-    '%B %d, %Y',          # January 15, 2024
-    '%B %d %Y',           # January 15 2024
-    '%b %d, %Y',          # Jan 15, 2024
-    '%b %d %Y',           # Jan 15 2024
-    '%d %B %Y',           # 15 January 2024
-    '%d %b %Y',           # 15 Jan 2024
-    '%Y-%m-%dT%H:%M:%S',  # 2024-01-15T14:30:25
-    '%Y-%m-%dT%H:%M:%SZ',  # 2024-01-15T14:30:25Z
+    "%Y-%m-%d",  # 2024-01-15
+    "%Y/%m/%d",  # 2024/01/15
+    "%m/%d/%Y",  # 01/15/2024
+    "%d/%m/%Y",  # 15/01/2024
+    "%m-%d-%Y",  # 01-15-2024
+    "%d-%m-%Y",  # 15-01-2024
+    "%B %d, %Y",  # January 15, 2024
+    "%B %d %Y",  # January 15 2024
+    "%b %d, %Y",  # Jan 15, 2024
+    "%b %d %Y",  # Jan 15 2024
+    "%d %B %Y",  # 15 January 2024
+    "%d %b %Y",  # 15 Jan 2024
+    "%Y-%m-%dT%H:%M:%S",  # 2024-01-15T14:30:25
+    "%Y-%m-%dT%H:%M:%SZ",  # 2024-01-15T14:30:25Z
 ]
 
 # URL Patterns
 SKIP_URL_PATTERNS = [
-    '/tag/', '/category/', '/author/', '/page/', '/feed/', '/comments/',
-    '/about', '/contact', '/privacy', '/terms', '/rss', '/sitemap',
-    '/search', '/login', '/register', '/admin', '/wp-admin',
-    '/reply', '/trackback', '/pingback',
+    "/tag/",
+    "/category/",
+    "/author/",
+    "/page/",
+    "/feed/",
+    "/comments/",
+    "/about",
+    "/contact",
+    "/privacy",
+    "/terms",
+    "/rss",
+    "/sitemap",
+    "/search",
+    "/login",
+    "/register",
+    "/admin",
+    "/wp-admin",
+    "/reply",
+    "/trackback",
+    "/pingback",
 ]
 
 POST_URL_INDICATORS = [
-    '/20', '/post', '/article', '/blog', '/entry',
-    '/track/', '/release/', '/album/', '/ep/', '/remix/', 'sharing-db.club/'
+    "/20",
+    "/post",
+    "/article",
+    "/blog",
+    "/entry",
+    "/track/",
+    "/release/",
+    "/album/",
+    "/ep/",
+    "/remix/",
+    "sharing-db.club/",
 ]
 
 PAGINATION_PATTERNS = [
-    re.compile(r'/page/(\d+)'),
-    re.compile(r'\?paged=(\d+)'),
-    re.compile(r'/\?page=(\d+)')
+    re.compile(r"/page/(\d+)"),
+    re.compile(r"\?paged=(\d+)"),
+    re.compile(r"/\?page=(\d+)"),
 ]
 
 # Download Patterns
 DOWNLOAD_PATTERNS = [
-    re.compile(r'zippyshare\.com', re.I),
-    re.compile(r'krakenfiles\.com', re.I),
-    re.compile(r'we\.tl', re.I),
-    re.compile(r'wetransfer\.com', re.I),
-    re.compile(r'drive\.google\.com', re.I),
-    re.compile(r'mega\.nz', re.I),
-    re.compile(r'mediafire\.com', re.I),
-    re.compile(r'sendspace\.com', re.I),
-    re.compile(r'turbobit\.net', re.I),
-    re.compile(r'rapidgator\.net', re.I),
-    re.compile(r'uploaded\.net', re.I),
-    re.compile(r'hybeddit\.com', re.I),
-    re.compile(r'hypeddit\.com', re.I),
-    re.compile(r'nfile\.cc', re.I),
-    re.compile(r'novafile\.org', re.I),
-    re.compile(r'dropbox\.com', re.I),
-    re.compile(r'google\.com', re.I),
-    re.compile(r'rapidshare\.com', re.I),
-    re.compile(r'depositfiles\.com', re.I),
-    re.compile(r'soundcloud\.com', re.I)
+    re.compile(r"zippyshare\.com", re.I),
+    re.compile(r"krakenfiles\.com", re.I),
+    re.compile(r"we\.tl", re.I),
+    re.compile(r"wetransfer\.com", re.I),
+    re.compile(r"drive\.google\.com", re.I),
+    re.compile(r"mega\.nz", re.I),
+    re.compile(r"mediafire\.com", re.I),
+    re.compile(r"sendspace\.com", re.I),
+    re.compile(r"turbobit\.net", re.I),
+    re.compile(r"rapidgator\.net", re.I),
+    re.compile(r"uploaded\.net", re.I),
+    re.compile(r"hybeddit\.com", re.I),
+    re.compile(r"hypeddit\.com", re.I),
+    re.compile(r"nfile\.cc", re.I),
+    re.compile(r"novafile\.org", re.I),
+    re.compile(r"dropbox\.com", re.I),
+    re.compile(r"google\.com", re.I),
+    re.compile(r"rapidshare\.com", re.I),
+    re.compile(r"depositfiles\.com", re.I),
+    re.compile(r"soundcloud\.com", re.I),
 ]
 
 RELEASE_IDENTIFIER_PATTERNS = [
-    re.compile(r'([A-Z0-9]+-\d+)'),  # Catalog numbers
-    re.compile(r'\[([A-Z0-9]+)\]'),   # Bracketed IDs
-    re.compile(r'/(\d+)_'),  # Number followed by underscore
-    re.compile(r'/([a-zA-Z0-9-]+)_[a-zA-Z0-9-]+$'),  # Alphanumeric before last underscore
+    re.compile(r"([A-Z0-9]+-\d+)"),  # Catalog numbers
+    re.compile(r"\[([A-Z0-9]+)\]"),  # Bracketed IDs
+    re.compile(r"/(\d+)_"),  # Number followed by underscore
+    re.compile(r"/([a-zA-Z0-9-]+)_[a-zA-Z0-9-]+$"),  # Alphanumeric before last underscore
 ]
 
 # ==========================================
@@ -201,6 +284,7 @@ RELEASE_IDENTIFIER_PATTERNS = [
 @dataclass
 class ScraperSettings:
     """Data class to hold scraper settings."""
+
     url: str = ""
     scraper_type: str = "standard"  # 'standard' or 'specialized'
     genres: List[str] = field(default_factory=list)
@@ -226,13 +310,13 @@ class ScraperConfig:
         """Get common date range presets."""
         today = datetime.now().date()
         return {
-            'Last 7 days': today - timedelta(days=7),
-            'Last 30 days': today - timedelta(days=30),
-            'Last 3 months': today - timedelta(days=90),
-            'Last 6 months': today - timedelta(days=180),
-            'This year': date(today.year, 1, 1),
-            'Last year': date(today.year - 1, 1, 1),
-            'Custom range': None
+            "Last 7 days": today - timedelta(days=7),
+            "Last 30 days": today - timedelta(days=30),
+            "Last 3 months": today - timedelta(days=90),
+            "Last 6 months": today - timedelta(days=180),
+            "This year": date(today.year, 1, 1),
+            "Last year": date(today.year - 1, 1, 1),
+            "Custom range": None,
         }
 
     @staticmethod
@@ -241,10 +325,12 @@ class ScraperConfig:
         if not url:
             return False
         # Basic validation, could use regex or urllib
-        return url.startswith('http://') or url.startswith('https://')
+        return url.startswith("http://") or url.startswith("https://")
 
     @staticmethod
-    def validate_date_range(start_date: Optional[date], end_date: Optional[date]) -> Tuple[bool, str]:
+    def validate_date_range(
+        start_date: Optional[date], end_date: Optional[date]
+    ) -> Tuple[bool, str]:
         """Validate date range."""
         if start_date and end_date and start_date > end_date:
             return False, "Start date cannot be after end date."

@@ -1,6 +1,7 @@
 """
 User prompts and input handling.
 """
+
 from typing import List, Optional
 
 
@@ -10,7 +11,7 @@ def prompt_user(message: str, default: Optional[str] = None) -> str:
         message = f"{message} [{default}]"
 
     response = input(f"{message}: ").strip()
-    return response or default or ''
+    return response or default or ""
 
 
 def prompt_choice(message: str, choices: List[str]) -> Optional[str]:

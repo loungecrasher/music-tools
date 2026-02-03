@@ -1,6 +1,7 @@
 """
 Deezer authentication.
 """
+
 import logging
 from typing import Optional
 
@@ -8,7 +9,7 @@ import requests
 
 from ..config import config_manager
 
-logger = logging.getLogger('music_tools_common.auth.deezer')
+logger = logging.getLogger("music_tools_common.auth.deezer")
 
 
 class DeezerAuthManager:
@@ -22,17 +23,19 @@ class DeezerAuthManager:
         if self.session is not None:
             return self.session
 
-        config = config_manager.load_config('deezer')
-        email = config.get('email')
+        config = config_manager.load_config("deezer")
+        email = config.get("email")
 
         if not email:
             raise ValueError("Missing Deezer credentials")
 
         session = requests.Session()
-        session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-            'Accept': 'application/json'
-        })
+        session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "Accept": "application/json",
+            }
+        )
         session.email = email
 
         self.session = session

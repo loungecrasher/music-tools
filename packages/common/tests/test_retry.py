@@ -61,11 +61,7 @@ class TestRetryDecorator:
         """Test retry only on specific exception types."""
         call_count = 0
 
-        @retry(
-            max_attempts=3,
-            exceptions=(ConnectionError, TimeoutError),
-            delay=0.1
-        )
+        @retry(max_attempts=3, exceptions=(ConnectionError, TimeoutError), delay=0.1)
         def selective_retry():
             nonlocal call_count
             call_count += 1
@@ -105,7 +101,7 @@ class TestRetryDecorator:
             max_attempts=4,
             delay=0.1,
             backoff=2,  # Exponential: 0.1, 0.2, 0.4
-            exceptions=(ValueError,)
+            exceptions=(ValueError,),
         )
         def exponential_function():
             nonlocal call_count
@@ -121,7 +117,7 @@ class TestRetryDecorator:
         assert call_count == 4
 
         # Check delays between attempts (roughly exponential)
-        delays = [timestamps[i+1] - timestamps[i] for i in range(len(timestamps)-1)]
+        delays = [timestamps[i + 1] - timestamps[i] for i in range(len(timestamps) - 1)]
         # First delay ~0.1s, second ~0.2s, third ~0.4s
         assert delays[0] >= 0.09  # Allow for timing variance
         assert delays[1] >= 0.18
@@ -136,7 +132,7 @@ class TestRetryDecorator:
             delay=0.1,
             backoff=10,  # Would create huge delays
             max_delay=0.3,  # But capped at 0.3s
-            exceptions=(ValueError,)
+            exceptions=(ValueError,),
         )
         def capped_delay_function():
             nonlocal call_count
@@ -165,11 +161,7 @@ class TestRetryDecorator:
             delays_used.append(delay)
             return delay
 
-        @retry(
-            max_attempts=3,
-            delay=custom_delay,
-            exceptions=(ValueError,)
-        )
+        @retry(max_attempts=3, delay=custom_delay, exceptions=(ValueError,))
         def custom_delay_function():
             nonlocal call_count
             call_count += 1
@@ -189,20 +181,11 @@ class TestRetryDecorator:
         retry_info = []
 
         def on_retry(attempt, exception, delay):
-            retry_info.append({
-                'attempt': attempt,
-                'exception': str(exception),
-                'delay': delay
-            })
+            retry_info.append({"attempt": attempt, "exception": str(exception), "delay": delay})
 
         call_count = 0
 
-        @retry(
-            max_attempts=3,
-            delay=0.1,
-            exceptions=(ValueError,),
-            on_retry=on_retry
-        )
+        @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,), on_retry=on_retry)
         def function_with_callback():
             nonlocal call_count
             call_count += 1
@@ -214,11 +197,12 @@ class TestRetryDecorator:
 
         assert result == "success"
         assert len(retry_info) == 2  # 2 retries
-        assert retry_info[0]['attempt'] == 1
-        assert "Attempt 1" in retry_info[0]['exception']
+        assert retry_info[0]["attempt"] == 1
+        assert "Attempt 1" in retry_info[0]["exception"]
 
     def test_retry_preserves_function_metadata(self):
         """Test that decorator preserves function metadata."""
+
         @retry(max_attempts=3)
         def documented_function():
             """This function has documentation."""
@@ -257,10 +241,7 @@ class TestExponentialBackoff:
     def test_exponential_backoff_calculation(self):
         """Test exponential backoff calculations."""
         # base_delay=1, backoff=2
-        delays = [
-            exponential_backoff(attempt, base_delay=1, backoff=2)
-            for attempt in range(1, 6)
-        ]
+        delays = [exponential_backoff(attempt, base_delay=1, backoff=2) for attempt in range(1, 6)]
 
         # Should be: 1, 2, 4, 8, 16
         assert delays == [1, 2, 4, 8, 16]
@@ -268,12 +249,7 @@ class TestExponentialBackoff:
     def test_exponential_backoff_with_max_delay(self):
         """Test exponential backoff respects max_delay."""
         delays = [
-            exponential_backoff(
-                attempt,
-                base_delay=1,
-                backoff=2,
-                max_delay=5
-            )
+            exponential_backoff(attempt, base_delay=1, backoff=2, max_delay=5)
             for attempt in range(1, 6)
         ]
 
@@ -283,13 +259,7 @@ class TestExponentialBackoff:
     def test_exponential_backoff_with_jitter(self):
         """Test exponential backoff with jitter."""
         delays = [
-            exponential_backoff(
-                attempt=3,
-                base_delay=1,
-                backoff=2,
-                jitter=True
-            )
-            for _ in range(100)
+            exponential_backoff(attempt=3, base_delay=1, backoff=2, jitter=True) for _ in range(100)
         ]
 
         # Base delay for attempt 3: 4 seconds
@@ -308,15 +278,13 @@ class TestExponentialBackoff:
         """Test exponential backoff with different backoff factors."""
         # Backoff factor of 3
         delays_3x = [
-            exponential_backoff(attempt, base_delay=1, backoff=3)
-            for attempt in range(1, 4)
+            exponential_backoff(attempt, base_delay=1, backoff=3) for attempt in range(1, 4)
         ]
         assert delays_3x == [1, 3, 9]
 
         # Backoff factor of 1.5
         delays_1_5x = [
-            exponential_backoff(attempt, base_delay=2, backoff=1.5)
-            for attempt in range(1, 4)
+            exponential_backoff(attempt, base_delay=2, backoff=1.5) for attempt in range(1, 4)
         ]
         assert delays_1_5x == [2, 3, 4.5]
 
@@ -328,12 +296,7 @@ class TestRetryWithRealScenarios:
         """Test retry pattern for database connections."""
         attempts = []
 
-        @retry(
-            max_attempts=5,
-            delay=0.1,
-            backoff=2,
-            exceptions=(ConnectionError,)
-        )
+        @retry(max_attempts=5, delay=0.1, backoff=2, exceptions=(ConnectionError,))
         def connect_to_database():
             attempts.append(time.time())
             if len(attempts) < 3:
@@ -352,11 +315,7 @@ class TestRetryWithRealScenarios:
         class RateLimitError(Exception):
             pass
 
-        @retry(
-            max_attempts=4,
-            delay=0.5,
-            exceptions=(RateLimitError,)
-        )
+        @retry(max_attempts=4, delay=0.5, exceptions=(RateLimitError,))
         def api_request():
             nonlocal call_count
             call_count += 1
@@ -373,11 +332,7 @@ class TestRetryWithRealScenarios:
         """Test retry for file operations with transient errors."""
         attempts = 0
 
-        @retry(
-            max_attempts=3,
-            delay=0.1,
-            exceptions=(OSError, IOError)
-        )
+        @retry(max_attempts=3, delay=0.1, exceptions=(OSError, IOError))
         def read_file(filepath):
             nonlocal attempts
             attempts += 1
@@ -394,11 +349,7 @@ class TestRetryWithRealScenarios:
         """Test retry handling multiple error types."""
         call_sequence = []
 
-        @retry(
-            max_attempts=5,
-            delay=0.1,
-            exceptions=(ConnectionError, TimeoutError, OSError)
-        )
+        @retry(max_attempts=5, delay=0.1, exceptions=(ConnectionError, TimeoutError, OSError))
         def network_request():
             call_sequence.append(len(call_sequence) + 1)
 
@@ -422,6 +373,7 @@ class TestRetryErrorHandling:
 
     def test_retry_error_contains_original_exception(self):
         """Test RetryError contains information about original exception."""
+
         @retry(max_attempts=2, delay=0.1, exceptions=(ValueError,))
         def failing_function():
             raise ValueError("Original error message")
@@ -435,6 +387,7 @@ class TestRetryErrorHandling:
 
     def test_retry_with_exception_chain(self):
         """Test retry preserves exception chain."""
+
         @retry(max_attempts=2, delay=0.1)
         def function_with_chain():
             try:
@@ -447,6 +400,7 @@ class TestRetryErrorHandling:
 
     def test_retry_logs_attempts(self, caplog):
         """Test retry logs each attempt (if logging is implemented)."""
+
         @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
         def logged_function():
             raise ValueError("Test error")
@@ -498,6 +452,7 @@ class TestRetryConfiguration:
     def test_retry_with_negative_attempts(self):
         """Test retry handles invalid max_attempts."""
         with pytest.raises(ValueError):
+
             @retry(max_attempts=0)
             def invalid_retry():
                 return "result"
@@ -505,6 +460,7 @@ class TestRetryConfiguration:
     def test_retry_with_invalid_delay(self):
         """Test retry handles invalid delay values."""
         with pytest.raises(ValueError):
+
             @retry(delay=-1)
             def invalid_delay():
                 return "result"

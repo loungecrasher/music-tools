@@ -62,7 +62,7 @@ class LibraryFile:
                 self.filename = "unknown"
 
             if not self.file_format and self.file_path:
-                self.file_format = Path(self.file_path).suffix.lower().lstrip('.')
+                self.file_format = Path(self.file_path).suffix.lower().lstrip(".")
             elif not self.file_format:
                 self.file_format = ""
 
@@ -73,7 +73,9 @@ class LibraryFile:
             # Validate year if present (MEDIUM-4)
             if self.year is not None:
                 if not (MIN_VALID_YEAR <= self.year <= MAX_VALID_YEAR):
-                    logger.warning(f"Year {self.year} outside valid range {MIN_VALID_YEAR}-{MAX_VALID_YEAR}, setting to None")
+                    logger.warning(
+                        f"Year {self.year} outside valid range {MIN_VALID_YEAR}-{MAX_VALID_YEAR}, setting to None"
+                    )
                     self.year = None
 
             # Validate duration if present (LOW-7)
@@ -131,30 +133,36 @@ class LibraryFile:
             file_size = 0
 
         return {
-            'id': self.id,
-            'file_path': self.file_path,  # Already string, no need to convert
-            'filename': self.filename,  # Already string
-            'artist': self.artist,
-            'title': self.title,
-            'album': self.album,
-            'year': self.year,
-            'duration': self.duration,
-            'file_format': self.file_format,  # Already string
-            'file_size': file_size,
-            'metadata_hash': self.metadata_hash,  # Already string
-            'file_content_hash': self.file_content_hash,  # Already string
-            'indexed_at': self.indexed_at.isoformat() if self.indexed_at else None,
-            'file_mtime': self.file_mtime.isoformat() if self.file_mtime else None,
-            'last_verified': self.last_verified.isoformat() if self.last_verified else None,
-            'is_active': 1 if self.is_active else 0,
+            "id": self.id,
+            "file_path": self.file_path,  # Already string, no need to convert
+            "filename": self.filename,  # Already string
+            "artist": self.artist,
+            "title": self.title,
+            "album": self.album,
+            "year": self.year,
+            "duration": self.duration,
+            "file_format": self.file_format,  # Already string
+            "file_size": file_size,
+            "metadata_hash": self.metadata_hash,  # Already string
+            "file_content_hash": self.file_content_hash,  # Already string
+            "indexed_at": self.indexed_at.isoformat() if self.indexed_at else None,
+            "file_mtime": self.file_mtime.isoformat() if self.file_mtime else None,
+            "last_verified": self.last_verified.isoformat() if self.last_verified else None,
+            "is_active": 1 if self.is_active else 0,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'LibraryFile':
+    def from_dict(cls, data: Dict[str, Any]) -> "LibraryFile":
         """Create from database dictionary with comprehensive error handling."""
         # Validate required fields
-        required_fields = ['file_path', 'filename', 'file_format', 'file_size',
-                           'metadata_hash', 'file_content_hash']
+        required_fields = [
+            "file_path",
+            "filename",
+            "file_format",
+            "file_size",
+            "metadata_hash",
+            "file_content_hash",
+        ]
         for field_name in required_fields:
             if field_name not in data:
                 raise ValueError(f"Missing required field: {field_name}")
@@ -177,12 +185,12 @@ class LibraryFile:
                 logger.warning(f"Failed to parse datetime '{value}': {e}")
                 return None
 
-        indexed_at = safe_datetime_parse(data.get('indexed_at'))
-        file_mtime = safe_datetime_parse(data.get('file_mtime'))
-        last_verified = safe_datetime_parse(data.get('last_verified'))
+        indexed_at = safe_datetime_parse(data.get("indexed_at"))
+        file_mtime = safe_datetime_parse(data.get("file_mtime"))
+        last_verified = safe_datetime_parse(data.get("last_verified"))
 
         # Validate and sanitize file_size
-        file_size = data.get('file_size', 0)
+        file_size = data.get("file_size", 0)
         try:
             file_size = max(0, int(file_size))
         except (ValueError, TypeError):
@@ -190,22 +198,22 @@ class LibraryFile:
             file_size = 0
 
         return cls(
-            id=data.get('id'),
-            file_path=str(data['file_path']),
-            filename=str(data['filename']),
-            artist=data.get('artist'),
-            title=data.get('title'),
-            album=data.get('album'),
-            year=data.get('year'),
-            duration=data.get('duration'),
-            file_format=str(data.get('file_format', '')),
+            id=data.get("id"),
+            file_path=str(data["file_path"]),
+            filename=str(data["filename"]),
+            artist=data.get("artist"),
+            title=data.get("title"),
+            album=data.get("album"),
+            year=data.get("year"),
+            duration=data.get("duration"),
+            file_format=str(data.get("file_format", "")),
             file_size=file_size,
-            metadata_hash=str(data.get('metadata_hash', '')),
-            file_content_hash=str(data.get('file_content_hash', '')),
+            metadata_hash=str(data.get("metadata_hash", "")),
+            file_content_hash=str(data.get("file_content_hash", "")),
             indexed_at=indexed_at,
             file_mtime=file_mtime,
             last_verified=last_verified,
-            is_active=bool(data.get('is_active', 1)),
+            is_active=bool(data.get("is_active", 1)),
         )
 
 
@@ -229,10 +237,10 @@ class DuplicateResult:
 
     # Valid match type values
     VALID_MATCH_TYPES = {
-        'exact_metadata',  # Exact match on artist|title hash
-        'fuzzy_metadata',  # Fuzzy match on normalized metadata
-        'exact_file',      # Exact match on file content hash
-        'none'            # No match found
+        "exact_metadata",  # Exact match on artist|title hash
+        "fuzzy_metadata",  # Fuzzy match on normalized metadata
+        "exact_file",  # Exact match on file content hash
+        "none",  # No match found
     }
 
     def __post_init__(self) -> None:
@@ -247,7 +255,9 @@ class DuplicateResult:
 
         # Validate match_type
         if self.match_type not in self.VALID_MATCH_TYPES:
-            raise ValueError(f"Invalid match_type: {self.match_type}. Must be one of {self.VALID_MATCH_TYPES}")
+            raise ValueError(
+                f"Invalid match_type: {self.match_type}. Must be one of {self.VALID_MATCH_TYPES}"
+            )
 
         # Validate consistency
         if self.is_duplicate and self.confidence == 0.0:
@@ -352,16 +362,16 @@ class VettingReport:
     def get_summary(self) -> dict:
         """Get summary statistics."""
         return {
-            'import_folder': self.import_folder,
-            'total_files': self.total_files,
-            'duplicates': self.duplicate_count,
-            'new_songs': self.new_count,
-            'uncertain': self.uncertain_count,
-            'duplicate_percentage': self.duplicate_percentage,
-            'new_percentage': self.new_percentage,
-            'threshold': self.threshold,
-            'scan_duration': self.scan_duration,
-            'vetted_at': self.vetted_at.isoformat() if self.vetted_at else None,
+            "import_folder": self.import_folder,
+            "total_files": self.total_files,
+            "duplicates": self.duplicate_count,
+            "new_songs": self.new_count,
+            "uncertain": self.uncertain_count,
+            "duplicate_percentage": self.duplicate_percentage,
+            "new_percentage": self.new_percentage,
+            "threshold": self.threshold,
+            "scan_duration": self.scan_duration,
+            "vetted_at": self.vetted_at.isoformat() if self.vetted_at else None,
         }
 
 
@@ -380,14 +390,14 @@ class LibraryStatistics:
     @property
     def total_size_gb(self) -> float:
         """Total size in gigabytes."""
-        return self.total_size / (1024 ** 3)
+        return self.total_size / (1024**3)
 
     @property
     def average_file_size_mb(self) -> float:
         """Average file size in megabytes."""
         if self.total_files == 0:
             return 0.0
-        return (self.total_size / self.total_files) / (1024 ** 2)
+        return (self.total_size / self.total_files) / (1024**2)
 
     def get_format_percentages(self) -> Dict[str, float]:
         """Get percentage breakdown by format.

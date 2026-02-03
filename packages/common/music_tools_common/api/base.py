@@ -1,12 +1,13 @@
 """
 Base API client.
 """
+
 import logging
 from typing import Any, Dict, Optional
 
 import requests
 
-logger = logging.getLogger('music_tools_common.api')
+logger = logging.getLogger("music_tools_common.api")
 
 
 class BaseAPIClient:
@@ -19,10 +20,7 @@ class BaseAPIClient:
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Optional[Dict[str, Any]]:
         """Make GET request."""
         try:
-            response = self.session.get(
-                f"{self.base_url}/{endpoint}",
-                params=params
-            )
+            response = self.session.get(f"{self.base_url}/{endpoint}", params=params)
             response.raise_for_status()
             return response.json()
         except Exception as e:

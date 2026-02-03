@@ -12,107 +12,91 @@ from requests.exceptions import ConnectionError, HTTPError, RequestException, Ti
 class TestSafeRequest:
     """Tests for safe_request function with retry logic."""
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_success(self, mock_get):
         """Test successful HTTP request."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'data': 'test'}
+        mock_response.json.return_value = {"data": "test"}
         mock_get.return_value = mock_response
 
-        response = safe_request('https://api.example.com/data')
+        response = safe_request("https://api.example.com/data")
 
         assert response is not None
         assert response.status_code == 200
-        assert response.json() == {'data': 'test'}
+        assert response.json() == {"data": "test"}
         mock_get.assert_called_once()
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_retry_on_500(self, mock_get):
         """Test retry logic on 500 server error."""
         # First two calls fail, third succeeds
         mock_get.side_effect = [
             Mock(status_code=500),
             Mock(status_code=503),
-            Mock(status_code=200, json=lambda: {'data': 'success'})
+            Mock(status_code=200, json=lambda: {"data": "success"}),
         ]
 
-        response = safe_request(
-            'https://api.example.com/data',
-            max_retries=3
-        )
+        response = safe_request("https://api.example.com/data", max_retries=3)
 
         assert response is not None
         assert response.status_code == 200
         assert mock_get.call_count == 3
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_retry_on_connection_error(self, mock_get):
         """Test retry logic on connection error."""
         # First call fails, second succeeds
         mock_get.side_effect = [
             ConnectionError("Connection failed"),
-            Mock(status_code=200, json=lambda: {'data': 'success'})
+            Mock(status_code=200, json=lambda: {"data": "success"}),
         ]
 
-        response = safe_request(
-            'https://api.example.com/data',
-            max_retries=2
-        )
+        response = safe_request("https://api.example.com/data", max_retries=2)
 
         assert response is not None
         assert response.status_code == 200
         assert mock_get.call_count == 2
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_retry_on_timeout(self, mock_get):
         """Test retry logic on timeout."""
         mock_get.side_effect = [
             Timeout("Request timed out"),
-            Mock(status_code=200, json=lambda: {'data': 'success'})
+            Mock(status_code=200, json=lambda: {"data": "success"}),
         ]
 
-        response = safe_request(
-            'https://api.example.com/data',
-            timeout=5,
-            max_retries=2
-        )
+        response = safe_request("https://api.example.com/data", timeout=5, max_retries=2)
 
         assert response is not None
         assert mock_get.call_count == 2
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_max_retries_exceeded(self, mock_get):
         """Test failure after max retries exceeded."""
         mock_get.side_effect = ConnectionError("Connection failed")
 
-        response = safe_request(
-            'https://api.example.com/data',
-            max_retries=3
-        )
+        response = safe_request("https://api.example.com/data", max_retries=3)
 
         assert response is None
         assert mock_get.call_count == 3
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_429_rate_limit(self, mock_get):
         """Test handling of 429 rate limit with Retry-After header."""
         # First call returns 429 with Retry-After, second succeeds
         rate_limit_response = Mock()
         rate_limit_response.status_code = 429
-        rate_limit_response.headers = {'Retry-After': '1'}
+        rate_limit_response.headers = {"Retry-After": "1"}
 
         success_response = Mock()
         success_response.status_code = 200
-        success_response.json.return_value = {'data': 'success'}
+        success_response.json.return_value = {"data": "success"}
 
         mock_get.side_effect = [rate_limit_response, success_response]
 
         start_time = time.time()
-        response = safe_request(
-            'https://api.example.com/data',
-            max_retries=2
-        )
+        response = safe_request("https://api.example.com/data", max_retries=2)
         elapsed = time.time() - start_time
 
         assert response is not None
@@ -120,61 +104,53 @@ class TestSafeRequest:
         assert elapsed >= 1.0  # Should have waited at least 1 second
         assert mock_get.call_count == 2
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_no_retry_on_404(self, mock_get):
         """Test no retry on 404 (client error)."""
         mock_get.return_value = Mock(status_code=404)
 
-        response = safe_request('https://api.example.com/nonexistent')
+        response = safe_request("https://api.example.com/nonexistent")
 
         assert response is not None
         assert response.status_code == 404
         mock_get.assert_called_once()  # Should not retry
 
-    @patch('requests.post')
+    @patch("requests.post")
     def test_safe_request_post_method(self, mock_post):
         """Test POST request with data."""
-        mock_post.return_value = Mock(
-            status_code=201,
-            json=lambda: {'id': '123'}
-        )
+        mock_post.return_value = Mock(status_code=201, json=lambda: {"id": "123"})
 
         response = safe_request(
-            'https://api.example.com/create',
-            method='POST',
-            json={'name': 'test'}
+            "https://api.example.com/create", method="POST", json={"name": "test"}
         )
 
         assert response.status_code == 201
         mock_post.assert_called_once()
         call_kwargs = mock_post.call_args[1]
-        assert call_kwargs['json'] == {'name': 'test'}
+        assert call_kwargs["json"] == {"name": "test"}
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_custom_headers(self, mock_get):
         """Test request with custom headers."""
         mock_get.return_value = Mock(status_code=200)
 
-        headers = {
-            'Authorization': 'Bearer token123',
-            'User-Agent': 'MusicTools/1.0'
-        }
+        headers = {"Authorization": "Bearer token123", "User-Agent": "MusicTools/1.0"}
 
-        safe_request('https://api.example.com/data', headers=headers)
+        safe_request("https://api.example.com/data", headers=headers)
 
         call_kwargs = mock_get.call_args[1]
-        assert 'Authorization' in call_kwargs['headers']
-        assert call_kwargs['headers']['Authorization'] == 'Bearer token123'
+        assert "Authorization" in call_kwargs["headers"]
+        assert call_kwargs["headers"]["Authorization"] == "Bearer token123"
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_safe_request_timeout_parameter(self, mock_get):
         """Test timeout parameter is passed correctly."""
         mock_get.return_value = Mock(status_code=200)
 
-        safe_request('https://api.example.com/data', timeout=10)
+        safe_request("https://api.example.com/data", timeout=10)
 
         call_kwargs = mock_get.call_args[1]
-        assert call_kwargs['timeout'] == 10
+        assert call_kwargs["timeout"] == 10
 
 
 class TestRateLimiter:
@@ -263,26 +239,23 @@ class TestSessionSetup:
         session = setup_session()
 
         assert isinstance(session, requests.Session)
-        assert 'User-Agent' in session.headers
+        assert "User-Agent" in session.headers
 
     def test_setup_session_custom_headers(self):
         """Test session setup with custom headers."""
-        custom_headers = {
-            'Authorization': 'Bearer token',
-            'Custom-Header': 'value'
-        }
+        custom_headers = {"Authorization": "Bearer token", "Custom-Header": "value"}
 
         session = setup_session(headers=custom_headers)
 
-        assert session.headers['Authorization'] == 'Bearer token'
-        assert session.headers['Custom-Header'] == 'value'
+        assert session.headers["Authorization"] == "Bearer token"
+        assert session.headers["Custom-Header"] == "value"
 
     def test_setup_session_retry_configuration(self):
         """Test session setup with retry configuration."""
         session = setup_session(max_retries=5)
 
         # Check that retry adapter is configured
-        adapter = session.get_adapter('https://')
+        adapter = session.get_adapter("https://")
         assert adapter is not None
 
     def test_setup_session_timeout_default(self):
@@ -293,7 +266,7 @@ class TestSessionSetup:
         # This test depends on your actual implementation
         assert session is not None
 
-    @patch('requests.Session')
+    @patch("requests.Session")
     def test_setup_session_connection_pooling(self, mock_session_class):
         """Test session connection pooling is configured."""
         mock_session = MagicMock()
@@ -308,7 +281,7 @@ class TestSessionSetup:
 class TestHTTPErrorHandling:
     """Tests for HTTP error handling scenarios."""
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_handle_http_error_status(self, mock_get):
         """Test handling of HTTP error status codes."""
         mock_response = Mock()
@@ -316,15 +289,12 @@ class TestHTTPErrorHandling:
         mock_response.raise_for_status.side_effect = HTTPError("Server Error")
         mock_get.return_value = mock_response
 
-        safe_request(
-            'https://api.example.com/error',
-            max_retries=1
-        )
+        safe_request("https://api.example.com/error", max_retries=1)
 
         # Should retry on 500 errors
         assert mock_get.call_count >= 1
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_handle_json_decode_error(self, mock_get):
         """Test handling of JSON decode errors."""
         mock_response = Mock()
@@ -332,18 +302,18 @@ class TestHTTPErrorHandling:
         mock_response.json.side_effect = ValueError("Invalid JSON")
         mock_get.return_value = mock_response
 
-        response = safe_request('https://api.example.com/data')
+        response = safe_request("https://api.example.com/data")
 
         # Should still return the response even if JSON parsing fails
         assert response is not None
         assert response.status_code == 200
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_handle_ssl_error(self, mock_get):
         """Test handling of SSL certificate errors."""
         mock_get.side_effect = requests.exceptions.SSLError("SSL Error")
 
-        response = safe_request('https://api.example.com/data')
+        response = safe_request("https://api.example.com/data")
 
         # Should return None on SSL errors (security critical)
         assert response is None
@@ -352,45 +322,37 @@ class TestHTTPErrorHandling:
 class TestIntegrationScenarios:
     """Integration tests for real-world HTTP scenarios."""
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_spotify_api_workflow(self, mock_get):
         """Test typical Spotify API interaction workflow."""
         # First request gets playlists
         playlists_response = Mock()
         playlists_response.status_code = 200
-        playlists_response.json.return_value = {
-            'items': [{'id': '1', 'name': 'Playlist 1'}]
-        }
+        playlists_response.json.return_value = {"items": [{"id": "1", "name": "Playlist 1"}]}
 
         # Second request hits rate limit
         rate_limit_response = Mock()
         rate_limit_response.status_code = 429
-        rate_limit_response.headers = {'Retry-After': '0.5'}
+        rate_limit_response.headers = {"Retry-After": "0.5"}
 
         # Third request succeeds
         success_response = Mock()
         success_response.status_code = 200
-        success_response.json.return_value = {
-            'items': [{'id': '2', 'name': 'Playlist 2'}]
-        }
+        success_response.json.return_value = {"items": [{"id": "2", "name": "Playlist 2"}]}
 
-        mock_get.side_effect = [
-            playlists_response,
-            rate_limit_response,
-            success_response
-        ]
+        mock_get.side_effect = [playlists_response, rate_limit_response, success_response]
 
         # First call
-        response1 = safe_request('https://api.spotify.com/v1/me/playlists')
+        response1 = safe_request("https://api.spotify.com/v1/me/playlists")
         assert response1.status_code == 200
 
         # Second call (rate limited, then succeeds)
-        response2 = safe_request('https://api.spotify.com/v1/me/playlists')
+        response2 = safe_request("https://api.spotify.com/v1/me/playlists")
         assert response2.status_code == 200
 
         assert mock_get.call_count == 3
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_network_resilience_workflow(self, mock_get):
         """Test resilience to network issues."""
         # Simulate intermittent network issues
@@ -398,14 +360,10 @@ class TestIntegrationScenarios:
             ConnectionError("Network unreachable"),
             Timeout("Request timeout"),
             ConnectionError("Network unreachable"),
-            Mock(status_code=200, json=lambda: {'status': 'ok'})
+            Mock(status_code=200, json=lambda: {"status": "ok"}),
         ]
 
-        response = safe_request(
-            'https://api.example.com/data',
-            max_retries=5,
-            timeout=10
-        )
+        response = safe_request("https://api.example.com/data", max_retries=5, timeout=10)
 
         assert response is not None
         assert response.status_code == 200
@@ -415,21 +373,17 @@ class TestIntegrationScenarios:
 class TestRetryStrategies:
     """Tests for different retry strategies."""
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_exponential_backoff(self, mock_get):
         """Test exponential backoff between retries."""
         mock_get.side_effect = [
             ConnectionError("Fail 1"),
             ConnectionError("Fail 2"),
-            Mock(status_code=200)
+            Mock(status_code=200),
         ]
 
         start_time = time.time()
-        response = safe_request(
-            'https://api.example.com/data',
-            max_retries=3,
-            backoff_factor=0.5
-        )
+        response = safe_request("https://api.example.com/data", max_retries=3, backoff_factor=0.5)
         time.time() - start_time
 
         # With exponential backoff: 0.5s, 1s (total ~1.5s minimum)
@@ -437,7 +391,7 @@ class TestRetryStrategies:
         assert response is not None
         assert mock_get.call_count == 3
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_no_retry_on_client_errors(self, mock_get):
         """Test that client errors (4xx) don't trigger retries."""
         client_error_codes = [400, 401, 403, 404, 422]
@@ -446,16 +400,13 @@ class TestRetryStrategies:
             mock_get.reset_mock()
             mock_get.return_value = Mock(status_code=status_code)
 
-            response = safe_request(
-                'https://api.example.com/data',
-                max_retries=3
-            )
+            response = safe_request("https://api.example.com/data", max_retries=3)
 
             # Should not retry on client errors
             assert mock_get.call_count == 1
             assert response.status_code == status_code
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_retry_on_server_errors(self, mock_get):
         """Test that server errors (5xx) trigger retries."""
         server_error_codes = [500, 502, 503, 504]
@@ -465,13 +416,10 @@ class TestRetryStrategies:
             mock_get.side_effect = [
                 Mock(status_code=status_code),
                 Mock(status_code=status_code),
-                Mock(status_code=200)
+                Mock(status_code=200),
             ]
 
-            safe_request(
-                'https://api.example.com/data',
-                max_retries=3
-            )
+            safe_request("https://api.example.com/data", max_retries=3)
 
             # Should retry on server errors
             assert mock_get.call_count == 3

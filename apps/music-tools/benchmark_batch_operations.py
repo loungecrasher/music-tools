@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import List
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / 'apps' / 'music-tools' / 'src'))
+sys.path.insert(0, str(Path(__file__).parent / "apps" / "music-tools" / "src"))
 
 from library.database import LibraryDatabase
 from library.models import LibraryFile
@@ -47,13 +47,13 @@ def create_test_files(count: int) -> List[LibraryFile]:
             album=f"Album {i % 50}",
             year=2000 + (i % 25),
             duration=180.0 + (i % 300),
-            file_format='mp3',
+            file_format="mp3",
             file_size=3000000 + (i * 1000),
             metadata_hash=f"hash_meta_{i}",
             file_content_hash=f"hash_content_{i}",
             indexed_at=datetime.now(timezone.utc),
             file_mtime=datetime.now(timezone.utc),
-            is_active=True
+            is_active=True,
         )
         files.append(file)
     return files
@@ -195,18 +195,14 @@ def print_results(operation: str, sequential_time: float, batch_time: float, cou
     print(f"  Reduction:  {((sequential_time - batch_time) / sequential_time * 100):.1f}% faster")
 
 
-def run_benchmark(size: str = 'MEDIUM'):
+def run_benchmark(size: str = "MEDIUM"):
     """Run all benchmarks.
 
     Args:
         size: Benchmark size (SMALL, MEDIUM, LARGE)
     """
     # Determine test size
-    sizes = {
-        'SMALL': 100,
-        'MEDIUM': 1000,
-        'LARGE': 5000
-    }
+    sizes = {"SMALL": 100, "MEDIUM": 1000, "LARGE": 5000}
 
     count = sizes.get(size.upper(), 1000)
 
@@ -265,7 +261,7 @@ def run_benchmark(size: str = 'MEDIUM'):
 
         # Batch hash lookups
         start = time.time()
-        db_batch.batch_get_files_by_hashes(hashes, hash_type='metadata')
+        db_batch.batch_get_files_by_hashes(hashes, hash_type="metadata")
         batch_hash_time = time.time() - start
 
         print_results("HASH LOOKUP", seq_hash_time, batch_hash_time, count)
@@ -282,7 +278,9 @@ def run_benchmark(size: str = 'MEDIUM'):
         print(f"\nTotal Sequential Time: {total_seq:.3f}s")
         print(f"Total Batch Time:      {total_batch:.3f}s")
         print(f"Overall Speedup:       {overall_speedup:.1f}x")
-        print(f"\nTime Saved:            {total_seq - total_batch:.3f}s ({((total_seq - total_batch) / total_seq * 100):.1f}%)")
+        print(
+            f"\nTime Saved:            {total_seq - total_batch:.3f}s ({((total_seq - total_batch) / total_seq * 100):.1f}%)"
+        )
 
         print("\n" + "=" * 70)
         print("PERFORMANCE TARGETS MET:")
@@ -291,9 +289,15 @@ def run_benchmark(size: str = 'MEDIUM'):
         insert_speedup = seq_insert_time / batch_insert_time if batch_insert_time > 0 else 0
         update_speedup = seq_update_time / batch_update_time if batch_update_time > 0 else 0
 
-        print(f"  Insert:  {insert_speedup:.1f}x {'✓ PASS' if insert_speedup >= 10 else '✗ FAIL'} (target: 10x)")
-        print(f"  Update:  {update_speedup:.1f}x {'✓ PASS' if update_speedup >= 10 else '✗ FAIL'} (target: 10x)")
-        print(f"  Overall: {overall_speedup:.1f}x {'✓ PASS' if overall_speedup >= 10 else '✗ FAIL'} (target: 10x)")
+        print(
+            f"  Insert:  {insert_speedup:.1f}x {'✓ PASS' if insert_speedup >= 10 else '✗ FAIL'} (target: 10x)"
+        )
+        print(
+            f"  Update:  {update_speedup:.1f}x {'✓ PASS' if update_speedup >= 10 else '✗ FAIL'} (target: 10x)"
+        )
+        print(
+            f"  Overall: {overall_speedup:.1f}x {'✓ PASS' if overall_speedup >= 10 else '✗ FAIL'} (target: 10x)"
+        )
 
         # Projected time savings
         print("\n" + "=" * 70)
@@ -308,7 +312,7 @@ def run_benchmark(size: str = 'MEDIUM'):
             ("Small Library", 1000),
             ("Medium Library", 10000),
             ("Large Library", 50000),
-            ("Huge Library", 100000)
+            ("Huge Library", 100000),
         ]
 
         print(f"\n{'Scenario':<20} {'Old Time':<15} {'New Time':<15} {'Saved':<15}")
@@ -331,10 +335,10 @@ def run_benchmark(size: str = 'MEDIUM'):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmark batch database operations")
     parser.add_argument(
-        '--size',
-        choices=['SMALL', 'MEDIUM', 'LARGE'],
-        default='MEDIUM',
-        help='Benchmark size (default: MEDIUM)'
+        "--size",
+        choices=["SMALL", "MEDIUM", "LARGE"],
+        default="MEDIUM",
+        help="Benchmark size (default: MEDIUM)",
     )
 
     args = parser.parse_args()
@@ -349,5 +353,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nBenchmark failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

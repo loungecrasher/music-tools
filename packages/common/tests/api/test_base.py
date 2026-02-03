@@ -37,59 +37,50 @@ class TestBaseAPIClient:
 class TestBaseAPIClientGet:
     """Tests for BaseAPIClient GET request method."""
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_success_without_params(self, mock_get):
         """Test successful GET request without parameters."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'data': 'test'}
+        mock_response.json.return_value = {"data": "test"}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
         result = client.get("endpoint")
 
-        assert result == {'data': 'test'}
-        mock_get.assert_called_once_with(
-            "https://api.example.com/endpoint",
-            params=None
-        )
+        assert result == {"data": "test"}
+        mock_get.assert_called_once_with("https://api.example.com/endpoint", params=None)
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_success_with_params(self, mock_get):
         """Test successful GET request with query parameters."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'items': [1, 2, 3]}
+        mock_response.json.return_value = {"items": [1, 2, 3]}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
-        params = {'limit': 10, 'offset': 0}
+        params = {"limit": 10, "offset": 0}
         result = client.get("search", params=params)
 
-        assert result == {'items': [1, 2, 3]}
-        mock_get.assert_called_once_with(
-            "https://api.example.com/search",
-            params=params
-        )
+        assert result == {"items": [1, 2, 3]}
+        mock_get.assert_called_once_with("https://api.example.com/search", params=params)
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_success_with_nested_endpoint(self, mock_get):
         """Test GET request with nested endpoint path."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'user': 'data'}
+        mock_response.json.return_value = {"user": "data"}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
         result = client.get("users/123/profile")
 
-        assert result == {'user': 'data'}
-        mock_get.assert_called_once_with(
-            "https://api.example.com/users/123/profile",
-            params=None
-        )
+        assert result == {"user": "data"}
+        mock_get.assert_called_once_with("https://api.example.com/users/123/profile", params=None)
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_empty_response(self, mock_get):
         """Test GET request with empty JSON response."""
         mock_response = Mock()
@@ -102,7 +93,7 @@ class TestBaseAPIClientGet:
 
         assert result == {}
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_array_response(self, mock_get):
         """Test GET request returning JSON array."""
         mock_response = Mock()
@@ -115,7 +106,7 @@ class TestBaseAPIClientGet:
 
         assert result == [1, 2, 3, 4, 5]
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_404_error(self, mock_get):
         """Test GET request handles 404 Not Found error."""
         mock_response = Mock()
@@ -128,7 +119,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_500_error(self, mock_get):
         """Test GET request handles 500 Internal Server Error."""
         mock_response = Mock()
@@ -141,7 +132,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_401_unauthorized(self, mock_get):
         """Test GET request handles 401 Unauthorized error."""
         mock_response = Mock()
@@ -154,7 +145,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_403_forbidden(self, mock_get):
         """Test GET request handles 403 Forbidden error."""
         mock_response = Mock()
@@ -167,7 +158,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_429_rate_limit(self, mock_get):
         """Test GET request handles 429 Rate Limit error."""
         mock_response = Mock()
@@ -180,7 +171,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_connection_error(self, mock_get):
         """Test GET request handles connection error."""
         mock_get.side_effect = ConnectionError("Failed to connect")
@@ -190,7 +181,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_timeout(self, mock_get):
         """Test GET request handles timeout error."""
         mock_get.side_effect = Timeout("Request timed out")
@@ -200,7 +191,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_generic_request_exception(self, mock_get):
         """Test GET request handles generic request exception."""
         mock_get.side_effect = RequestException("Unknown error")
@@ -210,7 +201,7 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_handles_json_decode_error(self, mock_get):
         """Test GET request handles invalid JSON response."""
         mock_response = Mock()
@@ -223,72 +214,66 @@ class TestBaseAPIClientGet:
 
         assert result is None
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_empty_endpoint(self, mock_get):
         """Test GET request with empty endpoint string."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'root': 'data'}
+        mock_response.json.return_value = {"root": "data"}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
         result = client.get("")
 
-        assert result == {'root': 'data'}
-        mock_get.assert_called_once_with(
-            "https://api.example.com/",
-            params=None
-        )
+        assert result == {"root": "data"}
+        mock_get.assert_called_once_with("https://api.example.com/", params=None)
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_special_chars_in_params(self, mock_get):
         """Test GET request with special characters in parameters."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'results': []}
+        mock_response.json.return_value = {"results": []}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
-        params = {'query': 'AC/DC', 'genre': 'rock & roll'}
+        params = {"query": "AC/DC", "genre": "rock & roll"}
         result = client.get("search", params=params)
 
-        assert result == {'results': []}
-        mock_get.assert_called_once_with(
-            "https://api.example.com/search",
-            params=params
-        )
+        assert result == {"results": []}
+        mock_get.assert_called_once_with("https://api.example.com/search", params=params)
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_numeric_params(self, mock_get):
         """Test GET request with numeric parameters."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'page': 2}
+        mock_response.json.return_value = {"page": 2}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
-        params = {'limit': 50, 'offset': 100, 'year': 2024}
+        params = {"limit": 50, "offset": 100, "year": 2024}
         result = client.get("items", params=params)
 
-        assert result == {'page': 2}
+        assert result == {"page": 2}
         mock_get.assert_called_once()
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_boolean_params(self, mock_get):
         """Test GET request with boolean parameters."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'filtered': True}
+        mock_response.json.return_value = {"filtered": True}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
-        params = {'active': True, 'verified': False}
+        params = {"active": True, "verified": False}
         result = client.get("users", params=params)
 
-        assert result == {'filtered': True}
+        assert result == {"filtered": True}
 
-    @patch('requests.Session.get')
-    @patch('music_tools_common.api.base.logger')
+    @patch("requests.Session.get")
+    @patch("music_tools_common.api.base.logger")
     def test_get_logs_error_on_failure(self, mock_logger, mock_get):
         """Test that errors are logged when GET request fails."""
         mock_get.side_effect = ConnectionError("Network error")
@@ -301,8 +286,8 @@ class TestBaseAPIClientGet:
         call_args = mock_logger.error.call_args[0][0]
         assert "API request failed" in call_args
 
-    @patch('requests.Session.get')
-    @patch('music_tools_common.api.base.logger')
+    @patch("requests.Session.get")
+    @patch("music_tools_common.api.base.logger")
     def test_get_logs_http_error_details(self, mock_logger, mock_get):
         """Test that HTTP errors are logged with details."""
         mock_response = Mock()
@@ -320,59 +305,56 @@ class TestBaseAPIClientGet:
 class TestBaseAPIClientEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_very_long_endpoint(self, mock_get):
         """Test GET request with very long endpoint path."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'data': 'ok'}
+        mock_response.json.return_value = {"data": "ok"}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
         long_endpoint = "/".join(["path"] * 50)
         result = client.get(long_endpoint)
 
-        assert result == {'data': 'ok'}
+        assert result == {"data": "ok"}
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_none_params(self, mock_get):
         """Test GET request explicitly passing None as params."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'data': 'test'}
+        mock_response.json.return_value = {"data": "test"}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
         result = client.get("endpoint", params=None)
 
-        assert result == {'data': 'test'}
-        mock_get.assert_called_once_with(
-            "https://api.example.com/endpoint",
-            params=None
-        )
+        assert result == {"data": "test"}
+        mock_get.assert_called_once_with("https://api.example.com/endpoint", params=None)
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_with_empty_params_dict(self, mock_get):
         """Test GET request with empty parameters dictionary."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'data': 'test'}
+        mock_response.json.return_value = {"data": "test"}
         mock_get.return_value = mock_response
 
         client = BaseAPIClient("https://api.example.com")
         result = client.get("endpoint", params={})
 
-        assert result == {'data': 'test'}
+        assert result == {"data": "test"}
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_multiple_consecutive_requests(self, mock_get):
         """Test multiple consecutive GET requests using same client."""
         mock_response1 = Mock(status_code=200)
-        mock_response1.json.return_value = {'request': 1}
+        mock_response1.json.return_value = {"request": 1}
         mock_response2 = Mock(status_code=200)
-        mock_response2.json.return_value = {'request': 2}
+        mock_response2.json.return_value = {"request": 2}
         mock_response3 = Mock(status_code=200)
-        mock_response3.json.return_value = {'request': 3}
+        mock_response3.json.return_value = {"request": 3}
 
         mock_get.side_effect = [mock_response1, mock_response2, mock_response3]
 
@@ -381,9 +363,9 @@ class TestBaseAPIClientEdgeCases:
         result2 = client.get("endpoint2")
         result3 = client.get("endpoint3")
 
-        assert result1 == {'request': 1}
-        assert result2 == {'request': 2}
-        assert result3 == {'request': 3}
+        assert result1 == {"request": 1}
+        assert result2 == {"request": 2}
+        assert result3 == {"request": 3}
         assert mock_get.call_count == 3
 
     def test_base_url_stored_correctly(self):
@@ -398,16 +380,16 @@ class TestBaseAPIClientEdgeCases:
             client = BaseAPIClient(url)
             assert client.base_url == url
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_get_preserves_response_type(self, mock_get):
         """Test that various JSON response types are preserved."""
         test_cases = [
-            {'string': 'value'},
+            {"string": "value"},
             [1, 2, 3],
-            {'nested': {'data': {'value': 123}}},
-            {'null_value': None},
-            {'bool': True},
-            {'number': 42.5},
+            {"nested": {"data": {"value": 123}}},
+            {"null_value": None},
+            {"bool": True},
+            {"number": 42.5},
         ]
 
         client = BaseAPIClient("https://api.example.com")
@@ -425,7 +407,7 @@ class TestBaseAPIClientEdgeCases:
 class TestBaseAPIClientIntegration:
     """Integration-style tests for BaseAPIClient."""
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_full_request_lifecycle(self, mock_get):
         """Test complete request lifecycle from init to response."""
         # Create client
@@ -435,22 +417,19 @@ class TestBaseAPIClientIntegration:
         # Setup mock response
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'items': [{'id': 1}, {'id': 2}],
-            'total': 2
-        }
+        mock_response.json.return_value = {"items": [{"id": 1}, {"id": 2}], "total": 2}
         mock_get.return_value = mock_response
 
         # Make request
-        result = client.get("items", params={'limit': 2})
+        result = client.get("items", params={"limit": 2})
 
         # Verify result
         assert result is not None
-        assert 'items' in result
-        assert len(result['items']) == 2
-        assert result['total'] == 2
+        assert "items" in result
+        assert len(result["items"]) == 2
+        assert result["total"] == 2
 
-    @patch('requests.Session.get')
+    @patch("requests.Session.get")
     def test_error_recovery_pattern(self, mock_get):
         """Test error handling and recovery pattern."""
         client = BaseAPIClient("https://api.example.com")
@@ -463,12 +442,12 @@ class TestBaseAPIClientIntegration:
         # Second request succeeds (simulating retry logic)
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'recovered': True}
+        mock_response.json.return_value = {"recovered": True}
         mock_get.side_effect = None
         mock_get.return_value = mock_response
 
         result2 = client.get("endpoint")
-        assert result2 == {'recovered': True}
+        assert result2 == {"recovered": True}
 
 
 # Run with: pytest packages/common/tests/api/test_base.py -v

@@ -26,7 +26,7 @@ def example_basic_usage():
         return
 
     # Filter by genres
-    target_genres = ['house', 'techno']
+    target_genres = ["house", "techno"]
     print(f"Filtering posts for genres: {target_genres}")
     matching_posts = scraper.filter_posts_by_genre(post_urls, target_genres)
 
@@ -42,13 +42,7 @@ def example_advanced_usage():
     scraper = MusicBlogScraper("https://example-blog.com", "advanced_results.txt")
 
     # Define specific genres to search for
-    genres = [
-        'deep house',
-        'progressive house',
-        'tech house',
-        'melodic techno',
-        'liquid dnb'
-    ]
+    genres = ["deep house", "progressive house", "tech house", "melodic techno", "liquid dnb"]
 
     print(f"Searching for genres: {genres}")
 
@@ -68,7 +62,7 @@ def example_advanced_usage():
     # Group by genre
     genre_groups = {}
     for post in matching_posts:
-        for genre in post['matching_genres']:
+        for genre in post["matching_genres"]:
             if genre not in genre_groups:
                 genre_groups[genre] = []
             genre_groups[genre].append(post)
@@ -76,7 +70,7 @@ def example_advanced_usage():
     # Print summary by genre
     print("\nResults by genre:")
     for genre, posts in genre_groups.items():
-        total_links = sum(len(post['download_links']) for post in posts)
+        total_links = sum(len(post["download_links"]) for post in posts)
         print(f"  {genre}: {len(posts)} posts, {total_links} download links")
 
     # Save results
@@ -91,20 +85,20 @@ def example_json_output():
 
     # Find and filter posts
     post_urls = scraper.find_blog_posts(max_pages=3)
-    matching_posts = scraper.filter_posts_by_genre(post_urls, ['house', 'techno'])
+    matching_posts = scraper.filter_posts_by_genre(post_urls, ["house", "techno"])
 
     # Save as JSON for programmatic access
     json_data = {
-        'metadata': {
-            'generated_at': datetime.now().isoformat(),
-            'total_posts': len(matching_posts),
-            'total_links': sum(len(post['download_links']) for post in matching_posts),
-            'genres_searched': ['house', 'techno']
+        "metadata": {
+            "generated_at": datetime.now().isoformat(),
+            "total_posts": len(matching_posts),
+            "total_links": sum(len(post["download_links"]) for post in matching_posts),
+            "genres_searched": ["house", "techno"],
         },
-        'posts': matching_posts
+        "posts": matching_posts,
     }
 
-    with open('results.json', 'w', encoding='utf-8') as f:
+    with open("results.json", "w", encoding="utf-8") as f:
         json.dump(json_data, f, indent=2, ensure_ascii=False)
 
     print("Results saved to results.json")
@@ -117,26 +111,26 @@ def example_batch_processing():
     # List of blogs to process
     blogs = [
         {
-            'url': 'https://blog1.example.com',
-            'genres': ['house', 'deep house'],
-            'output': 'blog1_results.txt'
+            "url": "https://blog1.example.com",
+            "genres": ["house", "deep house"],
+            "output": "blog1_results.txt",
         },
         {
-            'url': 'https://blog2.example.com',
-            'genres': ['techno', 'trance'],
-            'output': 'blog2_results.txt'
-        }
+            "url": "https://blog2.example.com",
+            "genres": ["techno", "trance"],
+            "output": "blog2_results.txt",
+        },
     ]
 
     for blog in blogs:
         print(f"\nProcessing {blog['url']}...")
 
         try:
-            scraper = MusicBlogScraper(blog['url'], blog['output'])
+            scraper = MusicBlogScraper(blog["url"], blog["output"])
             post_urls = scraper.find_blog_posts(max_pages=5)
 
             if post_urls:
-                matching_posts = scraper.filter_posts_by_genre(post_urls, blog['genres'])
+                matching_posts = scraper.filter_posts_by_genre(post_urls, blog["genres"])
                 scraper.save_results(matching_posts)
                 print(f"  Found {len(matching_posts)} matching posts")
             else:
@@ -174,20 +168,22 @@ def example_custom_filtering():
                 title = scraper.extract_post_title(soup)
 
                 post_info = {
-                    'url': post_url,
-                    'title': title,
-                    'genres': genres,
-                    'download_links': download_links,
-                    'link_count': len(download_links)
+                    "url": post_url,
+                    "title": title,
+                    "genres": genres,
+                    "download_links": download_links,
+                    "link_count": len(download_links),
                 }
                 posts_with_multiple_links.append(post_info)
 
     # Sort by number of download links
-    posts_with_multiple_links.sort(key=lambda x: x['link_count'], reverse=True)
+    posts_with_multiple_links.sort(key=lambda x: x["link_count"], reverse=True)
 
     # Save results
-    with open('multiple_links_results.txt', 'w', encoding='utf-8') as f:
-        f.write(f"Posts with Multiple Download Links - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+    with open("multiple_links_results.txt", "w", encoding="utf-8") as f:
+        f.write(
+            f"Posts with Multiple Download Links - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        )
         f.write("=" * 80 + "\n\n")
 
         for post in posts_with_multiple_links:
@@ -196,7 +192,7 @@ def example_custom_filtering():
             f.write(f"Genres: {', '.join(post['genres'])}\n")
             f.write(f"Download Links ({post['link_count']}):\n")
 
-            for link in post['download_links']:
+            for link in post["download_links"]:
                 f.write(f"  - {link}\n")
 
             f.write("\n" + "-" * 60 + "\n\n")

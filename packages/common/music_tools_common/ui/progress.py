@@ -28,19 +28,20 @@ from rich.table import Table
 from .menu import THEME, get_themed_style
 
 console = Console()
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 # ==========================================
 # Progress Bar Configurations
 # ==========================================
 
+
 def create_progress_bar(
     description: str = "Processing...",
     show_eta: bool = True,
     show_speed: bool = True,
     show_percentage: bool = True,
-    transient: bool = False
+    transient: bool = False,
 ) -> Progress:
     """Create a customized progress bar with optional ETA and speed.
 
@@ -70,19 +71,12 @@ def create_progress_bar(
 
     columns.append(TimeElapsedColumn())
 
-    return Progress(
-        *columns,
-        console=console,
-        transient=transient
-    )
+    return Progress(*columns, console=console, transient=transient)
 
 
 @contextmanager
 def progress_context(
-    total: int,
-    description: str = "Processing...",
-    show_eta: bool = True,
-    unit: str = "items"
+    total: int, description: str = "Processing...", show_eta: bool = True, unit: str = "items"
 ):
     """Context manager for progress tracking with ETA.
 
@@ -112,7 +106,7 @@ def iterate_with_progress(
     items: Iterator[T],
     total: Optional[int] = None,
     description: str = "Processing...",
-    show_eta: bool = True
+    show_eta: bool = True,
 ) -> Iterator[T]:
     """Iterate over items with automatic progress tracking.
 
@@ -148,6 +142,7 @@ def iterate_with_progress(
 # Status Display
 # ==========================================
 
+
 class StatusBar:
     """Persistent status bar showing connection and library status."""
 
@@ -163,10 +158,7 @@ class StatusBar:
             connected: Whether service is connected
             details: Additional details (e.g., username)
         """
-        self.services[service] = {
-            'connected': connected,
-            'details': details
-        }
+        self.services[service] = {"connected": connected, "details": details}
 
     def set_library_stats(self, total_files: int = 0, indexed: bool = False) -> None:
         """Set library statistics.
@@ -175,10 +167,7 @@ class StatusBar:
             total_files: Total files in library
             indexed: Whether library has been indexed
         """
-        self.library_stats = {
-            'total_files': total_files,
-            'indexed': indexed
-        }
+        self.library_stats = {"total_files": total_files, "indexed": indexed}
 
     def render(self) -> Panel:
         """Render the status bar as a Rich Panel.
@@ -190,32 +179,28 @@ class StatusBar:
 
         # Service status
         for service, status in self.services.items():
-            if status['connected']:
+            if status["connected"]:
                 icon = "✓"
-                style = get_themed_style('success')
-                detail = f" ({status['details']})" if status['details'] else ""
+                style = get_themed_style("success")
+                detail = f" ({status['details']})" if status["details"] else ""
             else:
                 icon = "✗"
-                style = get_themed_style('error')
+                style = get_themed_style("error")
                 detail = ""
 
             status_parts.append(f"[{style}]{service}: {icon}{detail}[/]")
 
         # Library status
         if self.library_stats:
-            if self.library_stats['indexed']:
-                files = self.library_stats['total_files']
+            if self.library_stats["indexed"]:
+                files = self.library_stats["total_files"]
                 status_parts.append(f"[{get_themed_style('info')}]Library: {files:,} files[/]")
             else:
                 status_parts.append(f"[{get_themed_style('warning')}]Library: Not indexed[/]")
 
         status_text = " │ ".join(status_parts) if status_parts else "No services configured"
 
-        return Panel(
-            status_text,
-            border_style=get_themed_style('muted'),
-            padding=(0, 1)
-        )
+        return Panel(status_text, border_style=get_themed_style("muted"), padding=(0, 1))
 
     def display(self) -> None:
         """Display the status bar."""
@@ -226,11 +211,8 @@ class StatusBar:
 # Operation Summaries
 # ==========================================
 
-def show_operation_summary(
-    operation: str,
-    results: dict,
-    duration: Optional[float] = None
-) -> None:
+
+def show_operation_summary(operation: str, results: dict, duration: Optional[float] = None) -> None:
     """Display a summary of an operation's results.
 
     Args:
@@ -247,19 +229,19 @@ def show_operation_summary(
         ... }, duration=45.2)
     """
     table = Table(title=f"{operation} Results", show_header=True)
-    table.add_column("Metric", style=get_themed_style('primary'))
-    table.add_column("Value", style=get_themed_style('success'), justify="right")
+    table.add_column("Metric", style=get_themed_style("primary"))
+    table.add_column("Value", style=get_themed_style("success"), justify="right")
 
     for metric, value in results.items():
         # Color errors differently
-        if metric.lower() in ('errors', 'failed', 'error'):
+        if metric.lower() in ("errors", "failed", "error"):
             if value > 0:
                 table.add_row(metric, f"[{get_themed_style('error')}]{value:,}[/]")
             else:
                 table.add_row(metric, f"[{get_themed_style('muted')}]{value}[/]")
-        elif metric.lower() in ('success', 'added', 'new'):
+        elif metric.lower() in ("success", "added", "new"):
             table.add_row(metric, f"[{get_themed_style('success')}]{value:,}[/]")
-        elif metric.lower() in ('warning', 'skipped', 'uncertain'):
+        elif metric.lower() in ("warning", "skipped", "uncertain"):
             table.add_row(metric, f"[{get_themed_style('warning')}]{value:,}[/]")
         else:
             table.add_row(metric, f"{value:,}" if isinstance(value, int) else str(value))
@@ -281,7 +263,7 @@ def show_confirmation_preview(
     action: str,
     items: list,
     max_preview: int = 10,
-    item_formatter: Optional[Callable[[Any], str]] = None
+    item_formatter: Optional[Callable[[Any], str]] = None,
 ) -> bool:
     """Show a preview of items and ask for confirmation.
 
@@ -298,7 +280,9 @@ def show_confirmation_preview(
     from rich.tree import Tree
 
     # Format action with color
-    action_style = get_themed_style('error') if 'delete' in action.lower() else get_themed_style('warning')
+    action_style = (
+        get_themed_style("error") if "delete" in action.lower() else get_themed_style("warning")
+    )
 
     console.print(f"\n[{action_style}]{action}[/] - {len(items)} items will be affected:\n")
 
@@ -317,10 +301,7 @@ def show_confirmation_preview(
     console.print(tree)
     console.print()
 
-    return Confirm.ask(
-        f"[{action_style}]Proceed with {action.lower()}?[/]",
-        default=False
-    )
+    return Confirm.ask(f"[{action_style}]Proceed with {action.lower()}?[/]", default=False)
 
 
 # Global status bar instance

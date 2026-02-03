@@ -30,7 +30,7 @@ DEEZER_API_BASE = "https://api.deezer.com"
 def _extract_playlist_id(url_or_id: str) -> str:
     """Extract playlist ID from URL or return as-is if already an ID."""
     # Handle full URLs like https://www.deezer.com/en/playlist/14618296541
-    match = re.search(r'playlist[/:](\d+)', url_or_id)
+    match = re.search(r"playlist[/:](\d+)", url_or_id)
     if match:
         return match.group(1)
     # Handle just numbers
@@ -46,7 +46,7 @@ def _get_playlist_info(playlist_id: str) -> Dict[str, Any]:
     response.raise_for_status()
     data = response.json()
 
-    if 'error' in data:
+    if "error" in data:
         raise ValueError(f"Deezer API error: {data['error'].get('message', 'Unknown error')}")
 
     return data
@@ -62,93 +62,80 @@ def _get_all_playlist_tracks(playlist_id: str) -> List[Dict[str, Any]]:
         response.raise_for_status()
         data = response.json()
 
-        if 'error' in data:
+        if "error" in data:
             raise ValueError(f"Deezer API error: {data['error'].get('message', 'Unknown error')}")
 
-        tracks.extend(data.get('data', []))
-        url = data.get('next')  # Pagination URL
+        tracks.extend(data.get("data", []))
+        url = data.get("next")  # Pagination URL
 
     return tracks
 
 
 def _check_track_availability(track: Dict[str, Any]) -> Dict[str, Any]:
     """Check if a track is available and get additional info."""
-    track_id = track.get('id')
+    track_id = track.get("id")
 
     if not track_id:
-        return {
-            **track,
-            'available': False,
-            'reason': 'No track ID'
-        }
+        return {**track, "available": False, "reason": "No track ID"}
 
     try:
         response = requests.get(f"{DEEZER_API_BASE}/track/{track_id}")
         data = response.json()
 
-        if 'error' in data:
+        if "error" in data:
             return {
                 **track,
-                'available': False,
-                'reason': data['error'].get('message', 'Track not found')
+                "available": False,
+                "reason": data["error"].get("message", "Track not found"),
             }
 
         # Check if track is readable (available for streaming)
-        is_readable = data.get('readable', True)
+        is_readable = data.get("readable", True)
 
         return {
             **track,
-            'available': is_readable,
-            'reason': 'Not available in your region' if not is_readable else None,
-            'full_data': data
+            "available": is_readable,
+            "reason": "Not available in your region" if not is_readable else None,
+            "full_data": data,
         }
     except Exception as e:
-        return {
-            **track,
-            'available': False,
-            'reason': str(e)
-        }
+        return {**track, "available": False, "reason": str(e)}
 
 
 async def _check_track_availability_async(
-    session: aiohttp.ClientSession,
-    track: Dict[str, Any],
-    semaphore: asyncio.Semaphore
+    session: aiohttp.ClientSession, track: Dict[str, Any], semaphore: asyncio.Semaphore
 ) -> Dict[str, Any]:
     """Check track availability using async HTTP."""
-    track_id = track.get('id')
+    track_id = track.get("id")
 
     if not track_id:
-        return {**track, 'available': False, 'reason': 'No track ID'}
+        return {**track, "available": False, "reason": "No track ID"}
 
     async with semaphore:
         try:
-            async with session.get(
-                f"{DEEZER_API_BASE}/track/{track_id}"
-            ) as response:
+            async with session.get(f"{DEEZER_API_BASE}/track/{track_id}") as response:
                 data = await response.json()
 
-            if 'error' in data:
+            if "error" in data:
                 return {
                     **track,
-                    'available': False,
-                    'reason': data['error'].get('message', 'Track not found')
+                    "available": False,
+                    "reason": data["error"].get("message", "Track not found"),
                 }
 
-            is_readable = data.get('readable', True)
+            is_readable = data.get("readable", True)
             return {
                 **track,
-                'available': is_readable,
-                'reason': 'Not available in your region' if not is_readable else None,
-                'full_data': data
+                "available": is_readable,
+                "reason": "Not available in your region" if not is_readable else None,
+                "full_data": data,
             }
         except Exception as e:
-            return {**track, 'available': False, 'reason': str(e)}
+            return {**track, "available": False, "reason": str(e)}
 
 
 async def _check_tracks_batch(
-    tracks: List[Dict[str, Any]],
-    max_concurrent: int = 10
+    tracks: List[Dict[str, Any]], max_concurrent: int = 10
 ) -> List[Dict[str, Any]]:
     """Check availability for all tracks concurrently.
 
@@ -163,20 +150,13 @@ async def _check_tracks_batch(
     timeout = aiohttp.ClientTimeout(total=30)
     connector = aiohttp.TCPConnector(limit=max_concurrent)
 
-    async with aiohttp.ClientSession(
-        timeout=timeout, connector=connector
-    ) as session:
-        tasks = [
-            _check_track_availability_async(session, track, semaphore)
-            for track in tracks
-        ]
+    async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
+        tasks = [_check_track_availability_async(session, track, semaphore) for track in tracks]
         return await asyncio.gather(*tasks)
 
 
 def analyse_playlist(
-    playlist_url: str,
-    debug_dir: Optional[Path] = None,
-    use_api_fallback: bool = True
+    playlist_url: str, debug_dir: Optional[Path] = None, use_api_fallback: bool = True
 ) -> List[Dict[str, Any]]:
     """Analyze a Deezer playlist and check track availability.
 
@@ -200,7 +180,7 @@ def analyse_playlist(
     if use_api_fallback:
         results = asyncio.run(_check_tracks_batch(tracks))
     else:
-        results = [{**track, 'available': True, 'reason': None} for track in tracks]
+        results = [{**track, "available": True, "reason": None} for track in tracks]
 
     # Save debug output if requested
     if debug_dir:
@@ -208,18 +188,16 @@ def analyse_playlist(
         debug_dir.mkdir(parents=True, exist_ok=True)
 
         debug_file = debug_dir / f"playlist_{playlist_id}_debug.json"
-        with open(debug_file, 'w', encoding='utf-8') as f:
-            json.dump({
-                'playlist': playlist_info,
-                'tracks': results
-            }, f, indent=2, ensure_ascii=False)
+        with open(debug_file, "w", encoding="utf-8") as f:
+            json.dump(
+                {"playlist": playlist_info, "tracks": results}, f, indent=2, ensure_ascii=False
+            )
 
     return results
 
 
 def export_playlist_report(
-    tracks: List[Dict[str, Any]],
-    output_dir: Optional[Path] = None
+    tracks: List[Dict[str, Any]], output_dir: Optional[Path] = None
 ) -> Dict[str, Any]:
     """Export playlist analysis report to files.
 
@@ -235,76 +213,83 @@ def export_playlist_report(
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    available = [t for t in tracks if t.get('available', True)]
-    unavailable = [t for t in tracks if not t.get('available', True)]
+    available = [t for t in tracks if t.get("available", True)]
+    unavailable = [t for t in tracks if not t.get("available", True)]
 
     # Generate available tracks list
     available_file = output_dir / f"deezer_available_{timestamp}.txt"
-    with open(available_file, 'w', encoding='utf-8') as f:
+    with open(available_file, "w", encoding="utf-8") as f:
         for track in available:
-            artist = track.get('artist', {}).get('name', 'Unknown Artist')
-            title = track.get('title', 'Unknown Title')
+            artist = track.get("artist", {}).get("name", "Unknown Artist")
+            title = track.get("title", "Unknown Title")
             f.write(f"{artist} - {title}\n")
 
     # Generate unavailable tracks list
     unavailable_file = output_dir / f"deezer_unavailable_{timestamp}.txt"
-    with open(unavailable_file, 'w', encoding='utf-8') as f:
+    with open(unavailable_file, "w", encoding="utf-8") as f:
         for track in unavailable:
-            artist = track.get('artist', {}).get('name', 'Unknown Artist')
-            title = track.get('title', 'Unknown Title')
-            reason = track.get('reason', 'Unknown reason')
+            artist = track.get("artist", {}).get("name", "Unknown Artist")
+            title = track.get("title", "Unknown Title")
+            reason = track.get("reason", "Unknown reason")
             f.write(f"{artist} - {title} [{reason}]\n")
 
     # Generate full report
     report_file = output_dir / f"deezer_report_{timestamp}.json"
-    with open(report_file, 'w', encoding='utf-8') as f:
-        json.dump({
-            'timestamp': timestamp,
-            'total': len(tracks),
-            'available_count': len(available),
-            'unavailable_count': len(unavailable),
-            'available_tracks': [
-                {
-                    'id': t.get('id'),
-                    'title': t.get('title'),
-                    'artist': t.get('artist', {}).get('name'),
-                    'album': t.get('album', {}).get('title')
-                }
-                for t in available
-            ],
-            'unavailable_tracks': [
-                {
-                    'id': t.get('id'),
-                    'title': t.get('title'),
-                    'artist': t.get('artist', {}).get('name'),
-                    'reason': t.get('reason')
-                }
-                for t in unavailable
-            ]
-        }, f, indent=2, ensure_ascii=False)
+    with open(report_file, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "timestamp": timestamp,
+                "total": len(tracks),
+                "available_count": len(available),
+                "unavailable_count": len(unavailable),
+                "available_tracks": [
+                    {
+                        "id": t.get("id"),
+                        "title": t.get("title"),
+                        "artist": t.get("artist", {}).get("name"),
+                        "album": t.get("album", {}).get("title"),
+                    }
+                    for t in available
+                ],
+                "unavailable_tracks": [
+                    {
+                        "id": t.get("id"),
+                        "title": t.get("title"),
+                        "artist": t.get("artist", {}).get("name"),
+                        "reason": t.get("reason"),
+                    }
+                    for t in unavailable
+                ],
+            },
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
 
     return {
-        'total_count': len(tracks),
-        'available_count': len(available),
-        'unavailable_count': len(unavailable),
-        'available_file': str(available_file),
-        'unavailable_file': str(unavailable_file),
-        'report_file': str(report_file)
+        "total_count": len(tracks),
+        "available_count": len(available),
+        "unavailable_count": len(unavailable),
+        "available_file": str(available_file),
+        "unavailable_file": str(unavailable_file),
+        "report_file": str(report_file),
     }
 
 
 def run_deezer_playlist_checker():
     """Interactive Deezer playlist checker."""
-    console.print(Panel(
-        "[bold green]Deezer Playlist Checker[/bold green]\n\n"
-        "Analyze a Deezer playlist and check track availability.\n"
-        "This tool will:\n"
-        "• Check which tracks are available/unavailable\n"
-        "• Generate detailed reports\n"
-        "• Export track lists to files",
-        title="[bold]Deezer Playlist Checker[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Deezer Playlist Checker[/bold green]\n\n"
+            "Analyze a Deezer playlist and check track availability.\n"
+            "This tool will:\n"
+            "• Check which tracks are available/unavailable\n"
+            "• Generate detailed reports\n"
+            "• Export track lists to files",
+            title="[bold]Deezer Playlist Checker[/bold]",
+            border_style="green",
+        )
+    )
 
     playlist_url = Prompt.ask("\nEnter Deezer playlist URL or ID")
     if not playlist_url:
@@ -321,7 +306,9 @@ def run_deezer_playlist_checker():
             playlist_info = _get_playlist_info(playlist_id)
 
         console.print(f"\n[green]✓ Found playlist:[/green] {playlist_info['title']}")
-        console.print(f"[dim]Creator: {playlist_info.get('creator', {}).get('name', 'Unknown')}[/dim]")
+        console.print(
+            f"[dim]Creator: {playlist_info.get('creator', {}).get('name', 'Unknown')}[/dim]"
+        )
         console.print(f"[dim]Tracks: {playlist_info.get('nb_tracks', 'Unknown')}[/dim]")
     except Exception as e:
         console.print(f"[bold red]Error accessing playlist:[/bold red] {str(e)}")
@@ -337,20 +324,15 @@ def run_deezer_playlist_checker():
 
     try:
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
         ) as progress:
             task = progress.add_task("Fetching tracks...", total=None)
-            tracks = analyse_playlist(
-                playlist_url,
-                use_api_fallback=check_availability
-            )
+            tracks = analyse_playlist(playlist_url, use_api_fallback=check_availability)
             progress.update(task, description="Analysis complete!")
 
         # Show summary
-        available = [t for t in tracks if t.get('available', True)]
-        unavailable = [t for t in tracks if not t.get('available', True)]
+        available = [t for t in tracks if t.get("available", True)]
+        unavailable = [t for t in tracks if not t.get("available", True)]
 
         console.print("\n[bold green]✓ Analysis complete![/bold green]")
         console.print(f"Total tracks: {len(tracks)}")
@@ -367,9 +349,9 @@ def run_deezer_playlist_checker():
 
             for track in unavailable[:10]:
                 table.add_row(
-                    track.get('title', 'Unknown')[:40],
-                    track.get('artist', {}).get('name', 'Unknown')[:30],
-                    track.get('reason', 'Unknown')[:30]
+                    track.get("title", "Unknown")[:40],
+                    track.get("artist", {}).get("name", "Unknown")[:30],
+                    track.get("reason", "Unknown")[:30],
                 )
 
             if len(unavailable) > 10:

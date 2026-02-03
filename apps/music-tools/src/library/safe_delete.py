@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class ValidationLevel(Enum):
     """Validation severity levels"""
+
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
@@ -33,6 +34,7 @@ class ValidationLevel(Enum):
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
+
     level: ValidationLevel
     checkpoint: str
     message: str
@@ -46,6 +48,7 @@ class ValidationResult:
 @dataclass
 class DeletionGroup:
     """Represents a group of files where one is kept and others are deleted"""
+
     keep_file: str
     delete_files: List[str]
     reason: str
@@ -74,25 +77,26 @@ class DeletionGroup:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization"""
         return {
-            'group_id': self.group_id,
-            'keep_file': self.keep_file,
-            'delete_files': self.delete_files,
-            'reason': self.reason,
-            'validation_results': [
+            "group_id": self.group_id,
+            "keep_file": self.keep_file,
+            "delete_files": self.delete_files,
+            "reason": self.reason,
+            "validation_results": [
                 {
-                    'level': r.level.value,
-                    'checkpoint': r.checkpoint,
-                    'message': r.message,
-                    'details': r.details
+                    "level": r.level.value,
+                    "checkpoint": r.checkpoint,
+                    "message": r.message,
+                    "details": r.details,
                 }
                 for r in self.validation_results
-            ]
+            ],
         }
 
 
 @dataclass
 class DeletionStats:
     """Statistics from deletion operation"""
+
     total_groups: int = 0
     successful_deletions: int = 0
     failed_deletions: int = 0
@@ -130,7 +134,7 @@ class DeletionStats:
     @staticmethod
     def _format_bytes(bytes_size: int) -> str:
         """Format bytes to human-readable size"""
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        for unit in ["B", "KB", "MB", "GB", "TB"]:
             if bytes_size < 1024.0:
                 return f"{bytes_size:.2f} {unit}"
             bytes_size /= 1024.0
@@ -154,7 +158,9 @@ class DeletionValidator:
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.DeletionValidator")
 
-    def validate_group(self, group: DeletionGroup, check_backup_space: bool = True) -> List[ValidationResult]:
+    def validate_group(
+        self, group: DeletionGroup, check_backup_space: bool = True
+    ) -> List[ValidationResult]:
         """
         Run all validation checks on a deletion group
 
@@ -198,7 +204,7 @@ class DeletionValidator:
                 level=ValidationLevel.ERROR,
                 checkpoint="1. Keep File Exists",
                 message="Keep file path is empty",
-                details={'keep_file': group.keep_file}
+                details={"keep_file": group.keep_file},
             )
 
         keep_path = Path(group.keep_file)
@@ -207,7 +213,7 @@ class DeletionValidator:
                 level=ValidationLevel.ERROR,
                 checkpoint="1. Keep File Exists",
                 message=f"Keep file does not exist: {group.keep_file}",
-                details={'keep_file': group.keep_file, 'exists': False}
+                details={"keep_file": group.keep_file, "exists": False},
             )
 
         if not keep_path.is_file():
@@ -215,14 +221,14 @@ class DeletionValidator:
                 level=ValidationLevel.ERROR,
                 checkpoint="1. Keep File Exists",
                 message=f"Keep file path is not a file: {group.keep_file}",
-                details={'keep_file': group.keep_file, 'is_file': False}
+                details={"keep_file": group.keep_file, "is_file": False},
             )
 
         return ValidationResult(
             level=ValidationLevel.INFO,
             checkpoint="1. Keep File Exists",
             message=f"Keep file validated: {keep_path.name}",
-            details={'keep_file': group.keep_file, 'size_bytes': keep_path.stat().st_size}
+            details={"keep_file": group.keep_file, "size_bytes": keep_path.stat().st_size},
         )
 
     def _validate_has_files_to_delete(self, group: DeletionGroup) -> ValidationResult:
@@ -232,14 +238,14 @@ class DeletionValidator:
                 level=ValidationLevel.ERROR,
                 checkpoint="2. Has Files to Delete",
                 message="No files marked for deletion",
-                details={'delete_count': 0}
+                details={"delete_count": 0},
             )
 
         return ValidationResult(
             level=ValidationLevel.INFO,
             checkpoint="2. Has Files to Delete",
             message=f"{len(group.delete_files)} file(s) marked for deletion",
-            details={'delete_count': len(group.delete_files)}
+            details={"delete_count": len(group.delete_files)},
         )
 
     def _validate_no_higher_quality_deletion(self, group: DeletionGroup) -> List[ValidationResult]:
@@ -253,27 +259,31 @@ class DeletionValidator:
                 delete_bitrate = self._extract_bitrate(delete_file)
 
                 if delete_bitrate and keep_bitrate and delete_bitrate > keep_bitrate:
-                    results.append(ValidationResult(
-                        level=ValidationLevel.WARNING,
-                        checkpoint="3. Quality Check",
-                        message=f"Deleting higher bitrate file: {Path(delete_file).name} ({delete_bitrate} kbps) while keeping {Path(group.keep_file).name} ({keep_bitrate} kbps)",
-                        details={
-                            'keep_file': group.keep_file,
-                            'keep_bitrate': keep_bitrate,
-                            'delete_file': delete_file,
-                            'delete_bitrate': delete_bitrate
-                        }
-                    ))
+                    results.append(
+                        ValidationResult(
+                            level=ValidationLevel.WARNING,
+                            checkpoint="3. Quality Check",
+                            message=f"Deleting higher bitrate file: {Path(delete_file).name} ({delete_bitrate} kbps) while keeping {Path(group.keep_file).name} ({keep_bitrate} kbps)",
+                            details={
+                                "keep_file": group.keep_file,
+                                "keep_bitrate": keep_bitrate,
+                                "delete_file": delete_file,
+                                "delete_bitrate": delete_bitrate,
+                            },
+                        )
+                    )
         except Exception as e:
             self.logger.debug(f"Could not compare bitrates: {e}")
 
         if not results:
-            results.append(ValidationResult(
-                level=ValidationLevel.INFO,
-                checkpoint="3. Quality Check",
-                message="No higher quality files being deleted",
-                details={}
-            ))
+            results.append(
+                ValidationResult(
+                    level=ValidationLevel.INFO,
+                    checkpoint="3. Quality Check",
+                    message="No higher quality files being deleted",
+                    details={},
+                )
+            )
 
         return results
 
@@ -285,27 +295,33 @@ class DeletionValidator:
             delete_path = Path(delete_file)
 
             if not delete_path.exists():
-                results.append(ValidationResult(
-                    level=ValidationLevel.ERROR,
-                    checkpoint="4. Files Exist",
-                    message=f"File marked for deletion does not exist: {delete_file}",
-                    details={'delete_file': delete_file, 'exists': False}
-                ))
+                results.append(
+                    ValidationResult(
+                        level=ValidationLevel.ERROR,
+                        checkpoint="4. Files Exist",
+                        message=f"File marked for deletion does not exist: {delete_file}",
+                        details={"delete_file": delete_file, "exists": False},
+                    )
+                )
             elif not delete_path.is_file():
-                results.append(ValidationResult(
-                    level=ValidationLevel.ERROR,
-                    checkpoint="4. Files Exist",
-                    message=f"Path marked for deletion is not a file: {delete_file}",
-                    details={'delete_file': delete_file, 'is_file': False}
-                ))
+                results.append(
+                    ValidationResult(
+                        level=ValidationLevel.ERROR,
+                        checkpoint="4. Files Exist",
+                        message=f"Path marked for deletion is not a file: {delete_file}",
+                        details={"delete_file": delete_file, "is_file": False},
+                    )
+                )
 
         if not results:
-            results.append(ValidationResult(
-                level=ValidationLevel.INFO,
-                checkpoint="4. Files Exist",
-                message=f"All {len(group.delete_files)} file(s) to delete verified",
-                details={'verified_count': len(group.delete_files)}
-            ))
+            results.append(
+                ValidationResult(
+                    level=ValidationLevel.INFO,
+                    checkpoint="4. Files Exist",
+                    message=f"All {len(group.delete_files)} file(s) to delete verified",
+                    details={"verified_count": len(group.delete_files)},
+                )
+            )
 
         return results
 
@@ -317,7 +333,7 @@ class DeletionValidator:
                 level=ValidationLevel.ERROR,
                 checkpoint="5. Keep At Least One",
                 message="Cannot delete all files - keep file is invalid",
-                details={'keep_file_valid': False}
+                details={"keep_file_valid": False},
             )
 
         # Check if any delete file is the same as keep file
@@ -329,17 +345,14 @@ class DeletionValidator:
                     level=ValidationLevel.ERROR,
                     checkpoint="5. Keep At Least One",
                     message="Keep file is also marked for deletion",
-                    details={
-                        'keep_file': group.keep_file,
-                        'conflict_file': delete_file
-                    }
+                    details={"keep_file": group.keep_file, "conflict_file": delete_file},
                 )
 
         return ValidationResult(
             level=ValidationLevel.INFO,
             checkpoint="5. Keep At Least One",
             message="Keep file will be preserved",
-            details={'keep_file': group.keep_file}
+            details={"keep_file": group.keep_file},
         )
 
     def _validate_file_permissions(self, group: DeletionGroup) -> List[ValidationResult]:
@@ -355,36 +368,39 @@ class DeletionValidator:
             # Check write permission on parent directory
             parent_dir = delete_path.parent
             if not os.access(parent_dir, os.W_OK):
-                results.append(ValidationResult(
-                    level=ValidationLevel.ERROR,
-                    checkpoint="6. File Permissions",
-                    message=f"No write permission on directory: {parent_dir}",
-                    details={
-                        'delete_file': delete_file,
-                        'parent_dir': str(parent_dir),
-                        'writable': False
-                    }
-                ))
+                results.append(
+                    ValidationResult(
+                        level=ValidationLevel.ERROR,
+                        checkpoint="6. File Permissions",
+                        message=f"No write permission on directory: {parent_dir}",
+                        details={
+                            "delete_file": delete_file,
+                            "parent_dir": str(parent_dir),
+                            "writable": False,
+                        },
+                    )
+                )
 
             # Check write permission on file itself
             if not os.access(delete_path, os.W_OK):
-                results.append(ValidationResult(
-                    level=ValidationLevel.ERROR,
-                    checkpoint="6. File Permissions",
-                    message=f"No write permission on file: {delete_file}",
-                    details={
-                        'delete_file': delete_file,
-                        'writable': False
-                    }
-                ))
+                results.append(
+                    ValidationResult(
+                        level=ValidationLevel.ERROR,
+                        checkpoint="6. File Permissions",
+                        message=f"No write permission on file: {delete_file}",
+                        details={"delete_file": delete_file, "writable": False},
+                    )
+                )
 
         if not results:
-            results.append(ValidationResult(
-                level=ValidationLevel.INFO,
-                checkpoint="6. File Permissions",
-                message="All file permissions verified",
-                details={'permissions_ok': True}
-            ))
+            results.append(
+                ValidationResult(
+                    level=ValidationLevel.INFO,
+                    checkpoint="6. File Permissions",
+                    message="All file permissions verified",
+                    details={"permissions_ok": True},
+                )
+            )
 
         return results
 
@@ -413,17 +429,17 @@ class DeletionValidator:
                             checkpoint="7. Backup Space",
                             message=f"Limited disk space for backup. Available: {DeletionStats._format_bytes(available_space)}, Required: {DeletionStats._format_bytes(required_space)}",
                             details={
-                                'available_bytes': available_space,
-                                'required_bytes': required_space,
-                                'total_size': total_size
-                            }
+                                "available_bytes": available_space,
+                                "required_bytes": required_space,
+                                "total_size": total_size,
+                            },
                         )
 
             return ValidationResult(
                 level=ValidationLevel.INFO,
                 checkpoint="7. Backup Space",
                 message="Sufficient disk space for backup",
-                details={'total_size': total_size}
+                details={"total_size": total_size},
             )
 
         except Exception as e:
@@ -432,7 +448,7 @@ class DeletionValidator:
                 level=ValidationLevel.WARNING,
                 checkpoint="7. Backup Space",
                 message=f"Could not verify disk space: {str(e)}",
-                details={'error': str(e)}
+                details={"error": str(e)},
             )
 
     @staticmethod
@@ -440,13 +456,14 @@ class DeletionValidator:
         """Extract bitrate from filename or metadata (basic implementation)"""
         # Simple pattern matching for common bitrate indicators in filenames
         import re
+
         filename = Path(filepath).name.lower()
 
         # Look for patterns like "320kbps", "320k", "320 kbps"
         patterns = [
-            r'(\d{3})kbps',
-            r'(\d{3})k',
-            r'(\d{3})\s*kbps',
+            r"(\d{3})kbps",
+            r"(\d{3})k",
+            r"(\d{3})\s*kbps",
         ]
 
         for pattern in patterns:
@@ -493,13 +510,11 @@ class SafeDeletionPlan:
         Returns:
             The created DeletionGroup
         """
-        group = DeletionGroup(
-            keep_file=keep_file,
-            delete_files=delete_files,
-            reason=reason
-        )
+        group = DeletionGroup(keep_file=keep_file, delete_files=delete_files, reason=reason)
         self.groups.append(group)
-        self.logger.info(f"Added deletion group: keep={Path(keep_file).name}, delete={len(delete_files)} files")
+        self.logger.info(
+            f"Added deletion group: keep={Path(keep_file).name}, delete={len(delete_files)} files"
+        )
         return group
 
     def validate(self, check_backup_space: bool = True) -> Tuple[bool, List[str]]:
@@ -631,18 +646,18 @@ class SafeDeletionPlan:
             filepath: Path where JSON file should be saved
         """
         export_data = {
-            'metadata': {
-                'created': datetime.now().isoformat(),
-                'total_groups': len(self.groups),
-                'backup_dir': self.backup_dir
+            "metadata": {
+                "created": datetime.now().isoformat(),
+                "total_groups": len(self.groups),
+                "backup_dir": self.backup_dir,
             },
-            'groups': [group.to_dict() for group in self.groups]
+            "groups": [group.to_dict() for group in self.groups],
         }
 
         output_path = Path(filepath)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
 
         self.logger.info(f"Deletion plan exported to: {filepath}")

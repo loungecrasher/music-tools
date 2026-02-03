@@ -3,6 +3,7 @@
 First-Run Setup Wizard for Music Tools.
 Guides users through initial configuration in <10 minutes.
 """
+
 import os
 import sys
 from pathlib import Path
@@ -16,7 +17,9 @@ from rich.table import Table
 
 # Add paths for imports
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'packages'))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "packages")
+)
 
 from music_tools_common.config import config_manager
 
@@ -27,10 +30,10 @@ class SetupWizard:
     """First-run setup wizard."""
 
     def __init__(self):
-        self.config_dir = Path.home() / '.music_tools'
-        self.env_file = Path(__file__).parent / '.env'
-        self.env_example = Path(__file__).parent / '.env.example'
-        self.setup_complete_marker = self.config_dir / '.setup_complete'
+        self.config_dir = Path.home() / ".music_tools"
+        self.env_file = Path(__file__).parent / ".env"
+        self.env_example = Path(__file__).parent / ".env.example"
+        self.setup_complete_marker = self.config_dir / ".setup_complete"
 
     def needs_setup(self) -> bool:
         """Check if first-run setup is needed."""
@@ -43,8 +46,12 @@ class SetupWizard:
         # Welcome screen
         self.show_welcome()
 
-        if not Confirm.ask("\n[bold cyan]Would you like to run the setup wizard?[/bold cyan]", default=True):
-            console.print("\n[yellow]You can run setup later with:[/yellow] python3 setup_wizard.py")
+        if not Confirm.ask(
+            "\n[bold cyan]Would you like to run the setup wizard?[/bold cyan]", default=True
+        ):
+            console.print(
+                "\n[yellow]You can run setup later with:[/yellow] python3 setup_wizard.py"
+            )
             return False
 
         # Step 1: Create config directory
@@ -103,7 +110,9 @@ This wizard will help you configure your music management suite in less than 10 
         console.print("[dim]Spotify is required for most music management features.[/dim]\n")
 
         if not Confirm.ask("Configure Spotify now?", default=True):
-            console.print("[yellow]⚠ Skipped - You can configure Spotify later from the Configuration menu[/yellow]")
+            console.print(
+                "[yellow]⚠ Skipped - You can configure Spotify later from the Configuration menu[/yellow]"
+            )
             return False
 
         # Show instructions
@@ -136,19 +145,16 @@ This wizard will help you configure your music management suite in less than 10 
             console.print("[yellow]⚠ Skipped Spotify configuration[/yellow]")
             return False
 
-        redirect_uri = Prompt.ask(
-            "Spotify Redirect URI",
-            default="http://127.0.0.1:8888/callback"
-        )
+        redirect_uri = Prompt.ask("Spotify Redirect URI", default="http://127.0.0.1:8888/callback")
 
         # Save configuration
         try:
             config = {
-                'client_id': client_id,
-                'client_secret': client_secret,
-                'redirect_uri': redirect_uri
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": redirect_uri,
             }
-            config_manager.save_config('spotify', config)
+            config_manager.save_config("spotify", config)
             console.print("[green]✓ Spotify configured successfully![/green]")
             return True
         except Exception as e:
@@ -158,7 +164,9 @@ This wizard will help you configure your music management suite in less than 10 
     def configure_deezer(self) -> bool:
         """Configure Deezer integration (optional)."""
         console.print("\n[bold]Step 3:[/bold] Deezer Configuration (Optional)")
-        console.print("[dim]Deezer is used for playlist repair and cross-platform features.[/dim]\n")
+        console.print(
+            "[dim]Deezer is used for playlist repair and cross-platform features.[/dim]\n"
+        )
 
         if not Confirm.ask("Configure Deezer now?", default=False):
             console.print("[dim]○ Skipped - You can configure Deezer later if needed[/dim]")
@@ -170,8 +178,8 @@ This wizard will help you configure your music management suite in less than 10 
             return False
 
         try:
-            config = {'email': email}
-            config_manager.save_config('deezer', config)
+            config = {"email": email}
+            config_manager.save_config("deezer", config)
             console.print("[green]✓ Deezer configured successfully![/green]")
             return True
         except Exception as e:
@@ -180,7 +188,7 @@ This wizard will help you configure your music management suite in less than 10 
 
     def show_summary(self, spotify: bool, deezer: bool):
         """Show setup summary."""
-        console.print("\n" + "="*70)
+        console.print("\n" + "=" * 70)
         console.print("[bold cyan]Setup Complete![/bold cyan]\n")
 
         # Create summary table
@@ -192,13 +200,13 @@ This wizard will help you configure your music management suite in less than 10 
         table.add_row(
             "Spotify",
             "[green]✓ Configured[/green]" if spotify else "[yellow]⚠ Not configured[/yellow]",
-            "Playlists, Library, Tracks" if spotify else "[dim]Configure to enable[/dim]"
+            "Playlists, Library, Tracks" if spotify else "[dim]Configure to enable[/dim]",
         )
 
         table.add_row(
             "Deezer",
             "[green]✓ Configured[/green]" if deezer else "[dim]○ Not configured[/dim]",
-            "Playlist repair, Cross-platform" if deezer else "[dim]Optional[/dim]"
+            "Playlist repair, Cross-platform" if deezer else "[dim]Optional[/dim]",
         )
 
         console.print(table)

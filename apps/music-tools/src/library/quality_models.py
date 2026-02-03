@@ -23,7 +23,7 @@ MIN_DURATION = 0.0
 MIN_FILE_SIZE = 0
 
 # Quality thresholds
-LOSSLESS_FORMATS = {'flac', 'wav', 'aiff', 'ape', 'alac'}
+LOSSLESS_FORMATS = {"flac", "wav", "aiff", "ape", "alac"}
 HIGH_QUALITY_BITRATE = 320000  # 320 kbps
 CD_QUALITY_SAMPLE_RATE = 44100  # 44.1 kHz
 CD_QUALITY_BIT_DEPTH = 16
@@ -75,11 +75,15 @@ class AudioQuality:
 
             # Validate sample rate
             if self.sample_rate < MIN_SAMPLE_RATE:
-                raise ValueError(f"Sample rate must be >= {MIN_SAMPLE_RATE}, got {self.sample_rate}")
+                raise ValueError(
+                    f"Sample rate must be >= {MIN_SAMPLE_RATE}, got {self.sample_rate}"
+                )
 
             # Validate channels
             if not MIN_CHANNELS <= self.channels <= MAX_CHANNELS:
-                raise ValueError(f"Channels must be between {MIN_CHANNELS} and {MAX_CHANNELS}, got {self.channels}")
+                raise ValueError(
+                    f"Channels must be between {MIN_CHANNELS} and {MAX_CHANNELS}, got {self.channels}"
+                )
 
             # Validate duration
             if self.duration < MIN_DURATION:
@@ -93,7 +97,9 @@ class AudioQuality:
 
             # Validate quality score range
             if not MIN_QUALITY_SCORE <= self.quality_score <= MAX_QUALITY_SCORE:
-                raise ValueError(f"Quality score must be between {MIN_QUALITY_SCORE} and {MAX_QUALITY_SCORE}, got {self.quality_score}")
+                raise ValueError(
+                    f"Quality score must be between {MIN_QUALITY_SCORE} and {MAX_QUALITY_SCORE}, got {self.quality_score}"
+                )
 
             # Validate bit depth if present
             if self.bit_depth is not None and self.bit_depth <= 0:
@@ -131,8 +137,9 @@ class AudioQuality:
     @property
     def is_cd_quality(self) -> bool:
         """Check if audio meets CD quality standards."""
-        return (self.sample_rate >= CD_QUALITY_SAMPLE_RATE and
-                (self.bit_depth is None or self.bit_depth >= CD_QUALITY_BIT_DEPTH))
+        return self.sample_rate >= CD_QUALITY_SAMPLE_RATE and (
+            self.bit_depth is None or self.bit_depth >= CD_QUALITY_BIT_DEPTH
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage.
@@ -141,22 +148,22 @@ class AudioQuality:
             Dictionary representation of audio quality metrics
         """
         return {
-            'file_path': self.file_path,
-            'format': self.format,
-            'bitrate': self.bitrate,
-            'sample_rate': self.sample_rate,
-            'bit_depth': self.bit_depth,
-            'channels': self.channels,
-            'duration': self.duration,
-            'is_lossless': self.is_lossless,
-            'is_vbr': self.is_vbr,
-            'quality_score': self.quality_score,
-            'file_size': self.file_size,
-            'last_modified': self.last_modified.isoformat() if self.last_modified else None,
+            "file_path": self.file_path,
+            "format": self.format,
+            "bitrate": self.bitrate,
+            "sample_rate": self.sample_rate,
+            "bit_depth": self.bit_depth,
+            "channels": self.channels,
+            "duration": self.duration,
+            "is_lossless": self.is_lossless,
+            "is_vbr": self.is_vbr,
+            "quality_score": self.quality_score,
+            "file_size": self.file_size,
+            "last_modified": self.last_modified.isoformat() if self.last_modified else None,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'AudioQuality':
+    def from_dict(cls, data: Dict[str, Any]) -> "AudioQuality":
         """Create AudioQuality instance from dictionary.
 
         Args:
@@ -169,31 +176,31 @@ class AudioQuality:
             ValueError: If required fields are missing or invalid
         """
         # Validate required fields
-        required_fields = ['file_path', 'format', 'bitrate', 'sample_rate']
+        required_fields = ["file_path", "format", "bitrate", "sample_rate"]
         for field_name in required_fields:
             if field_name not in data:
                 raise ValueError(f"Missing required field: {field_name}")
 
         # Parse datetime if present
         last_modified = None
-        if data.get('last_modified'):
+        if data.get("last_modified"):
             try:
-                last_modified = datetime.fromisoformat(data['last_modified'])
+                last_modified = datetime.fromisoformat(data["last_modified"])
             except (ValueError, TypeError) as e:
                 logger.warning(f"Failed to parse last_modified '{data.get('last_modified')}': {e}")
 
         return cls(
-            file_path=str(data['file_path']),
-            format=str(data['format']),
-            bitrate=int(data['bitrate']),
-            sample_rate=int(data['sample_rate']),
-            bit_depth=data.get('bit_depth'),
-            channels=int(data.get('channels', 2)),
-            duration=float(data.get('duration', 0.0)),
-            is_lossless=bool(data.get('is_lossless', False)),
-            is_vbr=bool(data.get('is_vbr', False)),
-            quality_score=int(data.get('quality_score', 0)),
-            file_size=int(data.get('file_size', 0)),
+            file_path=str(data["file_path"]),
+            format=str(data["format"]),
+            bitrate=int(data["bitrate"]),
+            sample_rate=int(data["sample_rate"]),
+            bit_depth=data.get("bit_depth"),
+            channels=int(data.get("channels", 2)),
+            duration=float(data.get("duration", 0.0)),
+            is_lossless=bool(data.get("is_lossless", False)),
+            is_vbr=bool(data.get("is_vbr", False)),
+            quality_score=int(data.get("quality_score", 0)),
+            file_size=int(data.get("file_size", 0)),
             last_modified=last_modified,
         )
 
@@ -236,7 +243,9 @@ class DuplicateGroup:
 
             # Validate confidence range
             if not MIN_CONFIDENCE <= self.confidence <= MAX_CONFIDENCE:
-                raise ValueError(f"Confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}, got {self.confidence}")
+                raise ValueError(
+                    f"Confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}, got {self.confidence}"
+                )
 
             # Validate files list
             if not self.files:
@@ -290,19 +299,19 @@ class DuplicateGroup:
             Dictionary representation of duplicate group
         """
         return {
-            'id': self.id,
-            'track_hash': self.track_hash,
-            'files': [f.to_dict() for f in self.files],
-            'recommended_keep': self.recommended_keep.to_dict() if self.recommended_keep else None,
-            'recommended_delete': [f.to_dict() for f in self.recommended_delete],
-            'confidence': self.confidence,
-            'reason': self.reason,
-            'space_savings': self.space_savings,
-            'discovered_date': self.discovered_date.isoformat() if self.discovered_date else None,
+            "id": self.id,
+            "track_hash": self.track_hash,
+            "files": [f.to_dict() for f in self.files],
+            "recommended_keep": self.recommended_keep.to_dict() if self.recommended_keep else None,
+            "recommended_delete": [f.to_dict() for f in self.recommended_delete],
+            "confidence": self.confidence,
+            "reason": self.reason,
+            "space_savings": self.space_savings,
+            "discovered_date": self.discovered_date.isoformat() if self.discovered_date else None,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DuplicateGroup':
+    def from_dict(cls, data: Dict[str, Any]) -> "DuplicateGroup":
         """Create DuplicateGroup instance from dictionary.
 
         Args:
@@ -315,53 +324,55 @@ class DuplicateGroup:
             ValueError: If required fields are missing or invalid
         """
         # Validate required fields
-        required_fields = ['id', 'track_hash']
+        required_fields = ["id", "track_hash"]
         for field_name in required_fields:
             if field_name not in data:
                 raise ValueError(f"Missing required field: {field_name}")
 
         # Parse files list
         files = []
-        if data.get('files'):
+        if data.get("files"):
             try:
-                files = [AudioQuality.from_dict(f) for f in data['files']]
+                files = [AudioQuality.from_dict(f) for f in data["files"]]
             except Exception as e:
                 logger.error(f"Failed to parse files list: {e}")
                 raise ValueError(f"Invalid files data: {e}")
 
         # Parse recommended_keep
         recommended_keep = None
-        if data.get('recommended_keep'):
+        if data.get("recommended_keep"):
             try:
-                recommended_keep = AudioQuality.from_dict(data['recommended_keep'])
+                recommended_keep = AudioQuality.from_dict(data["recommended_keep"])
             except Exception as e:
                 logger.warning(f"Failed to parse recommended_keep: {e}")
 
         # Parse recommended_delete list
         recommended_delete = []
-        if data.get('recommended_delete'):
+        if data.get("recommended_delete"):
             try:
-                recommended_delete = [AudioQuality.from_dict(f) for f in data['recommended_delete']]
+                recommended_delete = [AudioQuality.from_dict(f) for f in data["recommended_delete"]]
             except Exception as e:
                 logger.warning(f"Failed to parse recommended_delete: {e}")
 
         # Parse discovered_date
         discovered_date = None
-        if data.get('discovered_date'):
+        if data.get("discovered_date"):
             try:
-                discovered_date = datetime.fromisoformat(data['discovered_date'])
+                discovered_date = datetime.fromisoformat(data["discovered_date"])
             except (ValueError, TypeError) as e:
-                logger.warning(f"Failed to parse discovered_date '{data.get('discovered_date')}': {e}")
+                logger.warning(
+                    f"Failed to parse discovered_date '{data.get('discovered_date')}': {e}"
+                )
 
         return cls(
-            id=str(data['id']),
-            track_hash=str(data['track_hash']),
+            id=str(data["id"]),
+            track_hash=str(data["track_hash"]),
             files=files,
             recommended_keep=recommended_keep,
             recommended_delete=recommended_delete,
-            confidence=float(data.get('confidence', 0.0)),
-            reason=str(data.get('reason', '')),
-            space_savings=int(data.get('space_savings', 0)),
+            confidence=float(data.get("confidence", 0.0)),
+            reason=str(data.get("reason", "")),
+            space_savings=int(data.get("space_savings", 0)),
             discovered_date=discovered_date,
         )
 
@@ -399,7 +410,9 @@ class UpgradeCandidate:
 
             # Validate priority score range
             if not MIN_QUALITY_SCORE <= self.priority_score <= MAX_QUALITY_SCORE:
-                raise ValueError(f"Priority score must be between {MIN_QUALITY_SCORE} and {MAX_QUALITY_SCORE}, got {self.priority_score}")
+                raise ValueError(
+                    f"Priority score must be between {MIN_QUALITY_SCORE} and {MAX_QUALITY_SCORE}, got {self.priority_score}"
+                )
 
             # Validate quality gap
             if self.quality_gap < 0:
@@ -441,16 +454,16 @@ class UpgradeCandidate:
             Dictionary representation of upgrade candidate
         """
         return {
-            'current_file': self.current_file.to_dict(),
-            'target_format': self.target_format,
-            'quality_gap': self.quality_gap,
-            'priority_score': self.priority_score,
-            'available_services': self.available_services.copy(),
-            'estimated_improvement': self.estimated_improvement,
+            "current_file": self.current_file.to_dict(),
+            "target_format": self.target_format,
+            "quality_gap": self.quality_gap,
+            "priority_score": self.priority_score,
+            "available_services": self.available_services.copy(),
+            "estimated_improvement": self.estimated_improvement,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'UpgradeCandidate':
+    def from_dict(cls, data: Dict[str, Any]) -> "UpgradeCandidate":
         """Create UpgradeCandidate instance from dictionary.
 
         Args:
@@ -463,29 +476,29 @@ class UpgradeCandidate:
             ValueError: If required fields are missing or invalid
         """
         # Validate required fields
-        required_fields = ['current_file', 'target_format', 'quality_gap']
+        required_fields = ["current_file", "target_format", "quality_gap"]
         for field_name in required_fields:
             if field_name not in data:
                 raise ValueError(f"Missing required field: {field_name}")
 
         # Parse current_file
         try:
-            current_file = AudioQuality.from_dict(data['current_file'])
+            current_file = AudioQuality.from_dict(data["current_file"])
         except Exception as e:
             logger.error(f"Failed to parse current_file: {e}")
             raise ValueError(f"Invalid current_file data: {e}")
 
         # Parse available_services list
-        available_services = data.get('available_services', [])
+        available_services = data.get("available_services", [])
         if not isinstance(available_services, list):
             logger.warning("available_services is not a list, converting to empty list")
             available_services = []
 
         return cls(
             current_file=current_file,
-            target_format=str(data['target_format']),
-            quality_gap=int(data['quality_gap']),
-            priority_score=int(data.get('priority_score', 0)),
+            target_format=str(data["target_format"]),
+            quality_gap=int(data["quality_gap"]),
+            priority_score=int(data.get("priority_score", 0)),
             available_services=available_services,
-            estimated_improvement=str(data.get('estimated_improvement', '')),
+            estimated_improvement=str(data.get("estimated_improvement", "")),
         )

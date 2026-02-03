@@ -114,8 +114,7 @@ class MyMusicTool(BaseCLI):
         print("=" * 60 + "\n")
 
         confirm = prompt_choice(
-            "Are you sure you want to reset all settings?",
-            ["Yes, reset", "No, cancel"]
+            "Are you sure you want to reset all settings?", ["Yes, reset", "No, cancel"]
         )
 
         if confirm == "Yes, reset":

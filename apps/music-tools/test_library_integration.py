@@ -3,6 +3,7 @@
 Integration test for library duplicate detection system.
 Tests all critical components and bug fixes.
 """
+
 import os
 import sys
 import tempfile
@@ -10,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from library.database import LibraryDatabase
 from library.duplicate_checker import DuplicateChecker
@@ -31,7 +32,7 @@ def test_models():
         file_format="mp3",
         file_size=1000000,
         metadata_hash="test_hash",
-        file_content_hash="test_content_hash"
+        file_content_hash="test_content_hash",
     )
 
     # Check timezone awareness
@@ -47,23 +48,24 @@ def test_models():
         file_format="mp3",
         file_size=1000000,
         metadata_hash="NO_METADATA_HASH",
-        file_content_hash="test_hash"
+        file_content_hash="test_hash",
     )
 
-    assert empty_file.metadata_key == "__filename__|unknown.mp3", \
-        "Empty metadata should use filename"
+    assert (
+        empty_file.metadata_key == "__filename__|unknown.mp3"
+    ), "Empty metadata should use filename"
     print("✅ Metadata hash collision fix working")
 
     # Test from_dict error handling
     try:
         data = {
-            'file_path': '/test.mp3',
-            'filename': 'test.mp3',
-            'file_format': 'mp3',
-            'file_size': 1000,
-            'metadata_hash': 'hash',
-            'file_content_hash': 'hash',
-            'indexed_at': 'invalid_datetime'
+            "file_path": "/test.mp3",
+            "filename": "test.mp3",
+            "file_format": "mp3",
+            "file_size": 1000,
+            "metadata_hash": "hash",
+            "file_content_hash": "hash",
+            "indexed_at": "invalid_datetime",
         }
         file = LibraryFile.from_dict(data)
         # Should handle invalid datetime gracefully
@@ -77,9 +79,9 @@ def test_models():
         DuplicateResult(
             is_duplicate=True,
             confidence=1.5,  # Invalid - should be 0-1
-            match_type='exact_metadata',
+            match_type="exact_metadata",
             matched_file=None,
-            all_matches=[]
+            all_matches=[],
         )
         print("❌ DuplicateResult validation failed - accepted invalid confidence")
         return False
@@ -104,12 +106,11 @@ def test_hash_utils():
 
     # Test empty metadata handling
     empty_hash = calculate_metadata_hash(None, None)
-    assert empty_hash == "NO_METADATA_HASH", \
-        "Empty metadata should return special marker"
+    assert empty_hash == "NO_METADATA_HASH", "Empty metadata should return special marker"
     print("✅ Empty metadata handling working")
 
     # Test file hash with temp file
-    with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.txt') as f:
+    with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".txt") as f:
         f.write(b"Test content for hashing")
         temp_path = f.name
 
@@ -129,7 +130,7 @@ def test_database():
     print("\n=== Testing database.py ===")
 
     # Create temp database
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.db') as f:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".db") as f:
         db_path = f.name
 
     try:
@@ -145,7 +146,7 @@ def test_database():
                 file_size=1000,
                 metadata_hash="hash",
                 file_content_hash="hash",
-                file_mtime=datetime.now(timezone.utc)
+                file_mtime=datetime.now(timezone.utc),
             )
 
             # Try to add file (should work)
@@ -153,7 +154,7 @@ def test_database():
 
             # Now try with invalid column names (simulated)
             file_dict = malicious_file.to_dict()
-            file_dict['malicious_column; DROP TABLE library_index;'] = 'value'
+            file_dict["malicious_column; DROP TABLE library_index;"] = "value"
 
             # This should be caught by ALLOWED_COLUMNS validation
             try:
@@ -187,7 +188,7 @@ def test_duplicate_checker():
     print("\n=== Testing duplicate_checker.py ===")
 
     # Create temp database
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.db') as f:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".db") as f:
         db_path = f.name
 
     try:
@@ -228,25 +229,21 @@ def test_vetter_categorization():
     uncertain_result = DuplicateResult(
         is_duplicate=False,
         confidence=0.75,  # Between 0.7 and threshold (0.8)
-        match_type='fuzzy_metadata',
+        match_type="fuzzy_metadata",
         matched_file=None,
-        all_matches=[]
+        all_matches=[],
     )
 
     duplicate_result = DuplicateResult(
         is_duplicate=True,
         confidence=0.95,
-        match_type='exact_metadata',
+        match_type="exact_metadata",
         matched_file=None,
-        all_matches=[]
+        all_matches=[],
     )
 
     new_result = DuplicateResult(
-        is_duplicate=False,
-        confidence=0.0,
-        match_type='none',
-        matched_file=None,
-        all_matches=[]
+        is_duplicate=False, confidence=0.0, match_type="none", matched_file=None, all_matches=[]
     )
 
     # Verify is_uncertain property
@@ -261,10 +258,10 @@ def test_vetter_categorization():
 
 def main():
     """Run all tests."""
-    print("="*60)
+    print("=" * 60)
     print("LIBRARY DUPLICATE DETECTION - INTEGRATION TESTS")
     print("Testing all critical bug fixes")
-    print("="*60)
+    print("=" * 60)
 
     all_passed = True
 
@@ -285,12 +282,13 @@ def main():
             all_passed = False
             print(f"\n❌ {name} tests FAILED with exception: {e}")
             import traceback
+
             traceback.print_exc()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     if all_passed:
         print("✅ ALL TESTS PASSED")
-        print("="*60)
+        print("=" * 60)
         print("\nSystem Status: PRODUCTION READY")
         print("\nAll critical and high severity bugs have been fixed:")
         print("  ✅ Timezone-aware datetimes")
@@ -306,9 +304,9 @@ def main():
         return 0
     else:
         print("❌ SOME TESTS FAILED")
-        print("="*60)
+        print("=" * 60)
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

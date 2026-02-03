@@ -16,13 +16,13 @@ def test_requirements_file():
     """Test that requirements.txt exists and is valid."""
     print("🔍 Testing requirements.txt...")
 
-    if not os.path.exists('requirements.txt'):
+    if not os.path.exists("requirements.txt"):
         print("❌ requirements.txt not found")
         return False
 
-    with open('requirements.txt', 'r') as f:
+    with open("requirements.txt", "r") as f:
         content = f.read()
-        if 'requests' in content and 'beautifulsoup4' in content:
+        if "requests" in content and "beautifulsoup4" in content:
             print("✅ requirements.txt is valid")
             return True
         else:
@@ -45,7 +45,7 @@ def test_config_imports():
         )
 
         # Test that patterns are pre-compiled
-        if hasattr(DOWNLOAD_PATTERNS[0], 'search'):
+        if hasattr(DOWNLOAD_PATTERNS[0], "search"):
             print("✅ Config imports work and patterns are pre-compiled")
             return True
         else:
@@ -104,11 +104,12 @@ def test_music_scraper():
 
         # Test genre extraction with BeautifulSoup object handling
         from bs4 import BeautifulSoup
+
         html = "<html><body>progressive house melodic techno</body></html>"
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         genres = scraper.extract_genres_from_text(soup)
 
-        if 'progressive house' in genres and 'melodic' in genres:
+        if "progressive house" in genres and "melodic" in genres:
             print("✅ Music scraper works with fixes")
             return True
         else:
@@ -128,7 +129,7 @@ def test_link_extractor():
         from link_extractor import LinkExtractor
 
         # Create test file with more specific content
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("""
             Download links:
             - https://nfile.cc/test1.flac
@@ -142,11 +143,13 @@ def test_link_extractor():
             results = extractor.extract_from_text(test_file)
 
             # The extractor finds links in both the text and the bullet points
-            if results['total_links'] >= 3:  # Allow for multiple matches
+            if results["total_links"] >= 3:  # Allow for multiple matches
                 print("✅ Link extractor works with streaming")
                 return True
             else:
-                print(f"❌ Link extractor found {results['total_links']} links, expected at least 3")
+                print(
+                    f"❌ Link extractor found {results['total_links']} links, expected at least 3"
+                )
                 return False
 
         finally:
@@ -168,7 +171,7 @@ def test_async_scraper():
         # Test initialization
         scraper = AsyncMusicBlogScraper("https://example.com", max_concurrent=3)
 
-        if scraper.max_concurrent == 3 and hasattr(scraper.rate_limiter, 'wait_if_needed'):
+        if scraper.max_concurrent == 3 and hasattr(scraper.rate_limiter, "wait_if_needed"):
             print("✅ Async scraper works with new rate limiter")
             return True
         else:
@@ -245,10 +248,10 @@ def test_models_validation():
 
         # Test valid post data
         post_data = {
-            'url': 'https://example.com/post',
-            'title': 'Test Post',
-            'genres': ['house', 'techno'],
-            'download_links': [{'url': 'https://example.com/track.flac'}]
+            "url": "https://example.com/post",
+            "title": "Test Post",
+            "genres": ["house", "techno"],
+            "download_links": [{"url": "https://example.com/track.flac"}],
         }
 
         validated_post = validate_post_data(post_data)
@@ -278,7 +281,7 @@ def main():
         test_async_scraper,
         test_cli_validation,
         test_date_validation,
-        test_models_validation
+        test_models_validation,
     ]
 
     passed = 0

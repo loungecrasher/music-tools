@@ -1,6 +1,7 @@
 """
 Interactive menu system.
 """
+
 from typing import Callable, List, Optional
 
 

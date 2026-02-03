@@ -40,39 +40,19 @@ def main():
     """Main entry point for test runner."""
     parser = argparse.ArgumentParser(description="Run tests for EDM Music Blog Scraper")
 
-    parser.add_argument(
-        "-c", "--coverage",
-        action="store_true",
-        help="Run with coverage report"
-    )
+    parser.add_argument("-c", "--coverage", action="store_true", help="Run with coverage report")
+
+    parser.add_argument("-v", "--verbose", action="store_true", help="Run with extra verbosity")
 
     parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Run with extra verbosity"
+        "-m", "--markers", help="Run tests matching given mark expression (e.g., 'not slow')"
     )
 
-    parser.add_argument(
-        "-m", "--markers",
-        help="Run tests matching given mark expression (e.g., 'not slow')"
-    )
+    parser.add_argument("-t", "--test", help="Run specific test file or test case")
 
-    parser.add_argument(
-        "-t", "--test",
-        help="Run specific test file or test case"
-    )
+    parser.add_argument("-x", "--failfast", action="store_true", help="Stop on first failure")
 
-    parser.add_argument(
-        "-x", "--failfast",
-        action="store_true",
-        help="Stop on first failure"
-    )
-
-    parser.add_argument(
-        "--pdb",
-        action="store_true",
-        help="Drop into debugger on failures"
-    )
+    parser.add_argument("--pdb", action="store_true", help="Drop into debugger on failures")
 
     args = parser.parse_args()
 

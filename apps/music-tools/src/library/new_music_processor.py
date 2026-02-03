@@ -7,6 +7,7 @@ into a single, streamlined workflow.
 Author: Music Tools Dev Team
 Created: 2026-01-26
 """
+
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ProcessingResult:
     """Results from processing a new music folder."""
+
     total_files: int = 0
     duplicates: List[str] = None  # Files already in library
     already_reviewed: List[str] = None  # Files in history
@@ -63,11 +65,7 @@ class NewMusicProcessor:
         self.vetter = ImportVetter(library_db, console=console)
         self.candidate_manager = CandidateManager()
 
-    def process_folder(
-        self,
-        folder_path: str,
-        threshold: float = 0.8
-    ) -> ProcessingResult:
+    def process_folder(self, folder_path: str, threshold: float = 0.8) -> ProcessingResult:
         """
         Process a new music folder against library and history.
 
@@ -87,9 +85,7 @@ class NewMusicProcessor:
         # Step 1: Check against library
         self.console.print("\n[cyan]Step 1/2: Checking against library index...[/cyan]")
         vet_report = self.vetter.vet_folder(
-            import_folder=str(folder),
-            threshold=threshold,
-            show_progress=True
+            import_folder=str(folder), threshold=threshold, show_progress=True
         )
 
         # Step 2: Check against history
@@ -104,7 +100,7 @@ class NewMusicProcessor:
             result.duplicates.append(file_path)
 
         # Already reviewed (in history but not necessarily in library)
-        history_files = {match['path'] for match in history_matches}
+        history_files = {match["path"] for match in history_matches}
         duplicate_files = set(result.duplicates)
 
         for hist_file in history_files:
@@ -131,26 +127,12 @@ class NewMusicProcessor:
         summary.add_column("Count", style="cyan", justify="right", width=10)
         summary.add_column("Description", style="white", width=50)
 
+        summary.add_row("📊 Total Files", str(result.total_files), "Total audio files scanned")
+        summary.add_row("🔴 Duplicates", str(len(result.duplicates)), "Already in your library")
         summary.add_row(
-            "📊 Total Files",
-            str(result.total_files),
-            "Total audio files scanned"
+            "🟡 Reviewed", str(len(result.already_reviewed)), "You've listened to before"
         )
-        summary.add_row(
-            "🔴 Duplicates",
-            str(len(result.duplicates)),
-            "Already in your library"
-        )
-        summary.add_row(
-            "🟡 Reviewed",
-            str(len(result.already_reviewed)),
-            "You've listened to before"
-        )
-        summary.add_row(
-            "🟢 New",
-            str(len(result.truly_new)),
-            "Require your attention"
-        )
+        summary.add_row("🟢 New", str(len(result.truly_new)), "Require your attention")
 
         self.console.print("\n", summary)
 
@@ -160,8 +142,10 @@ class NewMusicProcessor:
             rev_pct = (len(result.already_reviewed) / result.total_files) * 100
             new_pct = (len(result.truly_new) / result.total_files) * 100
 
-            self.console.print(f"\n[dim]Breakdown: {dup_pct:.1f}% duplicates | "
-                               f"{rev_pct:.1f}% reviewed | {new_pct:.1f}% new[/dim]")
+            self.console.print(
+                f"\n[dim]Breakdown: {dup_pct:.1f}% duplicates | "
+                f"{rev_pct:.1f}% reviewed | {new_pct:.1f}% new[/dim]"
+            )
 
     def export_new_songs(self, result: ProcessingResult, folder_path: str) -> str:
         """
@@ -176,7 +160,7 @@ class NewMusicProcessor:
         """
         export_path = Path(folder_path) / "new_songs.txt"
 
-        with open(export_path, 'w', encoding='utf-8') as f:
+        with open(export_path, "w", encoding="utf-8") as f:
             f.write(f"New Songs to Review ({len(result.truly_new)} files)\n")
             f.write("=" * 60 + "\n\n")
 
@@ -186,11 +170,7 @@ class NewMusicProcessor:
 
         return str(export_path)
 
-    def interactive_cleanup(
-        self,
-        result: ProcessingResult,
-        folder_path: str
-    ) -> Tuple[int, int]:
+    def interactive_cleanup(self, result: ProcessingResult, folder_path: str) -> Tuple[int, int]:
         """
         Interactive cleanup workflow for duplicates and reviewed files.
 
@@ -210,9 +190,7 @@ class NewMusicProcessor:
         if result.duplicates:
             self.console.print(f"\n[yellow]Found {len(result.duplicates)} duplicate files[/yellow]")
             action = Prompt.ask(
-                "Delete duplicates?",
-                choices=["yes", "no", "review"],
-                default="review"
+                "Delete duplicates?", choices=["yes", "no", "review"], default="review"
             )
 
             if action == "yes":
@@ -237,11 +215,11 @@ class NewMusicProcessor:
 
         # Handle already reviewed
         if result.already_reviewed:
-            self.console.print(f"\n[yellow]Found {len(result.already_reviewed)} previously reviewed files[/yellow]")
+            self.console.print(
+                f"\n[yellow]Found {len(result.already_reviewed)} previously reviewed files[/yellow]"
+            )
             action = Prompt.ask(
-                "Delete reviewed files?",
-                choices=["yes", "no", "review"],
-                default="no"
+                "Delete reviewed files?", choices=["yes", "no", "review"], default="no"
             )
 
             if action == "yes":

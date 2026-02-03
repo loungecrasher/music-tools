@@ -12,11 +12,11 @@ from .models import DuplicateResult, LibraryFile, VettingReport
 from .vetter import ImportVetter
 
 __all__ = [
-    'LibraryFile',
-    'VettingReport',
-    'DuplicateResult',
-    'LibraryDatabase',
-    'LibraryIndexer',
-    'DuplicateChecker',
-    'ImportVetter',
+    "LibraryFile",
+    "VettingReport",
+    "DuplicateResult",
+    "LibraryDatabase",
+    "LibraryIndexer",
+    "DuplicateChecker",
+    "ImportVetter",
 ]

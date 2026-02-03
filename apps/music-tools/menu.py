@@ -4,6 +4,7 @@ Unified menu interface for Music Tools.
 Provides access to all music-related tools through a centralized menu.
 Enhanced with Rich for better visual presentation.
 """
+
 import os
 import sys
 import time
@@ -50,11 +51,11 @@ except ImportError as e:
     sys.exit(1)
 
 # Set up logging
-logger = setup_logger('music_tools.menu')
+logger = setup_logger("music_tools.menu")
 
 # Constants
 TOOLS_DIR = os.path.dirname(os.path.realpath(__file__))
-DATA_DIR = os.path.join(TOOLS_DIR, 'data')
+DATA_DIR = os.path.join(TOOLS_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # Initialize Rich console
@@ -75,6 +76,7 @@ def display_enhanced_welcome() -> None:
     if db_path.exists():
         try:
             from src.library.database import LibraryDatabase
+
             library_db = LibraryDatabase(str(db_path))
             library_stats = library_db.get_statistics()
         except Exception as e:
@@ -94,25 +96,32 @@ def display_enhanced_welcome() -> None:
         welcome_text.append(f"  Albums: {library_stats.albums_count:,}\n", style="green")
     else:
         welcome_text.append("  Library: ", style="white")
-        welcome_text.append("Not indexed yet - run 'Index Library' to get started\n", style="yellow")
+        welcome_text.append(
+            "Not indexed yet - run 'Index Library' to get started\n", style="yellow"
+        )
 
     welcome_text.append("\nMain Features:\n", style="bold cyan")
-    welcome_text.append("  Process New Music - Check new folders against library + history\n", style="white")
-    welcome_text.append("  Library Management - Indexing, duplicate detection, statistics\n", style="white")
+    welcome_text.append(
+        "  Process New Music - Check new folders against library + history\n", style="white"
+    )
+    welcome_text.append(
+        "  Library Management - Indexing, duplicate detection, statistics\n", style="white"
+    )
     welcome_text.append("  EDM Blog Scraper - Find new music from EDM blogs\n", style="white")
     welcome_text.append("  AI Country Tagger - Tag files with country metadata\n", style="white")
-    welcome_text.append("  Spotify Tools - Playlist management, date filters, aggregation\n", style="white")
-    welcome_text.append("  Serato Tools - Track indexing, CSV to crate, crate browser\n", style="white")
+    welcome_text.append(
+        "  Spotify Tools - Playlist management, date filters, aggregation\n", style="white"
+    )
+    welcome_text.append(
+        "  Serato Tools - Track indexing, CSV to crate, crate browser\n", style="white"
+    )
 
-    welcome_text.append("\nUse the menu below to navigate through the available tools.\n", style="dim")
+    welcome_text.append(
+        "\nUse the menu below to navigate through the available tools.\n", style="dim"
+    )
 
     # Display welcome panel
-    console.print(Panel(
-        welcome_text,
-        title=title,
-        border_style="cyan",
-        padding=(1, 2)
-    ))
+    console.print(Panel(welcome_text, title=title, border_style="cyan", padding=(1, 2)))
 
     # Version and copyright
     console.print("\n[dim]Version 2.0.0 | Music Inxite | Simplified & Streamlined[/dim]")
@@ -126,6 +135,7 @@ def main() -> None:
     # Check if first-run setup is needed
     try:
         from setup_wizard import SetupWizard
+
         wizard = SetupWizard()
         if wizard.needs_setup():
             console.print("\n[bold cyan]First-time setup detected![/bold cyan]")
@@ -144,31 +154,44 @@ def main() -> None:
     # Create main menu with organized categories
     main_menu = Menu("Music Tools - Main Menu")
 
-    main_menu.add_option("Process New Music Folder", run_process_new_music,
-                         "Check new folder against library + history")
-    main_menu.add_option("Index Library", run_library_index,
-                         "Scan your main music library (one-time setup)")
-    main_menu.add_option("Library Statistics", run_library_stats,
-                         "View your library statistics")
-    main_menu.add_option("EDM Blog Scraper", run_edm_blog_scraper,
-                         "Find new music from EDM blogs")
-    main_menu.add_option("Country Tagger (AI)", run_music_country_tagger,
-                         "Tag files with country metadata")
-    main_menu.add_option("Spotify Playlist Manager", run_spotify_playlist_manager,
-                         "View, create, copy, and deduplicate playlists")
-    main_menu.add_option("Spotify Tracks by Date", run_spotify_tracks_after_date,
-                         "Filter playlist tracks by release date")
-    main_menu.add_option("Recent Tracks Aggregator", run_recent_tracks_aggregator,
-                         "Aggregate recent adds from ALL playlists into one")
+    main_menu.add_option(
+        "Process New Music Folder",
+        run_process_new_music,
+        "Check new folder against library + history",
+    )
+    main_menu.add_option(
+        "Index Library", run_library_index, "Scan your main music library (one-time setup)"
+    )
+    main_menu.add_option("Library Statistics", run_library_stats, "View your library statistics")
+    main_menu.add_option("EDM Blog Scraper", run_edm_blog_scraper, "Find new music from EDM blogs")
+    main_menu.add_option(
+        "Country Tagger (AI)", run_music_country_tagger, "Tag files with country metadata"
+    )
+    main_menu.add_option(
+        "Spotify Playlist Manager",
+        run_spotify_playlist_manager,
+        "View, create, copy, and deduplicate playlists",
+    )
+    main_menu.add_option(
+        "Spotify Tracks by Date",
+        run_spotify_tracks_after_date,
+        "Filter playlist tracks by release date",
+    )
+    main_menu.add_option(
+        "Recent Tracks Aggregator",
+        run_recent_tracks_aggregator,
+        "Aggregate recent adds from ALL playlists into one",
+    )
 
     # Serato Tools submenu
     serato_menu = main_menu.create_submenu("Serato Tools")
-    serato_menu.add_option("Build Track Index", run_serato_build_index,
-                           "Index music library for fast CSV import")
-    serato_menu.add_option("CSV to Crate", run_serato_csv_to_crate,
-                           "Import CSV playlist to Serato crate")
-    serato_menu.add_option("List Crates", run_serato_list_crates,
-                           "Browse your Serato crates")
+    serato_menu.add_option(
+        "Build Track Index", run_serato_build_index, "Index music library for fast CSV import"
+    )
+    serato_menu.add_option(
+        "CSV to Crate", run_serato_csv_to_crate, "Import CSV playlist to Serato crate"
+    )
+    serato_menu.add_option("List Crates", run_serato_list_crates, "Browse your Serato crates")
     serato_menu.set_exit_option("Back to Main Menu")
 
     # Set exit option for main menu

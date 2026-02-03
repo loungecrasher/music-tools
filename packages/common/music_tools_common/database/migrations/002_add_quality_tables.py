@@ -32,15 +32,14 @@ from typing import Optional, Tuple
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger('migration_002')
+logger = logging.getLogger("migration_002")
 
 # Migration metadata
-MIGRATION_VERSION = '002'
-MIGRATION_NAME = 'add_quality_tables'
-MIGRATION_DESCRIPTION = 'Add file quality, deduplication history, and upgrade candidate tables'
+MIGRATION_VERSION = "002"
+MIGRATION_NAME = "add_quality_tables"
+MIGRATION_DESCRIPTION = "Add file quality, deduplication history, and upgrade candidate tables"
 
 
 class MigrationError(Exception):
@@ -65,7 +64,7 @@ def create_backup(db_path: str) -> str:
         if not db_file.exists():
             raise MigrationError(f"Database file not found: {db_path}")
 
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_path = db_file.parent / f"{db_file.stem}_backup_{timestamp}{db_file.suffix}"
 
         logger.info(f"Creating backup: {backup_path}")
@@ -99,16 +98,19 @@ def validate_database(conn: sqlite3.Connection) -> bool:
         WHERE type='table' AND name IN ('playlists', 'tracks', 'settings')
     """)
     existing_tables = {row[0] for row in cursor.fetchall()}
-    required_tables = {'playlists', 'tracks', 'settings'}
+    required_tables = {"playlists", "tracks", "settings"}
 
     if not required_tables.issubset(existing_tables):
         missing = required_tables - existing_tables
         raise MigrationError(f"Missing required tables: {missing}")
 
     # Check that migration hasn't already been applied
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT value FROM settings WHERE key = ?
-    """, (f'migration_version_{MIGRATION_VERSION}',))
+    """,
+        (f"migration_version_{MIGRATION_VERSION}",),
+    )
 
     result = cursor.fetchone()
     if result:
@@ -351,29 +353,30 @@ def migrate(db_path: str) -> Tuple[bool, str]:
 
         # Update schema version in settings
         now = datetime.now().isoformat()
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO settings (key, value, updated_at)
             VALUES (?, ?, ?)
-        """, (f'migration_version_{MIGRATION_VERSION}', now, now))
+        """,
+            (f"migration_version_{MIGRATION_VERSION}", now, now),
+        )
 
         # Store migration metadata
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO settings (key, value, updated_at)
             VALUES (?, ?, ?)
-        """, (
-            f'migration_{MIGRATION_VERSION}_name',
-            MIGRATION_NAME,
-            now
-        ))
+        """,
+            (f"migration_{MIGRATION_VERSION}_name", MIGRATION_NAME, now),
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO settings (key, value, updated_at)
             VALUES (?, ?, ?)
-        """, (
-            f'migration_{MIGRATION_VERSION}_description',
-            MIGRATION_DESCRIPTION,
-            now
-        ))
+        """,
+            (f"migration_{MIGRATION_VERSION}_description", MIGRATION_DESCRIPTION, now),
+        )
 
         # Commit transaction
         conn.commit()
@@ -464,13 +467,19 @@ def rollback(db_path: str, backup_path: Optional[str] = None) -> Tuple[bool, str
         logger.info("Removing version tracking...")
 
         # Remove version tracking
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM settings WHERE key LIKE ?
-        """, (f'migration_{MIGRATION_VERSION}%',))
+        """,
+            (f"migration_{MIGRATION_VERSION}%",),
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM settings WHERE key = ?
-        """, (f'migration_version_{MIGRATION_VERSION}',))
+        """,
+            (f"migration_version_{MIGRATION_VERSION}",),
+        )
 
         # Commit transaction
         conn.commit()
@@ -510,9 +519,12 @@ def get_migration_status(db_path: str) -> dict:
         cursor = conn.cursor()
 
         # Check if migration has been applied
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT value FROM settings WHERE key = ?
-        """, (f'migration_version_{MIGRATION_VERSION}',))
+        """,
+            (f"migration_version_{MIGRATION_VERSION}",),
+        )
 
         result = cursor.fetchone()
         applied = result is not None
@@ -528,23 +540,20 @@ def get_migration_status(db_path: str) -> dict:
         conn.close()
 
         return {
-            'version': MIGRATION_VERSION,
-            'name': MIGRATION_NAME,
-            'description': MIGRATION_DESCRIPTION,
-            'applied': applied,
-            'applied_date': applied_date,
-            'tables_exist': len(existing_tables) == 3,
-            'existing_tables': existing_tables
+            "version": MIGRATION_VERSION,
+            "name": MIGRATION_NAME,
+            "description": MIGRATION_DESCRIPTION,
+            "applied": applied,
+            "applied_date": applied_date,
+            "tables_exist": len(existing_tables) == 3,
+            "existing_tables": existing_tables,
         }
 
     except Exception as e:
-        return {
-            'version': MIGRATION_VERSION,
-            'error': str(e)
-        }
+        return {"version": MIGRATION_VERSION, "error": str(e)}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Run migration from command line.
 
@@ -565,28 +574,28 @@ if __name__ == '__main__':
     command = sys.argv[1]
     db_path = sys.argv[2]
 
-    if command == 'migrate':
+    if command == "migrate":
         success, message = migrate(db_path)
         print(message)
         sys.exit(0 if success else 1)
 
-    elif command == 'rollback':
+    elif command == "rollback":
         backup_path = sys.argv[3] if len(sys.argv) > 3 else None
         success, message = rollback(db_path, backup_path)
         print(message)
         sys.exit(0 if success else 1)
 
-    elif command == 'status':
+    elif command == "status":
         status = get_migration_status(db_path)
         print(f"Migration {status['version']}: {status['name']}")
         print(f"Description: {status['description']}")
         print(f"Applied: {status.get('applied', False)}")
-        if status.get('applied_date'):
+        if status.get("applied_date"):
             print(f"Applied Date: {status['applied_date']}")
         print(f"Tables Exist: {status.get('tables_exist', False)}")
-        if status.get('existing_tables'):
+        if status.get("existing_tables"):
             print(f"Existing Tables: {', '.join(status['existing_tables'])}")
-        if 'error' in status:
+        if "error" in status:
             print(f"Error: {status['error']}")
         sys.exit(0)
 

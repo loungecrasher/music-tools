@@ -158,9 +158,7 @@ class TestRecentTracksAggregatorLogic:
             "uri3": {"added_at": datetime(2026, 1, 20, tzinfo=timezone.utc)},
         }
 
-        sorted_tracks = sorted(
-            tracks.items(), key=lambda x: x[1]["added_at"], reverse=True
-        )
+        sorted_tracks = sorted(tracks.items(), key=lambda x: x[1]["added_at"], reverse=True)
 
         assert sorted_tracks[0][0] == "uri2"  # Jan 30
         assert sorted_tracks[1][0] == "uri3"  # Jan 20
@@ -174,7 +172,10 @@ class TestRecentTracksAggregatorLogic:
     def test_episodes_skipped(self):
         """Podcast episodes should be excluded."""
         item = _make_track_item(
-            "spotify:episode:xyz", "Episode 1", "Podcast", "2026-01-20T00:00:00Z",
+            "spotify:episode:xyz",
+            "Episode 1",
+            "Podcast",
+            "2026-01-20T00:00:00Z",
             track_type="episode",
         )
         assert item["track"]["type"] == "episode"
@@ -185,7 +186,7 @@ class TestRecentTracksAggregatorLogic:
 
         batches = []
         for start in range(0, len(uris), 100):
-            batches.append(uris[start: start + 100])
+            batches.append(uris[start : start + 100])
 
         assert len(batches) == 3
         assert len(batches[0]) == 100
@@ -252,9 +253,7 @@ class TestPlaylistCreateOrUpdate:
         user_id = "user1"
         playlist_name = "My New Playlist"
 
-        new_pl = sp.user_playlist_create(
-            user_id, playlist_name, public=False, description="test"
-        )
+        new_pl = sp.user_playlist_create(user_id, playlist_name, public=False, description="test")
 
         assert new_pl["id"] == "new_id"
         sp.user_playlist_create.assert_called_once()

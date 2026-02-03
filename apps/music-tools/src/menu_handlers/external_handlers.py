@@ -41,11 +41,13 @@ def run_tool(script_path: str) -> None:
 
         # If running Spotify script, add Spotify credentials to environment
         if "Spotify Script" in script_path:
-            spotify_config = _get_config('spotify')
+            spotify_config = _get_config("spotify")
             if spotify_config:
-                env['SPOTIPY_CLIENT_ID'] = spotify_config.get('client_id', '')
-                env['SPOTIPY_CLIENT_SECRET'] = spotify_config.get('client_secret', '')
-                env['SPOTIPY_REDIRECT_URI'] = spotify_config.get('redirect_uri', 'http://localhost:8888/callback')
+                env["SPOTIPY_CLIENT_ID"] = spotify_config.get("client_id", "")
+                env["SPOTIPY_CLIENT_SECRET"] = spotify_config.get("client_secret", "")
+                env["SPOTIPY_REDIRECT_URI"] = spotify_config.get(
+                    "redirect_uri", "http://localhost:8888/callback"
+                )
                 console.print("[dim]Added Spotify credentials to environment[/dim]")
 
         # For interactive tools, run with direct output to console
@@ -59,9 +61,7 @@ def run_tool(script_path: str) -> None:
         ):
             console.print(f"\n[bold green]Running {script_name} directly...[/bold green]")
             process = subprocess.Popen(
-                [sys.executable, script_path],
-                env=env,
-                cwd=script_dir or None
+                [sys.executable, script_path], env=env, cwd=script_dir or None
             )
             process.wait()
             return_code = process.returncode
@@ -69,7 +69,9 @@ def run_tool(script_path: str) -> None:
             if return_code == 0:
                 console.print(f"\n[bold green]✓ {script_name} completed successfully![/bold green]")
             else:
-                console.print(f"\n[bold red]✗ {script_name} failed with error code: {return_code}[/bold red]")
+                console.print(
+                    f"\n[bold red]✗ {script_name} failed with error code: {return_code}[/bold red]"
+                )
 
             Prompt.ask("\nPress Enter to continue")
             return
@@ -82,7 +84,7 @@ def run_tool(script_path: str) -> None:
                 stderr=subprocess.PIPE,
                 text=True,
                 env=env,
-                cwd=script_dir or None
+                cwd=script_dir or None,
             )
             stdout, stderr = process.communicate()
             return_code = process.returncode
@@ -91,22 +93,28 @@ def run_tool(script_path: str) -> None:
             console.print(f"\n[bold green]✓ {script_name} completed successfully![/bold green]")
 
             if stdout and stdout.strip():
-                console.print(Panel(
-                    stdout.strip(),
-                    title="[cyan]Output[/cyan]",
-                    border_style="cyan",
-                    expand=False
-                ))
+                console.print(
+                    Panel(
+                        stdout.strip(),
+                        title="[cyan]Output[/cyan]",
+                        border_style="cyan",
+                        expand=False,
+                    )
+                )
         else:
-            console.print(f"\n[bold red]✗ {script_name} failed with error code: {return_code}[/bold red]")
+            console.print(
+                f"\n[bold red]✗ {script_name} failed with error code: {return_code}[/bold red]"
+            )
 
             if stderr and stderr.strip():
-                console.print(Panel(
-                    stderr.strip(),
-                    title="[red]Error Output[/red]",
-                    border_style="red",
-                    expand=False
-                ))
+                console.print(
+                    Panel(
+                        stderr.strip(),
+                        title="[red]Error Output[/red]",
+                        border_style="red",
+                        expand=False,
+                    )
+                )
 
         Prompt.ask("\nPress Enter to continue")
     except subprocess.CalledProcessError as e:
@@ -123,6 +131,7 @@ def run_edm_blog_scraper() -> None:
 
     try:
         from src.scraping import cli_scraper
+
         cli_scraper.main()
     except ImportError as e:
         console.print(f"[bold red]Error importing EDM scraper module:[/bold red] {e}")
@@ -139,6 +148,7 @@ def run_music_country_tagger() -> None:
 
     try:
         from src.tagging import cli
+
         cli.main()
     except ImportError as e:
         console.print(f"[bold red]Error importing music tagger module:[/bold red] {e}")

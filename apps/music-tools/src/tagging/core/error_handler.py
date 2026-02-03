@@ -47,7 +47,7 @@ class MusicTaggerError(Exception):
         error_type: ErrorType = ErrorType.PERMANENT,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
         original_error: Optional[Exception] = None,
-        context: Optional[dict] = None
+        context: Optional[dict] = None,
     ):
         super().__init__(message)
         self.error_type = error_type
@@ -61,10 +61,7 @@ class ConfigurationError(MusicTaggerError):
 
     def __init__(self, message: str, **kwargs):
         super().__init__(
-            message,
-            error_type=ErrorType.CONFIGURATION,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
+            message, error_type=ErrorType.CONFIGURATION, severity=ErrorSeverity.HIGH, **kwargs
         )
 
 
@@ -73,10 +70,7 @@ class CacheError(MusicTaggerError):
 
     def __init__(self, message: str, **kwargs):
         super().__init__(
-            message,
-            error_type=ErrorType.DATABASE,
-            severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            message, error_type=ErrorType.DATABASE, severity=ErrorSeverity.MEDIUM, **kwargs
         )
 
 
@@ -85,10 +79,7 @@ class MetadataError(MusicTaggerError):
 
     def __init__(self, message: str, **kwargs):
         super().__init__(
-            message,
-            error_type=ErrorType.FILESYSTEM,
-            severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            message, error_type=ErrorType.FILESYSTEM, severity=ErrorSeverity.MEDIUM, **kwargs
         )
 
 
@@ -96,12 +87,7 @@ class APIError(MusicTaggerError):
     """API-related errors."""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message,
-            error_type=ErrorType.API,
-            severity=ErrorSeverity.MEDIUM,
-            **kwargs
-        )
+        super().__init__(message, error_type=ErrorType.API, severity=ErrorSeverity.MEDIUM, **kwargs)
 
 
 class RetryConfig:
@@ -113,7 +99,7 @@ class RetryConfig:
         base_delay: float = 1.0,
         max_delay: float = 60.0,
         exponential_base: float = 2.0,
-        jitter: bool = True
+        jitter: bool = True,
     ):
         self.max_attempts = max_attempts
         self.base_delay = base_delay
@@ -165,19 +151,20 @@ class ErrorHandler:
             ErrorType.TRANSIENT,
             ErrorType.NETWORK,
             ErrorType.API,
-            ErrorType.DATABASE  # SQLite temporary lock issues
+            ErrorType.DATABASE,  # SQLite temporary lock issues
         )
 
     def calculate_delay(self, attempt: int, config: RetryConfig) -> float:
         """Calculate delay before retry with exponential backoff."""
 
-        delay = config.base_delay * (config.exponential_base ** attempt)
+        delay = config.base_delay * (config.exponential_base**attempt)
         delay = min(delay, config.max_delay)
 
         # Add jitter to prevent thundering herd
         if config.jitter:
             import random
-            delay *= (0.5 + random.random() * 0.5)
+
+            delay *= 0.5 + random.random() * 0.5
 
         return delay
 
@@ -189,16 +176,13 @@ class ErrorHandler:
 
         self.error_counts[key] = self.error_counts.get(key, 0) + 1
         self.last_errors[key] = {
-            'error': str(error),
-            'timestamp': time.time(),
-            'type': error_type.value
+            "error": str(error),
+            "timestamp": time.time(),
+            "type": error_type.value,
         }
 
     def format_error_message(
-        self,
-        operation: str,
-        error: Exception,
-        context: Optional[dict] = None
+        self, operation: str, error: Exception, context: Optional[dict] = None
     ) -> str:
         """Format a consistent error message."""
 
@@ -217,7 +201,7 @@ class ErrorHandler:
         error: Exception,
         context: Optional[dict] = None,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-        reraise: bool = False
+        reraise: bool = False,
     ) -> Optional[str]:
         """Handle an error with consistent logging and formatting."""
 
@@ -250,7 +234,7 @@ def with_error_handling(
     context: Optional[dict] = None,
     severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     reraise: bool = False,
-    default_return: Any = None
+    default_return: Any = None,
 ):
     """Decorator for consistent error handling."""
 
@@ -267,11 +251,12 @@ def with_error_handling(
                     error=e,
                     context=context,
                     severity=severity,
-                    reraise=reraise
+                    reraise=reraise,
                 )
                 return default_return
 
         return wrapper
+
     return decorator
 
 
@@ -279,7 +264,7 @@ def with_retry(
     operation: str,
     retry_config: Optional[RetryConfig] = None,
     error_handler: Optional[ErrorHandler] = None,
-    context: Optional[dict] = None
+    context: Optional[dict] = None,
 ):
     """Decorator for automatic retry with exponential backoff."""
 
@@ -311,12 +296,13 @@ def with_retry(
             handler.handle_error(
                 operation=operation,
                 error=last_error,
-                context={**(context or {}), 'attempts': config.max_attempts},
+                context={**(context or {}), "attempts": config.max_attempts},
                 severity=ErrorSeverity.HIGH,
-                reraise=True
+                reraise=True,
             )
 
         return wrapper
+
     return decorator
 
 
@@ -324,7 +310,7 @@ def safe_operation(
     operation: str,
     default_return: Any = None,
     context: Optional[dict] = None,
-    severity: ErrorSeverity = ErrorSeverity.MEDIUM
+    severity: ErrorSeverity = ErrorSeverity.MEDIUM,
 ):
     """Decorator for operations that should never raise exceptions."""
 
@@ -333,7 +319,7 @@ def safe_operation(
         context=context,
         severity=severity,
         reraise=False,
-        default_return=default_return
+        default_return=default_return,
     )
 
 
@@ -345,39 +331,27 @@ error_handler = ErrorHandler()
 def handle_database_error(operation: str, error: Exception, context: Optional[dict] = None):
     """Handle database-specific errors."""
     return error_handler.handle_error(
-        operation=operation,
-        error=error,
-        context=context,
-        severity=ErrorSeverity.MEDIUM
+        operation=operation, error=error, context=context, severity=ErrorSeverity.MEDIUM
     )
 
 
 def handle_file_error(operation: str, error: Exception, file_path: Optional[str] = None):
     """Handle file system errors."""
-    context = {'file_path': file_path} if file_path else None
+    context = {"file_path": file_path} if file_path else None
     return error_handler.handle_error(
-        operation=operation,
-        error=error,
-        context=context,
-        severity=ErrorSeverity.MEDIUM
+        operation=operation, error=error, context=context, severity=ErrorSeverity.MEDIUM
     )
 
 
 def handle_api_error(operation: str, error: Exception, context: Optional[dict] = None):
     """Handle API errors with potential retry classification."""
     return error_handler.handle_error(
-        operation=operation,
-        error=error,
-        context=context,
-        severity=ErrorSeverity.MEDIUM
+        operation=operation, error=error, context=context, severity=ErrorSeverity.MEDIUM
     )
 
 
 def handle_config_error(operation: str, error: Exception, context: Optional[dict] = None):
     """Handle configuration errors."""
     return error_handler.handle_error(
-        operation=operation,
-        error=error,
-        context=context,
-        severity=ErrorSeverity.HIGH
+        operation=operation, error=error, context=context, severity=ErrorSeverity.HIGH
     )

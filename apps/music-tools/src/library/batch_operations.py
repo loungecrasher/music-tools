@@ -35,10 +35,22 @@ class BatchOperationsMixin:
 
     # Whitelist of allowed columns (must match LibraryDatabase.ALLOWED_COLUMNS)
     ALLOWED_COLUMNS = {
-        'id', 'file_path', 'filename', 'artist', 'title', 'album', 'year',
-        'duration', 'file_format', 'file_size', 'metadata_hash',
-        'file_content_hash', 'indexed_at', 'file_mtime', 'last_verified',
-        'is_active'
+        "id",
+        "file_path",
+        "filename",
+        "artist",
+        "title",
+        "album",
+        "year",
+        "duration",
+        "file_format",
+        "file_size",
+        "metadata_hash",
+        "file_content_hash",
+        "indexed_at",
+        "file_mtime",
+        "last_verified",
+        "is_active",
     }
 
     def batch_insert_files(self, files: List[LibraryFile], batch_size: int = 500) -> int:
@@ -79,7 +91,7 @@ class BatchOperationsMixin:
 
         # Process files in batches
         for i in range(0, len(files), batch_size):
-            batch = files[i:i + batch_size]
+            batch = files[i : i + batch_size]
 
             try:
                 # Try batch insert first
@@ -133,7 +145,7 @@ class BatchOperationsMixin:
 
             for file in files:
                 file_dict = file.to_dict()
-                file_dict.pop('id', None)  # Remove auto-generated id
+                file_dict.pop("id", None)  # Remove auto-generated id
 
                 # Validate columns on first file
                 if columns is None:
@@ -146,8 +158,8 @@ class BatchOperationsMixin:
                 file_dicts.append([file_dict.get(col) for col in columns])
 
             # Build SQL with placeholders
-            columns_str = ', '.join(columns)
-            placeholders = ', '.join(['?' for _ in columns])
+            columns_str = ", ".join(columns)
+            placeholders = ", ".join(["?" for _ in columns])
             sql = f"INSERT INTO library_index ({columns_str}) VALUES ({placeholders})"
 
             # Execute batch insert
@@ -185,7 +197,7 @@ class BatchOperationsMixin:
 
         # Process files in batches
         for i in range(0, len(files), batch_size):
-            batch = files[i:i + batch_size]
+            batch = files[i : i + batch_size]
 
             try:
                 # Try batch update
@@ -245,7 +257,7 @@ class BatchOperationsMixin:
 
             for file in files:
                 file_dict = file.to_dict()
-                file_id = file_dict.pop('id')
+                file_id = file_dict.pop("id")
 
                 # Validate columns on first file
                 if columns is None:
@@ -260,7 +272,7 @@ class BatchOperationsMixin:
                 file_data.append(values)
 
             # Build SQL with SET clause
-            set_clause = ', '.join([f"{col} = ?" for col in columns])
+            set_clause = ", ".join([f"{col} = ?" for col in columns])
             sql = f"UPDATE library_index SET {set_clause} WHERE id = ?"
 
             # Execute batch update
@@ -297,19 +309,21 @@ class BatchOperationsMixin:
 
         # Process paths in batches
         for i in range(0, len(paths), batch_size):
-            batch = paths[i:i + batch_size]
+            batch = paths[i : i + batch_size]
 
             try:
                 with self._get_connection() as conn:
                     cursor = conn.cursor()
 
                     # Use IN clause for batch delete
-                    placeholders = ','.join(['?' for _ in batch])
+                    placeholders = ",".join(["?" for _ in batch])
                     sql = f"DELETE FROM library_index WHERE file_path IN ({placeholders})"
 
                     cursor.execute(sql, batch)
                     total_deleted += cursor.rowcount
-                    logger.debug(f"Batch deleted {cursor.rowcount} files (batch {i//batch_size + 1})")
+                    logger.debug(
+                        f"Batch deleted {cursor.rowcount} files (batch {i//batch_size + 1})"
+                    )
 
             except Exception as e:
                 logger.error(f"Batch delete failed for batch {i//batch_size + 1}: {e}")
@@ -345,26 +359,30 @@ class BatchOperationsMixin:
 
         # Process paths in batches
         for i in range(0, len(paths), batch_size):
-            batch = paths[i:i + batch_size]
+            batch = paths[i : i + batch_size]
 
             try:
                 with self._get_connection() as conn:
                     cursor = conn.cursor()
 
                     # Use IN clause for batch update
-                    placeholders = ','.join(['?' for _ in batch])
+                    placeholders = ",".join(["?" for _ in batch])
                     sql = f"UPDATE library_index SET is_active = 0 WHERE file_path IN ({placeholders})"
 
                     cursor.execute(sql, batch)
                     total_marked += cursor.rowcount
-                    logger.debug(f"Batch marked {cursor.rowcount} files inactive (batch {i//batch_size + 1})")
+                    logger.debug(
+                        f"Batch marked {cursor.rowcount} files inactive (batch {i//batch_size + 1})"
+                    )
 
             except Exception as e:
                 logger.error(f"Batch mark inactive failed for batch {i//batch_size + 1}: {e}")
 
         return total_marked
 
-    def batch_get_files_by_paths(self, paths: List[str], batch_size: int = 500) -> Dict[str, Optional[LibraryFile]]:
+    def batch_get_files_by_paths(
+        self, paths: List[str], batch_size: int = 500
+    ) -> Dict[str, Optional[LibraryFile]]:
         """Get multiple files by paths in batched queries.
 
         Args:
@@ -393,21 +411,21 @@ class BatchOperationsMixin:
 
         # Process paths in batches
         for i in range(0, len(paths), batch_size):
-            batch = paths[i:i + batch_size]
+            batch = paths[i : i + batch_size]
 
             try:
                 with self._get_connection() as conn:
                     cursor = conn.cursor()
 
                     # Use IN clause for batch query
-                    placeholders = ','.join(['?' for _ in batch])
+                    placeholders = ",".join(["?" for _ in batch])
                     sql = f"SELECT * FROM library_index WHERE file_path IN ({placeholders})"
 
                     cursor.execute(sql, batch)
                     rows = cursor.fetchall()
 
                     # Map results
-                    found = {row['file_path']: LibraryFile.from_dict(dict(row)) for row in rows}
+                    found = {row["file_path"]: LibraryFile.from_dict(dict(row)) for row in rows}
 
                     # Add all paths to results (None if not found)
                     for path in batch:
@@ -422,10 +440,7 @@ class BatchOperationsMixin:
         return results
 
     def batch_get_files_by_hashes(
-        self,
-        hashes: List[str],
-        hash_type: str = 'metadata',
-        batch_size: int = 500
+        self, hashes: List[str], hash_type: str = "metadata", batch_size: int = 500
     ) -> Dict[str, List[LibraryFile]]:
         """Get multiple files by hash values in batched queries.
 
@@ -450,24 +465,24 @@ class BatchOperationsMixin:
         """
         if not hashes:
             raise ValueError("hashes cannot be None or empty")
-        if hash_type not in ('metadata', 'content'):
+        if hash_type not in ("metadata", "content"):
             raise ValueError(f"hash_type must be 'metadata' or 'content', got {hash_type}")
         # Clamp batch_size to valid range (1-1000), allowing small datasets
         batch_size = max(1, min(batch_size, 1000))
 
         results = {h: [] for h in hashes}
-        column = 'metadata_hash' if hash_type == 'metadata' else 'file_content_hash'
+        column = "metadata_hash" if hash_type == "metadata" else "file_content_hash"
 
         # Process hashes in batches
         for i in range(0, len(hashes), batch_size):
-            batch = hashes[i:i + batch_size]
+            batch = hashes[i : i + batch_size]
 
             try:
                 with self._get_connection() as conn:
                     cursor = conn.cursor()
 
                     # Use IN clause for batch query
-                    placeholders = ','.join(['?' for _ in batch])
+                    placeholders = ",".join(["?" for _ in batch])
                     sql = f"SELECT * FROM library_index WHERE {column} IN ({placeholders}) AND is_active = 1"
 
                     cursor.execute(sql, batch)
@@ -488,7 +503,7 @@ class BatchOperationsMixin:
         return results
 
     @contextmanager
-    def batch_operation(self, operation_type: str = 'insert'):
+    def batch_operation(self, operation_type: str = "insert"):
         """Context manager for batch database operations.
 
         Provides a high-level interface for accumulating and committing operations
@@ -511,6 +526,7 @@ class BatchOperationsMixin:
             - Single transaction per batch
             - Automatic rollback on error
         """
+
         class BatchOperationContext:
             def __init__(self, db, op_type):
                 self.db = db
@@ -526,11 +542,11 @@ class BatchOperationsMixin:
                 if not self.items:
                     return 0
 
-                if self.op_type == 'insert':
+                if self.op_type == "insert":
                     return self.db.batch_insert_files(self.items)
-                elif self.op_type == 'update':
+                elif self.op_type == "update":
                     return self.db.batch_update_files(self.items)
-                elif self.op_type == 'delete':
+                elif self.op_type == "delete":
                     # Items should be paths for delete
                     return self.db.batch_delete_files(self.items)
                 else:

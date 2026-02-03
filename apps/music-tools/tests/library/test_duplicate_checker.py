@@ -105,7 +105,7 @@ class TestCheckFile:
         checker = DuplicateChecker(library_db)
         result = checker.check_file("/nonexistent/file.mp3")
         assert result.is_duplicate is False
-        assert result.match_type == 'none'
+        assert result.match_type == "none"
 
     def test_exact_metadata_match(self, populated_library_db, tmp_path):
         """Test that exact metadata hash match is detected."""
@@ -114,17 +114,17 @@ class TestCheckFile:
         fake_file = tmp_path / "dup.flac"
         fake_file.write_bytes(b"fake audio data")
 
-        make_library_file(metadata_hash='hash_a1')
+        make_library_file(metadata_hash="hash_a1")
 
-        with patch.object(checker, '_extract_metadata') as mock_extract:
+        with patch.object(checker, "_extract_metadata") as mock_extract:
             mock_extract.return_value = make_library_file(
-                file_path=str(fake_file), metadata_hash='hash_a1'
+                file_path=str(fake_file), metadata_hash="hash_a1"
             )
             result = checker.check_file(str(fake_file))
 
         assert result.is_duplicate is True
         assert result.confidence == 1.0
-        assert result.match_type == 'exact_metadata'
+        assert result.match_type == "exact_metadata"
 
     def test_no_match_found(self, populated_library_db, tmp_path):
         checker = DuplicateChecker(populated_library_db)
@@ -132,18 +132,18 @@ class TestCheckFile:
         fake_file = tmp_path / "new_song.mp3"
         fake_file.write_bytes(b"new audio data")
 
-        with patch.object(checker, '_extract_metadata') as mock_extract:
+        with patch.object(checker, "_extract_metadata") as mock_extract:
             mock_extract.return_value = make_library_file(
                 file_path=str(fake_file),
-                artist='New Artist',
-                title='New Song',
-                metadata_hash='totally_new_hash',
-                file_content_hash='totally_new_content',
+                artist="New Artist",
+                title="New Song",
+                metadata_hash="totally_new_hash",
+                file_content_hash="totally_new_content",
             )
             result = checker.check_file(str(fake_file))
 
         assert result.is_duplicate is False
-        assert result.match_type == 'none'
+        assert result.match_type == "none"
 
 
 class TestCheckBatch:
@@ -176,14 +176,14 @@ class TestCheckMetadataHash:
 
     def test_returns_match(self, populated_library_db):
         checker = DuplicateChecker(populated_library_db)
-        file = make_library_file(metadata_hash='hash_a1')
+        file = make_library_file(metadata_hash="hash_a1")
         result = checker._check_metadata_hash(file)
         assert result is not None
-        assert result.metadata_hash == 'hash_a1'
+        assert result.metadata_hash == "hash_a1"
 
     def test_returns_none_for_no_match(self, populated_library_db):
         checker = DuplicateChecker(populated_library_db)
-        file = make_library_file(metadata_hash='nonexistent_hash')
+        file = make_library_file(metadata_hash="nonexistent_hash")
         assert checker._check_metadata_hash(file) is None
 
     def test_returns_none_for_none_file(self, library_db):
@@ -196,7 +196,7 @@ class TestCheckFuzzyMetadata:
 
     def test_finds_similar_titles(self, populated_library_db):
         checker = DuplicateChecker(populated_library_db)
-        file = make_library_file(artist='Artist A', title='Song On')  # Close to "Song One"
+        file = make_library_file(artist="Artist A", title="Song On")  # Close to "Song One"
         matches = checker._check_fuzzy_metadata(file, threshold=0.7)
         # May or may not find a match depending on similarity score
         # "Song On" vs "Song One" should be fairly similar
@@ -204,19 +204,19 @@ class TestCheckFuzzyMetadata:
 
     def test_no_artist_returns_empty(self, populated_library_db):
         checker = DuplicateChecker(populated_library_db)
-        file = make_library_file(artist=None, title='Song')
+        file = make_library_file(artist=None, title="Song")
         matches = checker._check_fuzzy_metadata(file, threshold=0.8)
         assert matches == []
 
     def test_no_title_returns_empty(self, populated_library_db):
         checker = DuplicateChecker(populated_library_db)
-        file = make_library_file(artist='Artist', title=None)
+        file = make_library_file(artist="Artist", title=None)
         matches = checker._check_fuzzy_metadata(file, threshold=0.8)
         assert matches == []
 
     def test_sorted_by_score_descending(self, populated_library_db):
         checker = DuplicateChecker(populated_library_db)
-        file = make_library_file(artist='Artist A', title='Song')
+        file = make_library_file(artist="Artist A", title="Song")
         matches = checker._check_fuzzy_metadata(file, threshold=0.3)
         if len(matches) > 1:
             scores = [score for _, score in matches]

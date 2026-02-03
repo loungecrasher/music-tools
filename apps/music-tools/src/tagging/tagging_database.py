@@ -22,6 +22,7 @@ from typing import Any, Dict, Optional, Tuple
 
 class FileStatus(Enum):
     """Status of a file in the tagging database."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -32,6 +33,7 @@ class FileStatus(Enum):
 @dataclass
 class FileRecord:
     """Represents a file record in the database."""
+
     id: int
     file_hash: str
     current_path: Optional[str]
@@ -139,7 +141,9 @@ class GlobalTaggingDatabase:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_status ON tagged_files(status)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_artist ON tagged_files(artist)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_path ON tagged_files(current_path)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_path_history_hash ON path_history(file_hash)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_path_history_hash ON path_history(file_hash)"
+            )
             conn.commit()
 
             print(f"Global database initialized: {self.db_path}")
@@ -157,58 +161,52 @@ class GlobalTaggingDatabase:
         """Get full record for a file by its hash."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute(
-                "SELECT * FROM tagged_files WHERE file_hash = ?",
-                (file_hash,)
-            )
+            cursor = conn.execute("SELECT * FROM tagged_files WHERE file_hash = ?", (file_hash,))
             row = cursor.fetchone()
             if not row:
                 return None
 
             return FileRecord(
-                id=row['id'],
-                file_hash=row['file_hash'],
-                current_path=row['current_path'],
-                file_size=row['file_size'],
-                artist=row['artist'],
-                title=row['title'],
-                status=FileStatus(row['status']),
-                genre_applied=row['genre_applied'],
-                grouping_applied=row['grouping_applied'],
-                year_applied=row['year_applied'],
-                processed_at=row['processed_at'],
-                error_message=row['error_message'],
-                retry_count=row['retry_count'],
-                created_at=row['created_at'],
-                last_seen_at=row['last_seen_at']
+                id=row["id"],
+                file_hash=row["file_hash"],
+                current_path=row["current_path"],
+                file_size=row["file_size"],
+                artist=row["artist"],
+                title=row["title"],
+                status=FileStatus(row["status"]),
+                genre_applied=row["genre_applied"],
+                grouping_applied=row["grouping_applied"],
+                year_applied=row["year_applied"],
+                processed_at=row["processed_at"],
+                error_message=row["error_message"],
+                retry_count=row["retry_count"],
+                created_at=row["created_at"],
+                last_seen_at=row["last_seen_at"],
             )
 
     def get_record_by_path(self, file_path: str) -> Optional[FileRecord]:
         """Get record by current path (less reliable than hash)."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute(
-                "SELECT * FROM tagged_files WHERE current_path = ?",
-                (file_path,)
-            )
+            cursor = conn.execute("SELECT * FROM tagged_files WHERE current_path = ?", (file_path,))
             row = cursor.fetchone()
             if row:
                 return FileRecord(
-                    id=row['id'],
-                    file_hash=row['file_hash'],
-                    current_path=row['current_path'],
-                    file_size=row['file_size'],
-                    artist=row['artist'],
-                    title=row['title'],
-                    status=FileStatus(row['status']),
-                    genre_applied=row['genre_applied'],
-                    grouping_applied=row['grouping_applied'],
-                    year_applied=row['year_applied'],
-                    processed_at=row['processed_at'],
-                    error_message=row['error_message'],
-                    retry_count=row['retry_count'],
-                    created_at=row['created_at'],
-                    last_seen_at=row['last_seen_at']
+                    id=row["id"],
+                    file_hash=row["file_hash"],
+                    current_path=row["current_path"],
+                    file_size=row["file_size"],
+                    artist=row["artist"],
+                    title=row["title"],
+                    status=FileStatus(row["status"]),
+                    genre_applied=row["genre_applied"],
+                    grouping_applied=row["grouping_applied"],
+                    year_applied=row["year_applied"],
+                    processed_at=row["processed_at"],
+                    error_message=row["error_message"],
+                    retry_count=row["retry_count"],
+                    created_at=row["created_at"],
+                    last_seen_at=row["last_seen_at"],
                 )
             return None
 
@@ -263,23 +261,34 @@ class GlobalTaggingDatabase:
         """Update the current path for a file and log to history."""
         with sqlite3.connect(self.db_path) as conn:
             # Update current path
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files SET
                     current_path = ?,
                     last_seen_at = CURRENT_TIMESTAMP
                 WHERE file_hash = ?
-            """, (new_path, file_hash))
+            """,
+                (new_path, file_hash),
+            )
 
             # Add to path history
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO path_history (file_hash, path)
                 VALUES (?, ?)
-            """, (file_hash, new_path))
+            """,
+                (file_hash, new_path),
+            )
 
             conn.commit()
 
-    def mark_processing(self, file_path: str, artist: Optional[str] = None,
-                        title: Optional[str] = None, metadata: Optional[Dict] = None):
+    def mark_processing(
+        self,
+        file_path: str,
+        artist: Optional[str] = None,
+        title: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+    ):
         """Mark a file as currently being processed."""
         try:
             file_hash = self.calculate_file_hash(file_path)
@@ -289,15 +298,13 @@ class GlobalTaggingDatabase:
 
         with sqlite3.connect(self.db_path) as conn:
             # Check if exists
-            cursor = conn.execute(
-                "SELECT id FROM tagged_files WHERE file_hash = ?",
-                (file_hash,)
-            )
+            cursor = conn.execute("SELECT id FROM tagged_files WHERE file_hash = ?", (file_hash,))
             exists = cursor.fetchone()
 
             if exists:
                 # Update existing
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE tagged_files SET
                         status = ?,
                         current_path = ?,
@@ -305,26 +312,39 @@ class GlobalTaggingDatabase:
                         title = COALESCE(?, title),
                         last_seen_at = CURRENT_TIMESTAMP
                     WHERE file_hash = ?
-                """, (FileStatus.PROCESSING.value, file_path, artist, title, file_hash))
+                """,
+                    (FileStatus.PROCESSING.value, file_path, artist, title, file_hash),
+                )
             else:
                 # Insert new
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO tagged_files
                     (file_hash, current_path, file_size, status, artist, title)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (file_hash, file_path, file_size, FileStatus.PROCESSING.value, artist, title))
+                """,
+                    (file_hash, file_path, file_size, FileStatus.PROCESSING.value, artist, title),
+                )
 
                 # Add to path history
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO path_history (file_hash, path)
                     VALUES (?, ?)
-                """, (file_hash, file_path))
+                """,
+                    (file_hash, file_path),
+                )
 
             conn.commit()
 
-    def mark_completed(self, file_path: str, genre: Optional[str] = None,
-                       grouping: Optional[str] = None, year: Optional[str] = None,
-                       artist: Optional[str] = None):
+    def mark_completed(
+        self,
+        file_path: str,
+        genre: Optional[str] = None,
+        grouping: Optional[str] = None,
+        year: Optional[str] = None,
+        artist: Optional[str] = None,
+    ):
         """Mark a file as successfully tagged."""
         try:
             file_hash = self.calculate_file_hash(file_path)
@@ -332,7 +352,8 @@ class GlobalTaggingDatabase:
             return
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files SET
                     status = ?,
                     genre_applied = COALESCE(?, genre_applied),
@@ -343,7 +364,9 @@ class GlobalTaggingDatabase:
                     error_message = NULL,
                     last_seen_at = CURRENT_TIMESTAMP
                 WHERE file_hash = ?
-            """, (FileStatus.COMPLETED.value, genre, grouping, year, artist, file_hash))
+            """,
+                (FileStatus.COMPLETED.value, genre, grouping, year, artist, file_hash),
+            )
             conn.commit()
 
     def mark_failed(self, file_path: str, error_message: str):
@@ -354,7 +377,8 @@ class GlobalTaggingDatabase:
             return
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files SET
                     status = ?,
                     error_message = ?,
@@ -362,7 +386,9 @@ class GlobalTaggingDatabase:
                     processed_at = CURRENT_TIMESTAMP,
                     last_seen_at = CURRENT_TIMESTAMP
                 WHERE file_hash = ?
-            """, (FileStatus.FAILED.value, error_message, file_hash))
+            """,
+                (FileStatus.FAILED.value, error_message, file_hash),
+            )
             conn.commit()
 
     def mark_skipped(self, file_path: str, reason: str):
@@ -375,27 +401,30 @@ class GlobalTaggingDatabase:
 
         with sqlite3.connect(self.db_path) as conn:
             # Check if exists
-            cursor = conn.execute(
-                "SELECT id FROM tagged_files WHERE file_hash = ?",
-                (file_hash,)
-            )
+            cursor = conn.execute("SELECT id FROM tagged_files WHERE file_hash = ?", (file_hash,))
             exists = cursor.fetchone()
 
             if exists:
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE tagged_files SET
                         status = ?,
                         error_message = ?,
                         current_path = ?,
                         last_seen_at = CURRENT_TIMESTAMP
                     WHERE file_hash = ?
-                """, (FileStatus.SKIPPED.value, reason, file_path, file_hash))
+                """,
+                    (FileStatus.SKIPPED.value, reason, file_path, file_hash),
+                )
             else:
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO tagged_files
                     (file_hash, current_path, file_size, status, error_message)
                     VALUES (?, ?, ?, ?, ?)
-                """, (file_hash, file_path, file_size, FileStatus.SKIPPED.value, reason))
+                """,
+                    (file_hash, file_path, file_size, FileStatus.SKIPPED.value, reason),
+                )
 
             conn.commit()
 
@@ -412,24 +441,24 @@ class GlobalTaggingDatabase:
             """)
             status_counts = {row[0]: row[1] for row in cursor.fetchall()}
 
-            stats['total_files'] = sum(status_counts.values())
-            stats['completed'] = status_counts.get('completed', 0)
-            stats['failed'] = status_counts.get('failed', 0)
-            stats['pending'] = status_counts.get('pending', 0)
-            stats['skipped'] = status_counts.get('skipped', 0)
+            stats["total_files"] = sum(status_counts.values())
+            stats["completed"] = status_counts.get("completed", 0)
+            stats["failed"] = status_counts.get("failed", 0)
+            stats["pending"] = status_counts.get("pending", 0)
+            stats["skipped"] = status_counts.get("skipped", 0)
 
             # Unique artists
             cursor = conn.execute("""
                 SELECT COUNT(DISTINCT artist) FROM tagged_files
                 WHERE artist IS NOT NULL
             """)
-            stats['unique_artists'] = cursor.fetchone()[0]
+            stats["unique_artists"] = cursor.fetchone()[0]
 
             # Last processed
             cursor = conn.execute("""
                 SELECT MAX(processed_at) FROM tagged_files
             """)
-            stats['last_processed'] = cursor.fetchone()[0]
+            stats["last_processed"] = cursor.fetchone()[0]
 
             return stats
 
@@ -465,42 +494,54 @@ class GlobalTaggingDatabase:
     def force_retag_artist(self, artist: str):
         """Mark all files by a specific artist as pending."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files
                 SET status = 'pending', retry_count = 0, error_message = NULL
                 WHERE artist = ?
-            """, (artist,))
+            """,
+                (artist,),
+            )
             conn.commit()
 
     # Session management
     def start_session(self, scan_directory: Optional[str] = None) -> int:
         """Start a new processing session."""
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 INSERT INTO sessions (scan_directory, started_at, status)
                 VALUES (?, CURRENT_TIMESTAMP, 'running')
-            """, (scan_directory,))
+            """,
+                (scan_directory,),
+            )
             conn.commit()
             return cursor.lastrowid
 
-    def update_session(self, session_id: int, files_processed: int,
-                       files_updated: int, files_failed: int):
+    def update_session(
+        self, session_id: int, files_processed: int, files_updated: int, files_failed: int
+    ):
         """Update session statistics."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE sessions SET
                     files_processed = ?,
                     files_updated = ?,
                     files_failed = ?
                 WHERE id = ?
-            """, (files_processed, files_updated, files_failed, session_id))
+            """,
+                (files_processed, files_updated, files_failed, session_id),
+            )
             conn.commit()
 
-    def end_session(self, session_id: int, files_processed: int,
-                    files_updated: int, files_failed: int):
+    def end_session(
+        self, session_id: int, files_processed: int, files_updated: int, files_failed: int
+    ):
         """End a processing session."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE sessions SET
                     ended_at = CURRENT_TIMESTAMP,
                     files_processed = ?,
@@ -508,7 +549,9 @@ class GlobalTaggingDatabase:
                     files_failed = ?,
                     status = 'completed'
                 WHERE id = ?
-            """, (files_processed, files_updated, files_failed, session_id))
+            """,
+                (files_processed, files_updated, files_failed, session_id),
+            )
             conn.commit()
 
     def get_last_session(self) -> Optional[Dict[str, Any]]:

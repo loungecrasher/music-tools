@@ -71,7 +71,7 @@ cli_file = apps_dir / "music_tools_cli" / "commands" / "library.py"
 if check_file(cli_file, "library.py (CLI)"):
     with open(cli_file) as f:
         content = f.read()
-        for cmd in ['scan', 'deduplicate', 'upgrades']:
+        for cmd in ["scan", "deduplicate", "upgrades"]:
             if f'@library_app.command("{cmd}")' in content:
                 print(f"   ✅ Command '{cmd}' found")
 print()

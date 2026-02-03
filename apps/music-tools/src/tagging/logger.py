@@ -30,7 +30,8 @@ _console = Console()
 @dataclass
 class LogConfig:
     """Configuration for logging system."""
-    log_level: str = 'INFO'
+
+    log_level: str = "INFO"
     log_to_console: bool = True
     log_to_file: bool = True
     log_dir: Optional[str] = None
@@ -68,11 +69,9 @@ class PerformanceLogger:
             self.logger.info(f"Timer '{name}' completed in {elapsed:.3f}s")
 
         # Store performance data
-        self._performance_log.append({
-            'timestamp': datetime.now().isoformat(),
-            'timer_name': name,
-            'elapsed_time': elapsed
-        })
+        self._performance_log.append(
+            {"timestamp": datetime.now().isoformat(), "timer_name": name, "elapsed_time": elapsed}
+        )
 
         return elapsed
 
@@ -94,9 +93,9 @@ class PerformanceLogger:
     def get_performance_summary(self) -> Dict[str, Any]:
         """Get performance summary."""
         return {
-            'active_timers': list(self._timers.keys()),
-            'counters': dict(self._counters),
-            'recent_timings': self._performance_log[-20:] if self._performance_log else []
+            "active_timers": list(self._timers.keys()),
+            "counters": dict(self._counters),
+            "recent_timings": self._performance_log[-20:] if self._performance_log else [],
         }
 
     def log_system_info(self):
@@ -107,12 +106,12 @@ class PerformanceLogger:
             import psutil
 
             system_info = {
-                'platform': platform.system(),
-                'platform_version': platform.version(),
-                'python_version': platform.python_version(),
-                'cpu_count': os.cpu_count(),
-                'memory_total_mb': psutil.virtual_memory().total // (1024 * 1024),
-                'disk_free_gb': psutil.disk_usage('/').free // (1024 * 1024 * 1024)
+                "platform": platform.system(),
+                "platform_version": platform.version(),
+                "python_version": platform.python_version(),
+                "cpu_count": os.cpu_count(),
+                "memory_total_mb": psutil.virtual_memory().total // (1024 * 1024),
+                "disk_free_gb": psutil.disk_usage("/").free // (1024 * 1024 * 1024),
             }
 
             self.logger.info(f"System info: {json.dumps(system_info, indent=2)}")
@@ -143,11 +142,12 @@ class StructuredLogFormatter(logging.Formatter):
         # Import security module if available
         try:
             from .core.security import SecurityValidator
+
             return SecurityValidator.sanitize_log_message(value)
         except ImportError:
             # Fallback sanitization if security module not available
             # Remove line breaks to prevent log injection
-            sanitized = str(value).replace('\n', '\\n').replace('\r', '\\r')
+            sanitized = str(value).replace("\n", "\\n").replace("\r", "\\r")
             # Limit length to prevent log bloat
             return sanitized[:1000] if len(sanitized) > 1000 else sanitized
 
@@ -156,35 +156,53 @@ class StructuredLogFormatter(logging.Formatter):
         timestamp = datetime.fromtimestamp(record.created).isoformat()
 
         log_data = {
-            'timestamp': timestamp,
-            'level': record.levelname,
-            'logger': record.name,
-            'message': self._sanitize_log_value(record.getMessage()),
+            "timestamp": timestamp,
+            "level": record.levelname,
+            "logger": record.name,
+            "message": self._sanitize_log_value(record.getMessage()),
         }
 
         # Add location info for debug level
         if record.levelno <= logging.DEBUG:
-            log_data['file'] = record.filename
-            log_data['line'] = record.lineno
-            log_data['function'] = record.funcName
+            log_data["file"] = record.filename
+            log_data["line"] = record.lineno
+            log_data["function"] = record.funcName
 
         # Add exception info if present
         if record.exc_info:
-            log_data['exception'] = self.formatException(record.exc_info)
+            log_data["exception"] = self.formatException(record.exc_info)
 
         # Add extra fields if enabled
         if self.include_extra:
             for key, value in record.__dict__.items():
-                if key not in ['name', 'msg', 'args', 'levelname', 'levelno', 'pathname',
-                               'filename', 'module', 'lineno', 'funcName', 'created',
-                               'msecs', 'relativeCreated', 'thread', 'threadName',
-                               'processName', 'process', 'message', 'exc_info', 'exc_text',
-                               'stack_info']:
-                    log_data['extra'] = log_data.get('extra', {})
+                if key not in [
+                    "name",
+                    "msg",
+                    "args",
+                    "levelname",
+                    "levelno",
+                    "pathname",
+                    "filename",
+                    "module",
+                    "lineno",
+                    "funcName",
+                    "created",
+                    "msecs",
+                    "relativeCreated",
+                    "thread",
+                    "threadName",
+                    "processName",
+                    "process",
+                    "message",
+                    "exc_info",
+                    "exc_text",
+                    "stack_info",
+                ]:
+                    log_data["extra"] = log_data.get("extra", {})
                     # Sanitize log values to prevent log injection
                     if isinstance(value, str):
                         value = self._sanitize_log_value(value)
-                    log_data['extra'][key] = value
+                    log_data["extra"][key] = value
 
         return json.dumps(log_data)
 
@@ -200,7 +218,7 @@ def setup_logging(config: Optional[LogConfig] = None) -> Path:
     if config.log_dir:
         _log_dir = Path(config.log_dir)
     else:
-        _log_dir = Path.home() / '.music_tagger' / 'logs'
+        _log_dir = Path.home() / ".music_tagger" / "logs"
 
     # Create log directory
     _log_dir.mkdir(parents=True, exist_ok=True)
@@ -220,66 +238,62 @@ def setup_logging(config: Optional[LogConfig] = None) -> Path:
             show_path=False,
             rich_tracebacks=True,
             markup=False,
-            log_time_format="[%X]"
+            log_time_format="[%X]",
         )
         console_handler.setLevel(getattr(logging, config.log_level.upper()))
 
         # Use simple format for console
-        console_formatter = logging.Formatter(
-            fmt="%(message)s",
-            datefmt=config.date_format
-        )
+        console_formatter = logging.Formatter(fmt="%(message)s", datefmt=config.date_format)
         console_handler.setFormatter(console_formatter)
         root_logger.addHandler(console_handler)
 
     # File handler with rotation
     if config.log_to_file:
         # Main log file
-        main_log_file = _log_dir / 'music_tagger.log'
+        main_log_file = _log_dir / "music_tagger.log"
         file_handler = logging.handlers.RotatingFileHandler(
             filename=main_log_file,
             maxBytes=config.max_file_size_mb * 1024 * 1024,
             backupCount=config.backup_count,
-            encoding='utf-8'
+            encoding="utf-8",
         )
         file_handler.setLevel(logging.DEBUG)  # Always capture debug in files
 
         # Detailed format for files
-        file_formatter = logging.Formatter(
-            fmt=config.file_format,
-            datefmt=config.date_format
-        )
+        file_formatter = logging.Formatter(fmt=config.file_format, datefmt=config.date_format)
         file_handler.setFormatter(file_formatter)
         root_logger.addHandler(file_handler)
 
         # Error log file
-        error_log_file = _log_dir / 'errors.log'
+        error_log_file = _log_dir / "errors.log"
         error_handler = logging.handlers.RotatingFileHandler(
             filename=error_log_file,
             maxBytes=config.max_file_size_mb * 1024 * 1024,
             backupCount=config.backup_count,
-            encoding='utf-8'
+            encoding="utf-8",
         )
         error_handler.setLevel(logging.WARNING)
         error_handler.setFormatter(file_formatter)
         root_logger.addHandler(error_handler)
 
         # Performance log file (structured JSON)
-        perf_log_file = _log_dir / 'performance.log'
+        perf_log_file = _log_dir / "performance.log"
         perf_handler = logging.handlers.RotatingFileHandler(
             filename=perf_log_file,
             maxBytes=config.max_file_size_mb * 1024 * 1024,
             backupCount=config.backup_count,
-            encoding='utf-8'
+            encoding="utf-8",
         )
         perf_handler.setLevel(logging.INFO)
-        perf_handler.addFilter(lambda record: hasattr(record, 'performance_data'))
+        perf_handler.addFilter(lambda record: hasattr(record, "performance_data"))
         perf_handler.setFormatter(StructuredLogFormatter())
         root_logger.addHandler(perf_handler)
 
     # Log the setup
-    setup_logger = get_logger('music_tagger.setup')
-    setup_logger.info(f"Logging configured - Level: {config.log_level}, Console: {config.log_to_console}, File: {config.log_to_file}")
+    setup_logger = get_logger("music_tagger.setup")
+    setup_logger.info(
+        f"Logging configured - Level: {config.log_level}, Console: {config.log_to_console}, File: {config.log_to_file}"
+    )
     setup_logger.info(f"Log directory: {_log_dir}")
 
     return _log_dir
@@ -304,6 +318,7 @@ def get_performance_logger(name: str) -> PerformanceLogger:
 
 def log_function_call(func):
     """Decorator to log function calls with timing."""
+
     def wrapper(*args, **kwargs):
         logger = get_logger(func.__module__)
         perf_logger = get_performance_logger(func.__module__)
@@ -330,13 +345,13 @@ def log_exception(logger: logging.Logger, exception: Exception, context: str = "
     import traceback
 
     exc_info = {
-        'exception_type': type(exception).__name__,
-        'exception_message': str(exception),
-        'context': context,
-        'timestamp': datetime.now().isoformat()
+        "exception_type": type(exception).__name__,
+        "exception_message": str(exception),
+        "context": context,
+        "timestamp": datetime.now().isoformat(),
     }
 
-    logger.error(f"Exception in {context}: {exception}", extra={'exception_data': exc_info})
+    logger.error(f"Exception in {context}: {exception}", extra={"exception_data": exc_info})
     logger.debug(f"Full traceback: {traceback.format_exc()}")
 
 
@@ -347,20 +362,17 @@ def get_log_files_info() -> Dict[str, Any]:
 
     log_files = {}
 
-    for log_file in _log_dir.glob('*.log*'):
+    for log_file in _log_dir.glob("*.log*"):
         try:
             stat = log_file.stat()
             log_files[log_file.name] = {
-                'path': str(log_file),
-                'size_mb': stat.st_size / (1024 * 1024),
-                'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                'readable': os.access(log_file, os.R_OK)
+                "path": str(log_file),
+                "size_mb": stat.st_size / (1024 * 1024),
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                "readable": os.access(log_file, os.R_OK),
             }
         except (OSError, PermissionError):
-            log_files[log_file.name] = {
-                'path': str(log_file),
-                'error': 'Cannot access file'
-            }
+            log_files[log_file.name] = {"path": str(log_file), "error": "Cannot access file"}
 
     return log_files
 
@@ -373,12 +385,12 @@ def cleanup_old_logs(days_to_keep: int = 30) -> int:
     cutoff_date = datetime.now() - timedelta(days=days_to_keep)
     cleaned_count = 0
 
-    logger = get_logger('music_tagger.cleanup')
+    logger = get_logger("music_tagger.cleanup")
 
-    for log_file in _log_dir.glob('*.log*'):
+    for log_file in _log_dir.glob("*.log*"):
         try:
             # Skip current log files (without backup numbers)
-            if log_file.suffix == '.log' and '.' not in log_file.stem:
+            if log_file.suffix == ".log" and "." not in log_file.stem:
                 continue
 
             stat = log_file.stat()
@@ -398,13 +410,14 @@ def cleanup_old_logs(days_to_keep: int = 30) -> int:
     return cleaned_count
 
 
-def export_logs(export_path: Path, include_debug: bool = False,
-                last_hours: Optional[int] = None) -> bool:
+def export_logs(
+    export_path: Path, include_debug: bool = False, last_hours: Optional[int] = None
+) -> bool:
     """Export log data to a file."""
     if not _log_dir or not _log_dir.exists():
         return False
 
-    logger = get_logger('music_tagger.export')
+    logger = get_logger("music_tagger.export")
 
     try:
         exported_lines = []
@@ -414,33 +427,34 @@ def export_logs(export_path: Path, include_debug: bool = False,
             cutoff_time = datetime.now() - timedelta(hours=last_hours)
 
         # Read all log files
-        for log_file in sorted(_log_dir.glob('*.log')):
-            if log_file.name.startswith('.'):
+        for log_file in sorted(_log_dir.glob("*.log")):
+            if log_file.name.startswith("."):
                 continue
 
             try:
-                with open(log_file, 'r', encoding='utf-8') as f:
+                with open(log_file, "r", encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if not line:
                             continue
 
                         # Filter debug logs if not included
-                        if not include_debug and ' [   DEBUG]' in line:
+                        if not include_debug and " [   DEBUG]" in line:
                             continue
 
                         # Filter by time if specified
                         if cutoff_time:
                             try:
                                 # Extract timestamp from log line
-                                if line.startswith('{'):
+                                if line.startswith("{"):
                                     # JSON format
                                     import json
+
                                     log_data = json.loads(line)
-                                    log_time = datetime.fromisoformat(log_data['timestamp'])
+                                    log_time = datetime.fromisoformat(log_data["timestamp"])
                                 else:
                                     # Standard format
-                                    timestamp_end = line.find(' [')
+                                    timestamp_end = line.find(" [")
                                     if timestamp_end > 0:
                                         timestamp_str = line[:timestamp_end]
                                         log_time = datetime.fromisoformat(timestamp_str)
@@ -460,7 +474,7 @@ def export_logs(export_path: Path, include_debug: bool = False,
                 continue
 
         # Write exported data
-        with open(export_path, 'w', encoding='utf-8') as f:
+        with open(export_path, "w", encoding="utf-8") as f:
             f.write("Music Library Country Tagger - Log Export\n")
             f.write(f"Generated: {datetime.now().isoformat()}\n")
             f.write(f"Include Debug: {include_debug}\n")
@@ -483,8 +497,7 @@ def export_logs(export_path: Path, include_debug: bool = False,
 class LoggingContext:
     """Context manager for scoped logging operations."""
 
-    def __init__(self, logger: logging.Logger, operation_name: str,
-                 log_level: int = logging.INFO):
+    def __init__(self, logger: logging.Logger, operation_name: str, log_level: int = logging.INFO):
         self.logger = logger
         self.operation_name = operation_name
         self.log_level = log_level
@@ -516,6 +529,8 @@ except Exception as e:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)8s] %(name)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
-    logging.getLogger(__name__).warning(f"Failed to setup advanced logging, using basic configuration: {e}")
+    logging.getLogger(__name__).warning(
+        f"Failed to setup advanced logging, using basic configuration: {e}"
+    )

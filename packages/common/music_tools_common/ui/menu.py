@@ -8,6 +8,7 @@ UI/UX Features:
 - Color-coded status indicators
 - Consistent theming across all menus
 """
+
 import sys
 import time
 from typing import Callable, List, Optional
@@ -27,26 +28,26 @@ console = Console()
 # Theme Configuration
 # ==========================================
 THEME = {
-    'primary': 'cyan',
-    'secondary': 'blue',
-    'success': 'green',
-    'warning': 'yellow',
-    'error': 'red',
-    'info': 'blue',
-    'muted': 'dim',
-    'menu_border': 'blue',
-    'menu_title': 'bold blue',
-    'option_number': 'cyan',
-    'option_name': 'green',
-    'option_desc': 'yellow',
-    'breadcrumb': 'dim cyan',
-    'exit_option': 'dim',
+    "primary": "cyan",
+    "secondary": "blue",
+    "success": "green",
+    "warning": "yellow",
+    "error": "red",
+    "info": "blue",
+    "muted": "dim",
+    "menu_border": "blue",
+    "menu_title": "bold blue",
+    "option_number": "cyan",
+    "option_name": "green",
+    "option_desc": "yellow",
+    "breadcrumb": "dim cyan",
+    "exit_option": "dim",
 }
 
 
 def get_themed_style(key: str) -> str:
     """Get a theme style by key with fallback."""
-    return THEME.get(key, '')
+    return THEME.get(key, "")
 
 
 class MenuOption:
@@ -83,7 +84,9 @@ class Menu:
         self.exit_option: Optional[MenuOption] = None
         self.parent_menu: Optional[Menu] = None
 
-    def add_option(self, name: str, action: Callable, description: str = "", icon: str = "") -> None:
+    def add_option(
+        self, name: str, action: Callable, description: str = "", icon: str = ""
+    ) -> None:
         """Add an option to the menu.
 
         Args:
@@ -122,13 +125,18 @@ class Menu:
         if action is None:
             # Default action is to return to parent menu or exit
             if self.parent_menu:
-                def action(): return self.parent_menu.display()
+
+                def action():
+                    return self.parent_menu.display()
+
             else:
-                def action(): return sys.exit(0)
+
+                def action():
+                    return sys.exit(0)
 
         self.exit_option = MenuOption(name, action)
 
-    def create_submenu(self, title: str, icon: str = "") -> 'Menu':
+    def create_submenu(self, title: str, icon: str = "") -> "Menu":
         """Create a submenu.
 
         Args:
@@ -159,9 +167,11 @@ class Menu:
 
             # Create a table for the menu
             table = Table(show_header=False, expand=True, box=None, row_styles=["", "on grey15"])
-            table.add_column("Number", style=get_themed_style('option_number'), justify="right", width=4)
-            table.add_column("Option", style=get_themed_style('option_name'), min_width=25)
-            table.add_column("Description", style=get_themed_style('option_desc'))
+            table.add_column(
+                "Number", style=get_themed_style("option_number"), justify="right", width=4
+            )
+            table.add_column("Option", style=get_themed_style("option_name"), min_width=25)
+            table.add_column("Description", style=get_themed_style("option_desc"))
 
             # Add options to the table with alternating row colors
             for i, option in enumerate(self.options, 1):
@@ -169,9 +179,15 @@ class Menu:
                 option_display = f"{option.icon} {option.name}" if option.icon else option.name
 
                 if option.description:
-                    table.add_row(f"[{get_themed_style('option_number')}]{i}[/]", option_display, option.description)
+                    table.add_row(
+                        f"[{get_themed_style('option_number')}]{i}[/]",
+                        option_display,
+                        option.description,
+                    )
                 else:
-                    table.add_row(f"[{get_themed_style('option_number')}]{i}[/]", option_display, "")
+                    table.add_row(
+                        f"[{get_themed_style('option_number')}]{i}[/]", option_display, ""
+                    )
 
             # Add separator before exit option
             if self.exit_option and self.options:
@@ -179,27 +195,36 @@ class Menu:
 
             # Add exit option if available
             if self.exit_option:
-                exit_display = f"← {self.exit_option.name}" if self.parent_menu else f"⏻ {self.exit_option.name}"
-                table.add_row(f"[{get_themed_style('exit_option')}]0[/]",
-                              f"[{get_themed_style('exit_option')}]{exit_display}[/]",
-                              "", style=get_themed_style('exit_option'))
+                exit_display = (
+                    f"← {self.exit_option.name}"
+                    if self.parent_menu
+                    else f"⏻ {self.exit_option.name}"
+                )
+                table.add_row(
+                    f"[{get_themed_style('exit_option')}]0[/]",
+                    f"[{get_themed_style('exit_option')}]{exit_display}[/]",
+                    "",
+                    style=get_themed_style("exit_option"),
+                )
 
             # Build title with icon
             title_display = f"{self.icon} {self.title}" if self.icon else self.title
 
             # Display the menu in a panel
-            console.print(Panel(
-                table,
-                title=f"[{get_themed_style('menu_title')}]{title_display}[/]",
-                border_style=get_themed_style('menu_border'),
-                padding=(1, 2)
-            ))
+            console.print(
+                Panel(
+                    table,
+                    title=f"[{get_themed_style('menu_title')}]{title_display}[/]",
+                    border_style=get_themed_style("menu_border"),
+                    padding=(1, 2),
+                )
+            )
 
             # Get user input
             try:
                 choice = Prompt.ask("\n[bold]Enter choice[/bold]", default="")
 
-                if choice == '0' and self.exit_option:
+                if choice == "0" and self.exit_option:
                     self.exit_option.action()
                     return
 
@@ -209,11 +234,15 @@ class Menu:
                         # Call the selected option's action
                         self.options[choice_idx].action()
                     else:
-                        console.print(f"[{get_themed_style('error')}]Invalid choice. Please enter a number between 0 and {len(self.options)}.[/]")
+                        console.print(
+                            f"[{get_themed_style('error')}]Invalid choice. Please enter a number between 0 and {len(self.options)}.[/]"
+                        )
                         time.sleep(1.5)
                 except ValueError:
                     if choice.strip():  # Only show error if user typed something
-                        console.print(f"[{get_themed_style('error')}]Invalid input. Please enter a number.[/]")
+                        console.print(
+                            f"[{get_themed_style('error')}]Invalid input. Please enter a number.[/]"
+                        )
                         time.sleep(1)
             except KeyboardInterrupt:
                 console.print(f"\n[{get_themed_style('warning')}]Exiting...[/]")
@@ -223,6 +252,7 @@ class Menu:
 # ==========================================
 # Enhanced Error Display
 # ==========================================
+
 
 def show_error(message: str, context: str = "", suggestion: str = "") -> None:
     """Display a well-formatted error message with context and suggestions.
@@ -242,12 +272,14 @@ def show_error(message: str, context: str = "", suggestion: str = "") -> None:
     if suggestion:
         error_parts.append(f"[{get_themed_style('info')}]→ {suggestion}[/]")
 
-    console.print(Panel(
-        "\n".join(error_parts),
-        title=f"[{get_themed_style('error')}]⚠ Error[/]",
-        border_style=get_themed_style('error'),
-        padding=(0, 2)
-    ))
+    console.print(
+        Panel(
+            "\n".join(error_parts),
+            title=f"[{get_themed_style('error')}]⚠ Error[/]",
+            border_style=get_themed_style("error"),
+            padding=(0, 2),
+        )
+    )
 
 
 def show_success(message: str, details: str = "") -> None:
@@ -262,11 +294,9 @@ def show_success(message: str, details: str = "") -> None:
     if details:
         success_parts.append(f"[{get_themed_style('muted')}]{details}[/]")
 
-    console.print(Panel(
-        "\n".join(success_parts),
-        border_style=get_themed_style('success'),
-        padding=(0, 2)
-    ))
+    console.print(
+        Panel("\n".join(success_parts), border_style=get_themed_style("success"), padding=(0, 2))
+    )
 
 
 def show_warning(message: str, suggestion: str = "") -> None:
@@ -281,8 +311,6 @@ def show_warning(message: str, suggestion: str = "") -> None:
     if suggestion:
         warning_parts.append(f"[{get_themed_style('info')}]→ {suggestion}[/]")
 
-    console.print(Panel(
-        "\n".join(warning_parts),
-        border_style=get_themed_style('warning'),
-        padding=(0, 2)
-    ))
+    console.print(
+        Panel("\n".join(warning_parts), border_style=get_themed_style("warning"), padding=(0, 2))
+    )

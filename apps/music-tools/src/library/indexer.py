@@ -30,7 +30,16 @@ from .models import LibraryFile, LibraryStatistics
 logger = logging.getLogger(__name__)
 
 # Constants
-SUPPORTED_AUDIO_FORMATS: Set[str] = {'.mp3', '.flac', '.m4a', '.wav', '.ogg', '.opus', '.aiff', '.aif'}
+SUPPORTED_AUDIO_FORMATS: Set[str] = {
+    ".mp3",
+    ".flac",
+    ".m4a",
+    ".wav",
+    ".ogg",
+    ".opus",
+    ".aiff",
+    ".aif",
+}
 MAX_DISPLAY_YEAR_LENGTH: int = 4  # Extract first 4 chars for year
 
 
@@ -60,7 +69,7 @@ class LibraryIndexer:
         library_path: str,
         rescan: bool = False,
         incremental: bool = True,
-        show_progress: bool = True
+        show_progress: bool = True,
     ) -> LibraryStatistics:
         """Index a music library.
 
@@ -114,7 +123,7 @@ class LibraryIndexer:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TaskProgressColumn(),
-                console=self.console
+                console=self.console,
             ) as progress:
                 task = progress.add_task("Indexing files...", total=total_files)
 
@@ -124,27 +133,23 @@ class LibraryIndexer:
                     rescan=rescan,
                     incremental=incremental,
                     progress=progress,
-                    task=task
+                    task=task,
                 )
 
-                added = result_counts['added']
-                updated = result_counts['updated']
-                skipped = result_counts['skipped']
-                errors = result_counts['errors']
+                added = result_counts["added"]
+                updated = result_counts["updated"]
+                skipped = result_counts["skipped"]
+                errors = result_counts["errors"]
         else:
             # Process in batches without progress bar
             result_counts = self._process_files_batch(
-                music_files,
-                rescan=rescan,
-                incremental=incremental,
-                progress=None,
-                task=None
+                music_files, rescan=rescan, incremental=incremental, progress=None, task=None
             )
 
-            added = result_counts['added']
-            updated = result_counts['updated']
-            skipped = result_counts['skipped']
-            errors = result_counts['errors']
+            added = result_counts["added"]
+            updated = result_counts["updated"]
+            skipped = result_counts["skipped"]
+            errors = result_counts["errors"]
 
         # Calculate duration
         duration = time.time() - start_time
@@ -174,7 +179,9 @@ class LibraryIndexer:
             return
 
         logger.warning(f"Error scanning directory {error.filename}: {error}")
-        self.console.print(f"[yellow]Warning: Could not access {error.filename}: {error.strerror}[/yellow]")
+        self.console.print(
+            f"[yellow]Warning: Could not access {error.filename}: {error.strerror}[/yellow]"
+        )
 
     def _scan_directory(self, path: Path) -> List[Path]:
         """Recursively scan directory for music files.
@@ -209,12 +216,7 @@ class LibraryIndexer:
 
         return sorted(music_files)
 
-    def _process_file(
-        self,
-        file_path: Path,
-        rescan: bool,
-        incremental: bool
-    ) -> str:
+    def _process_file(self, file_path: Path, rescan: bool, incremental: bool) -> str:
         """Process a single music file.
 
         Args:
@@ -233,7 +235,7 @@ class LibraryIndexer:
         # If incremental mode and file exists, check if changed
         if incremental and existing_file and not rescan:
             if self._is_file_unchanged(file_path, existing_file):
-                return 'skipped'
+                return "skipped"
 
         # Extract metadata and create LibraryFile
         library_file = self._extract_metadata(file_path)
@@ -245,10 +247,10 @@ class LibraryIndexer:
         if existing_file:
             library_file.id = existing_file.id
             self.db.update_file(library_file)
-            return 'updated'
+            return "updated"
         else:
             self.db.add_file(library_file)
-            return 'added'
+            return "added"
 
     def _process_files_batch(
         self,
@@ -257,7 +259,7 @@ class LibraryIndexer:
         incremental: bool,
         progress=None,
         task=None,
-        batch_size: int = 300
+        batch_size: int = 300,
     ) -> Dict[str, int]:
         """Process multiple files using batch operations for 10-50x performance improvement.
 
@@ -281,7 +283,7 @@ class LibraryIndexer:
             - New approach: 500-2000 files/sec (batch inserts)
             - 10-50x speedup on large libraries
         """
-        results = {'added': 0, 'updated': 0, 'skipped': 0, 'errors': 0}
+        results = {"added": 0, "updated": 0, "skipped": 0, "errors": 0}
 
         # Convert paths to strings for batch lookup
         file_paths_str = [str(fp) for fp in file_paths]
@@ -301,7 +303,7 @@ class LibraryIndexer:
                 # Check if should skip (incremental mode)
                 if incremental and existing_file and not rescan:
                     if self._is_file_unchanged(file_path, existing_file):
-                        results['skipped'] += 1
+                        results["skipped"] += 1
                         if progress and task is not None:
                             progress.advance(task)
                         continue
@@ -310,7 +312,7 @@ class LibraryIndexer:
                 library_file = self._extract_metadata(file_path)
 
                 if library_file is None:
-                    results['errors'] += 1
+                    results["errors"] += 1
                     logger.debug(f"Failed to extract metadata from {file_path}")
                     if progress and task is not None:
                         progress.advance(task)
@@ -328,19 +330,19 @@ class LibraryIndexer:
                 # Process batch when it reaches batch_size
                 if len(files_to_insert) >= batch_size:
                     inserted = self.db.batch_insert_files(files_to_insert, batch_size=batch_size)
-                    results['added'] += inserted
+                    results["added"] += inserted
                     files_to_insert = []
 
                 if len(files_to_update) >= batch_size:
                     updated = self.db.batch_update_files(files_to_update, batch_size=batch_size)
-                    results['updated'] += updated
+                    results["updated"] += updated
                     files_to_update = []
 
                 if progress and task is not None:
                     progress.advance(task)
 
             except Exception as e:
-                results['errors'] += 1
+                results["errors"] += 1
                 logger.error(f"Error processing {file_path}: {e}")
                 if progress and task is not None:
                     progress.advance(task)
@@ -348,19 +350,23 @@ class LibraryIndexer:
         # Process remaining files in final batches
         if files_to_insert:
             try:
-                inserted = self.db.batch_insert_files(files_to_insert, batch_size=len(files_to_insert))
-                results['added'] += inserted
+                inserted = self.db.batch_insert_files(
+                    files_to_insert, batch_size=len(files_to_insert)
+                )
+                results["added"] += inserted
             except Exception as e:
                 logger.error(f"Error in final batch insert: {e}")
-                results['errors'] += len(files_to_insert)
+                results["errors"] += len(files_to_insert)
 
         if files_to_update:
             try:
-                updated = self.db.batch_update_files(files_to_update, batch_size=len(files_to_update))
-                results['updated'] += updated
+                updated = self.db.batch_update_files(
+                    files_to_update, batch_size=len(files_to_update)
+                )
+                results["updated"] += updated
             except Exception as e:
                 logger.error(f"Error in final batch update: {e}")
-                results['errors'] += len(files_to_update)
+                results["errors"] += len(files_to_update)
 
         logger.info(
             f"Batch processing complete: {results['added']} added, "
@@ -399,11 +405,11 @@ class LibraryIndexer:
                 return None
 
             # Extract common tags
-            artist = self._get_tag(audio, 'artist')
-            title = self._get_tag(audio, 'title')
-            album = self._get_tag(audio, 'album')
+            artist = self._get_tag(audio, "artist")
+            title = self._get_tag(audio, "title")
+            album = self._get_tag(audio, "album")
             year = self._get_year(audio)
-            duration = audio.info.length if hasattr(audio.info, 'length') else None
+            duration = audio.info.length if hasattr(audio.info, "length") else None
 
             # Calculate hashes using shared hash_utils
             # Pass filename to prevent false matches for files without metadata
@@ -423,13 +429,13 @@ class LibraryIndexer:
                 album=album,
                 year=year,
                 duration=duration,
-                file_format=file_path.suffix.lower().lstrip('.'),
+                file_format=file_path.suffix.lower().lstrip("."),
                 file_size=file_size,
                 metadata_hash=metadata_hash,
                 file_content_hash=file_content_hash,
                 indexed_at=datetime.now(timezone.utc),
                 file_mtime=file_mtime,
-                is_active=True
+                is_active=True,
             )
 
         except Exception as e:
@@ -454,9 +460,9 @@ class LibraryIndexer:
             return None
         # Try common tag names
         tag_variants = {
-            'artist': ['artist', 'TPE1', '\xa9ART'],
-            'title': ['title', 'TIT2', '\xa9nam'],
-            'album': ['album', 'TALB', '\xa9alb'],
+            "artist": ["artist", "TPE1", "\xa9ART"],
+            "title": ["title", "TIT2", "\xa9nam"],
+            "album": ["album", "TALB", "\xa9alb"],
         }
 
         variants = tag_variants.get(tag_name, [tag_name])
@@ -486,7 +492,7 @@ class LibraryIndexer:
         if audio is None:
             return None
 
-        year_tags = ['date', 'year', 'TDRC', '\xa9day']
+        year_tags = ["date", "year", "TDRC", "\xa9day"]
 
         for tag in year_tags:
             if tag in audio:
@@ -539,12 +545,7 @@ class LibraryIndexer:
             return False
 
     def _display_index_results(
-        self,
-        added: int,
-        updated: int,
-        skipped: int,
-        errors: int,
-        duration: float
+        self, added: int, updated: int, skipped: int, errors: int, duration: float
     ) -> None:
         """Display indexing results.
 
@@ -609,7 +610,7 @@ class LibraryIndexer:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TaskProgressColumn(),
-                console=self.console
+                console=self.console,
             ) as progress:
                 task = progress.add_task("Verifying files...", total=len(all_files))
 
@@ -633,7 +634,9 @@ class LibraryIndexer:
         # Display results
         self.console.print()
         if missing > 0:
-            self.console.print(f"[yellow]Found {missing} missing files (marked as inactive)[/yellow]")
+            self.console.print(
+                f"[yellow]Found {missing} missing files (marked as inactive)[/yellow]"
+            )
         else:
             self.console.print("[green]All indexed files verified successfully[/green]")
 
@@ -683,11 +686,7 @@ class LibraryIndexer:
 
             percentages = stats.get_format_percentages()
             for fmt, count in sorted(stats.formats_breakdown.items()):
-                format_table.add_row(
-                    fmt.upper(),
-                    f"{count:,}",
-                    f"{percentages[fmt]:.1f}%"
-                )
+                format_table.add_row(fmt.upper(), f"{count:,}", f"{percentages[fmt]:.1f}%")
 
             self.console.print()
             self.console.print(format_table)

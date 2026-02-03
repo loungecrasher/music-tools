@@ -1,11 +1,12 @@
 """
 Base CLI class for Music Tools applications.
 """
+
 import logging
 import sys
 from abc import ABC, abstractmethod
 
-logger = logging.getLogger('music_tools_common.cli')
+logger = logging.getLogger("music_tools_common.cli")
 
 
 class BaseCLI(ABC):

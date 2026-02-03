@@ -45,16 +45,13 @@ Download Links:
 ------------------------------------------------------------
 """
 
-    with open('sample_output.txt', 'w') as f:
+    with open("sample_output.txt", "w") as f:
         f.write(sample_text)
 
     # Extract links
     extractor = LinkExtractor()
     results = extractor.extract_and_save(
-        'sample_output.txt',
-        'extracted_from_text.txt',
-        group_size=20,
-        include_stats=True
+        "sample_output.txt", "extracted_from_text.txt", group_size=20, include_stats=True
     )
 
     print(f"✅ Extracted {results['total_links']} unique links from text file")
@@ -70,7 +67,7 @@ Download Links:
             "generated_at": datetime.now().isoformat(),
             "total_posts": 3,
             "total_links": 5,
-            "genres_searched": ["house", "progressive house", "melodic"]
+            "genres_searched": ["house", "progressive house", "melodic"],
         },
         "posts": [
             {
@@ -80,9 +77,9 @@ Download Links:
                 "matching_genres": ["house"],
                 "download_links": [
                     "https://mega.nz/file/deep_house_essentials.flac",
-                    "https://mediafire.com/file/deep_house_320.mp3"
+                    "https://mediafire.com/file/deep_house_320.mp3",
                 ],
-                "post_date": "2024-01-15"
+                "post_date": "2024-01-15",
             },
             {
                 "url": "https://example.com/post2",
@@ -91,48 +88,43 @@ Download Links:
                 "matching_genres": ["melodic", "progressive house"],
                 "download_links": [
                     "https://nfile.cc/melodic_journey_flac.zip",
-                    "https://dropbox.com/s/melodic_320kbps.rar"
+                    "https://dropbox.com/s/melodic_320kbps.rar",
                 ],
-                "post_date": "2024-01-14"
+                "post_date": "2024-01-14",
             },
             {
                 "url": "https://example.com/post3",
                 "title": "Bass House Bangers",
                 "genres": ["bass house", "house"],
                 "matching_genres": ["house"],
-                "download_links": [
-                    "https://soundcloud.com/bass_house_mix"
-                ],
-                "post_date": "2024-01-13"
-            }
-        ]
+                "download_links": ["https://soundcloud.com/bass_house_mix"],
+                "post_date": "2024-01-13",
+            },
+        ],
     }
 
-    with open('sample_output.json', 'w') as f:
+    with open("sample_output.json", "w") as f:
         json.dump(sample_json, f, indent=2)
 
     # Extract links
     results = extractor.extract_and_save(
-        'sample_output.json',
-        'extracted_from_json.txt',
-        group_size=20,
-        include_stats=True
+        "sample_output.json", "extracted_from_json.txt", group_size=20, include_stats=True
     )
 
     print(f"✅ Extracted {results['total_links']} unique links from JSON file")
     print("   Saved to: extracted_from_json.txt")
 
     # Show quality statistics
-    if 'quality_stats' in results:
+    if "quality_stats" in results:
         print("\nQuality Statistics:")
         print(f"  FLAC/Lossless: {results['quality_stats']['flac']}")
         print(f"  MP3 320kbps: {results['quality_stats']['mp3_320']}")
         print(f"  Other: {results['quality_stats']['other']}")
 
     # Show genre statistics
-    if 'genre_stats' in results:
+    if "genre_stats" in results:
         print("\nGenre Statistics:")
-        for genre, count in results['genre_stats'].items():
+        for genre, count in results["genre_stats"].items():
             print(f"  {genre}: {count} posts")
 
     print("\n✅ Example completed successfully!")

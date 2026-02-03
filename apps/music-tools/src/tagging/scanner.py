@@ -26,26 +26,35 @@ class MusicFileScanner:
             supported_extensions: Set of supported file extensions (default: mp3, flac, m4a, wav)
             skip_directories: Set of directory names to skip for performance
         """
-        self.supported_extensions = supported_extensions or {'.mp3', '.flac', '.m4a', '.wav'}
+        self.supported_extensions = supported_extensions or {".mp3", ".flac", ".m4a", ".wav"}
 
         # Common directories to skip for performance
         self.skip_directories = skip_directories or {
-            '.git', '.svn', '.hg',  # Version control
-            '__pycache__', '.pyc',  # Python cache
-            'node_modules', '.npm',  # Node.js
-            '.DS_Store', 'Thumbs.db',  # System files
-            '.cache', '.tmp', 'temp',  # Cache/temp directories
-            'System Volume Information',  # Windows system
-            '.Trash', '.Trashes',  # Trash folders
-            'lost+found',  # Linux lost+found
-            'Recovery', 'RecycleBin',  # Recovery folders
+            ".git",
+            ".svn",
+            ".hg",  # Version control
+            "__pycache__",
+            ".pyc",  # Python cache
+            "node_modules",
+            ".npm",  # Node.js
+            ".DS_Store",
+            "Thumbs.db",  # System files
+            ".cache",
+            ".tmp",
+            "temp",  # Cache/temp directories
+            "System Volume Information",  # Windows system
+            ".Trash",
+            ".Trashes",  # Trash folders
+            "lost+found",  # Linux lost+found
+            "Recovery",
+            "RecycleBin",  # Recovery folders
         }
 
         self.statistics = {
-            'total_files_scanned': 0,
-            'music_files_found': 0,
-            'directories_scanned': 0,
-            'errors': 0
+            "total_files_scanned": 0,
+            "music_files_found": 0,
+            "directories_scanned": 0,
+            "errors": 0,
         }
 
     def is_music_file(self, file_path: str) -> bool:
@@ -76,7 +85,7 @@ class MusicFileScanner:
             True if directory should be scanned, False to skip
         """
         # Skip hidden directories
-        if directory_name.startswith('.'):
+        if directory_name.startswith("."):
             return False
 
         # Skip directories in the skip list
@@ -84,13 +93,15 @@ class MusicFileScanner:
             return False
 
         # Skip common non-music directories by pattern
-        skip_patterns = ['backup', 'archive', 'temp', 'cache', 'log']
+        skip_patterns = ["backup", "archive", "temp", "cache", "log"]
         if any(pattern in directory_name.lower() for pattern in skip_patterns):
             return False
 
         return True
 
-    def scan_directory(self, directory_path: str, recursive: bool = True) -> Generator[str, None, None]:
+    def scan_directory(
+        self, directory_path: str, recursive: bool = True
+    ) -> Generator[str, None, None]:
         """
         Scan directory for music files.
 
@@ -119,7 +130,7 @@ class MusicFileScanner:
 
         except Exception as e:
             logger.error(f"Error scanning directory {directory_path}: {e}")
-            self.statistics['errors'] += 1
+            self.statistics["errors"] += 1
 
     def _scan_recursive(self, directory_path: str) -> Generator[str, None, None]:
         """
@@ -133,7 +144,7 @@ class MusicFileScanner:
         """
         try:
             for root, dirs, files in os.walk(directory_path):
-                self.statistics['directories_scanned'] += 1
+                self.statistics["directories_scanned"] += 1
 
                 # Enhanced directory filtering for performance
                 dirs[:] = [d for d in dirs if self._should_scan_directory(d)]
@@ -143,25 +154,25 @@ class MusicFileScanner:
                     continue
 
                 for file in files:
-                    self.statistics['total_files_scanned'] += 1
+                    self.statistics["total_files_scanned"] += 1
 
                     # Skip hidden files
-                    if file.startswith('.'):
+                    if file.startswith("."):
                         continue
 
                     file_path = os.path.join(root, file)
 
                     if self.is_music_file(file_path):
-                        self.statistics['music_files_found'] += 1
+                        self.statistics["music_files_found"] += 1
                         logger.debug(f"Found music file: {file_path}")
                         yield file_path
 
         except PermissionError as e:
             logger.warning(f"Permission denied accessing {directory_path}: {e}")
-            self.statistics['errors'] += 1
+            self.statistics["errors"] += 1
         except Exception as e:
             logger.error(f"Error in recursive scan of {directory_path}: {e}")
-            self.statistics['errors'] += 1
+            self.statistics["errors"] += 1
 
     def _scan_single_directory(self, directory_path: str) -> Generator[str, None, None]:
         """
@@ -174,31 +185,33 @@ class MusicFileScanner:
             Paths to music files found
         """
         try:
-            self.statistics['directories_scanned'] += 1
+            self.statistics["directories_scanned"] += 1
 
             for file in os.listdir(directory_path):
-                self.statistics['total_files_scanned'] += 1
+                self.statistics["total_files_scanned"] += 1
 
                 # Skip hidden files
-                if file.startswith('.'):
+                if file.startswith("."):
                     continue
 
                 file_path = os.path.join(directory_path, file)
 
                 # Only process files, not directories
                 if os.path.isfile(file_path) and self.is_music_file(file_path):
-                    self.statistics['music_files_found'] += 1
+                    self.statistics["music_files_found"] += 1
                     logger.debug(f"Found music file: {file_path}")
                     yield file_path
 
         except PermissionError as e:
             logger.warning(f"Permission denied accessing {directory_path}: {e}")
-            self.statistics['errors'] += 1
+            self.statistics["errors"] += 1
         except Exception as e:
             logger.error(f"Error scanning directory {directory_path}: {e}")
-            self.statistics['errors'] += 1
+            self.statistics["errors"] += 1
 
-    def scan_multiple_directories(self, directory_paths: List[str], recursive: bool = True) -> Generator[str, None, None]:
+    def scan_multiple_directories(
+        self, directory_paths: List[str], recursive: bool = True
+    ) -> Generator[str, None, None]:
         """
         Scan multiple directories for music files.
 
@@ -232,14 +245,14 @@ class MusicFileScanner:
             if recursive:
                 for root, dirs, files in os.walk(directory_path):
                     # Skip hidden directories
-                    dirs[:] = [d for d in dirs if not d.startswith('.')]
+                    dirs[:] = [d for d in dirs if not d.startswith(".")]
 
                     for file in files:
-                        if not file.startswith('.') and self.is_music_file(file):
+                        if not file.startswith(".") and self.is_music_file(file):
                             count += 1
             else:
                 for file in os.listdir(directory_path):
-                    if not file.startswith('.'):
+                    if not file.startswith("."):
                         file_path = os.path.join(directory_path, file)
                         if os.path.isfile(file_path) and self.is_music_file(file_path):
                             count += 1
@@ -261,10 +274,10 @@ class MusicFileScanner:
     def reset_statistics(self):
         """Reset scanner statistics."""
         self.statistics = {
-            'total_files_scanned': 0,
-            'music_files_found': 0,
-            'directories_scanned': 0,
-            'errors': 0
+            "total_files_scanned": 0,
+            "music_files_found": 0,
+            "directories_scanned": 0,
+            "errors": 0,
         }
 
     def validate_directory(self, directory_path: str) -> tuple[bool, str]:

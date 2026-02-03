@@ -35,10 +35,12 @@ console = Console()
 # Import tagging database (now global)
 try:
     from .tagging_database import FileStatus, GlobalTaggingDatabase
+
     TAGGING_DB_AVAILABLE = True
 except ImportError:
     try:
         from src.tagging.tagging_database import FileStatus, GlobalTaggingDatabase
+
         TAGGING_DB_AVAILABLE = True
     except ImportError:
         TAGGING_DB_AVAILABLE = False
@@ -46,6 +48,7 @@ except ImportError:
         FileStatus = None
         # CRITICAL WARNING: Database tracking disabled!
         import logging
+
         logging.getLogger(__name__).critical(
             "⚠️  TAGGING DATABASE NOT AVAILABLE - FILE TRACKING DISABLED!\n"
             "    All files will be re-tagged on every run.\n"
@@ -65,7 +68,7 @@ class ProcessingConfig:
         self.speed_mode: str = "normal"  # speed, normal, safe
 
     @classmethod
-    def from_speed_mode(cls, mode: str) -> 'ProcessingConfig':
+    def from_speed_mode(cls, mode: str) -> "ProcessingConfig":
         """Create config from speed mode preset."""
         config = cls()
         if mode == "speed":
@@ -83,7 +86,9 @@ class ProcessingConfig:
 class MusicLibraryProcessor:
     """Handles music library processing with database tracking."""
 
-    def __init__(self, scanner, metadata_handler, ai_researcher, cache_manager, config, verbose=False):
+    def __init__(
+        self, scanner, metadata_handler, ai_researcher, cache_manager, config, verbose=False
+    ):
         self.scanner = scanner
         self.metadata_handler = metadata_handler
         self.ai_researcher = ai_researcher
@@ -106,7 +111,9 @@ class MusicLibraryProcessor:
         self.skipped_count = 0
         self.failed_files = []
 
-    def process(self, path: str, batch_size: int, dry_run: bool, resume: bool, missing_only: bool = False) -> Dict[str, Any]:
+    def process(
+        self, path: str, batch_size: int, dry_run: bool, resume: bool, missing_only: bool = False
+    ) -> Dict[str, Any]:
         """Main processing entry point with database tracking."""
         try:
             # Initialize database for this library
@@ -139,10 +146,7 @@ class MusicLibraryProcessor:
             # End session
             if self.tagging_db and self.session_id:
                 self.tagging_db.end_session(
-                    self.session_id,
-                    self.processed_count,
-                    self.updated_count,
-                    self.error_count
+                    self.session_id, self.processed_count, self.updated_count, self.error_count
                 )
 
             self._display_final_statistics(dry_run)
@@ -154,26 +158,28 @@ class MusicLibraryProcessor:
 
         except KeyboardInterrupt:
             # Bug #12 fix: Better error recovery with proper state cleanup
-            total_files = len(music_files) if 'music_files' in locals() else 0
+            total_files = len(music_files) if "music_files" in locals() else 0
             self._handle_interruption(total_files)
 
             # Save partial progress to database if available
-            if hasattr(self, 'tagging_db') and self.tagging_db:
+            if hasattr(self, "tagging_db") and self.tagging_db:
                 try:
                     # Reset any stuck 'processing' status from this interrupted session
                     self.tagging_db.reset_processing_status()
                     console.print("[yellow]💾 Partial progress saved to database[/yellow]")
                 except Exception as db_error:
-                    console.print(f"[red]Warning: Could not save partial progress: {db_error}[/red]")
+                    console.print(
+                        f"[red]Warning: Could not save partial progress: {db_error}[/red]"
+                    )
 
-            return self._get_results_summary(dry_run=False) if 'dry_run' in locals() else {}
+            return self._get_results_summary(dry_run=False) if "dry_run" in locals() else {}
         except Exception as e:
             console.print(f"[red]Scan failed: {e}[/red]")
             if self.verbose:
                 console.print_exception()
 
             # Bug #12 fix: Attempt to save any partial progress even on error
-            if hasattr(self, 'tagging_db') and self.tagging_db:
+            if hasattr(self, "tagging_db") and self.tagging_db:
                 try:
                     self.tagging_db.reset_processing_status()
                     console.print("[yellow]💾 Attempted to save partial progress[/yellow]")
@@ -205,7 +211,7 @@ class MusicLibraryProcessor:
         try:
             for item in sorted(os.listdir(path)):
                 item_path = os.path.join(path, item)
-                if os.path.isdir(item_path) and not item.startswith('.'):
+                if os.path.isdir(item_path) and not item.startswith("."):
                     # Count files in subdirectory
                     file_count = sum(1 for _ in self.scanner.scan_directory(item_path))
                     subdirs.append((item, item_path, file_count))
@@ -232,7 +238,9 @@ class MusicLibraryProcessor:
             total_files += count
 
         console.print(table)
-        console.print(f"\n[bold]Total: {total_files} files across {len(subdirs)} directories[/bold]")
+        console.print(
+            f"\n[bold]Total: {total_files} files across {len(subdirs)} directories[/bold]"
+        )
 
         # Selection options
         console.print("\n[bold cyan]Selection Options:[/bold cyan]")
@@ -253,16 +261,18 @@ class MusicLibraryProcessor:
             return [path]
         else:
             # Select specific subdirectories
-            console.print("\n[dim]Enter directory numbers separated by commas (e.g., 1,3,5-10)[/dim]")
+            console.print(
+                "\n[dim]Enter directory numbers separated by commas (e.g., 1,3,5-10)[/dim]"
+            )
             selection = Prompt.ask("Select directories")
 
             # Parse selection
             selected_indices = set()
-            for part in selection.split(','):
+            for part in selection.split(","):
                 part = part.strip()
-                if '-' in part:
+                if "-" in part:
                     try:
-                        start, end = part.split('-')
+                        start, end = part.split("-")
                         for i in range(int(start), int(end) + 1):
                             selected_indices.add(i)
                     except ValueError:
@@ -294,7 +304,7 @@ class MusicLibraryProcessor:
         # Show current stats if database available
         if self.tagging_db:
             stats = self.tagging_db.get_statistics()
-            if stats['total_files'] > 0:
+            if stats["total_files"] > 0:
                 console.print("\n[cyan]Library Status:[/cyan]")
                 console.print(f"  Total files tracked: {stats['total_files']}")
                 console.print(f"  Completed: [green]{stats['completed']}[/green]")
@@ -303,10 +313,11 @@ class MusicLibraryProcessor:
                 console.print(f"  Skipped: [dim]{stats['skipped']}[/dim]")
 
         # Session limit
-        console.print("\n[dim]Session limit controls how many files to process before stopping.[/dim]")
+        console.print(
+            "\n[dim]Session limit controls how many files to process before stopping.[/dim]"
+        )
         self.processing_config.session_limit = IntPrompt.ask(
-            "Session limit (files per run)",
-            default=1000
+            "Session limit (files per run)", default=1000
         )
 
         # Speed mode
@@ -315,32 +326,30 @@ class MusicLibraryProcessor:
         console.print("  2. Normal (5s delay) - Balanced (recommended)")
         console.print("  3. Safe (10s delay) - Slow but guaranteed safe")
 
-        speed_choice = Prompt.ask(
-            "Select speed mode",
-            choices=["1", "2", "3"],
-            default="2"
-        )
+        speed_choice = Prompt.ask("Select speed mode", choices=["1", "2", "3"], default="2")
 
         speed_modes = {"1": "speed", "2": "normal", "3": "safe"}
         self.processing_config = ProcessingConfig.from_speed_mode(speed_modes[speed_choice])
-        self.processing_config.session_limit = IntPrompt.ask(
-            "Confirm session limit",
-            default=1000
-        ) if speed_choice != "2" else self.processing_config.session_limit
+        self.processing_config.session_limit = (
+            IntPrompt.ask("Confirm session limit", default=1000)
+            if speed_choice != "2"
+            else self.processing_config.session_limit
+        )
 
         # Force re-tag option
         if self.tagging_db:
             stats = self.tagging_db.get_statistics()
-            if stats['completed'] > 0:
+            if stats["completed"] > 0:
                 self.processing_config.force_retag = Confirm.ask(
-                    f"Force re-tag {stats['completed']} completed files?",
-                    default=False
+                    f"Force re-tag {stats['completed']} completed files?", default=False
                 )
                 if self.processing_config.force_retag:
                     self.tagging_db.force_retag_all()
                     console.print("[yellow]All files will be re-tagged[/yellow]")
 
-    def _scan_and_filter_files(self, path: str, selected_dirs: Optional[List[str]] = None, missing_only: bool = False) -> List[str]:
+    def _scan_and_filter_files(
+        self, path: str, selected_dirs: Optional[List[str]] = None, missing_only: bool = False
+    ) -> List[str]:
         """Scan directory and filter files based on database status."""
         console.print("\n[cyan]🔍 Scanning for music files...[/cyan]")
 
@@ -370,7 +379,7 @@ class MusicLibraryProcessor:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 MofNCompleteColumn(),
-                console=console
+                console=console,
             ) as progress:
                 task = progress.add_task("Checking tags...", total=len(all_files))
 
@@ -378,8 +387,8 @@ class MusicLibraryProcessor:
                     try:
                         metadata = self.metadata_handler.extract_metadata(file_path)
                         if metadata:
-                            genre = metadata.get('genre')
-                            grouping = metadata.get('grouping')
+                            genre = metadata.get("genre")
+                            grouping = metadata.get("grouping")
 
                             # If either is missing/empty, we need to process it
                             if not genre or not grouping:
@@ -404,7 +413,7 @@ class MusicLibraryProcessor:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 MofNCompleteColumn(),
-                console=console
+                console=console,
             ) as progress:
                 task = progress.add_task("Checking file status...", total=len(all_files))
 
@@ -433,8 +442,10 @@ class MusicLibraryProcessor:
 
         # Apply session limit
         if len(files_to_process) > self.processing_config.session_limit:
-            console.print(f"[yellow]Session limit: Processing first {self.processing_config.session_limit} files[/yellow]")
-            files_to_process = files_to_process[:self.processing_config.session_limit]
+            console.print(
+                f"[yellow]Session limit: Processing first {self.processing_config.session_limit} files[/yellow]"
+            )
+            files_to_process = files_to_process[: self.processing_config.session_limit]
 
         if not files_to_process:
             console.print("[green]✓ All files already processed![/green]")
@@ -457,7 +468,7 @@ class MusicLibraryProcessor:
             BarColumn(),
             MofNCompleteColumn(),
             TimeRemainingColumn(),
-            console=console
+            console=console,
         ) as progress:
             main_task = progress.add_task("Processing files...", total=len(music_files))
             batch_task = progress.add_task("Current batch...", total=batch_size, visible=False)
@@ -469,25 +480,30 @@ class MusicLibraryProcessor:
                 current_batch = music_files[batch_start:batch_end]
 
                 self._process_single_batch(
-                    current_batch, batch_start, batch_size, len(music_files),
-                    progress, batch_task, main_task, dry_run
+                    current_batch,
+                    batch_start,
+                    batch_size,
+                    len(music_files),
+                    progress,
+                    batch_task,
+                    main_task,
+                    dry_run,
                 )
 
                 progress.update(batch_task, visible=False)
 
                 # Pacing delay between batches
                 if batch_end < len(music_files):
-                    progress.update(main_task, description=f"[dim]Waiting {delay}s before next batch...[/dim]")
+                    progress.update(
+                        main_task, description=f"[dim]Waiting {delay}s before next batch...[/dim]"
+                    )
                     time.sleep(delay)
                     progress.update(main_task, description="Processing files...")
 
                 # Update session in database
                 if self.tagging_db and self.session_id:
                     self.tagging_db.update_session(
-                        self.session_id,
-                        self.processed_count,
-                        self.updated_count,
-                        self.error_count
+                        self.session_id, self.processed_count, self.updated_count, self.error_count
                     )
 
     # _scan_directory replaced by _scan_and_filter_files above
@@ -511,8 +527,8 @@ class MusicLibraryProcessor:
             # Extract metadata for preview
             try:
                 metadata = self.metadata_handler.extract_metadata(file_path)
-                artist = metadata.get('artist', 'Unknown') if metadata else 'Unknown'
-                genre = metadata.get('genre', '[empty]') if metadata else '[empty]'
+                artist = metadata.get("artist", "Unknown") if metadata else "Unknown"
+                genre = metadata.get("genre", "[empty]") if metadata else "[empty]"
 
                 # Truncate long values
                 if len(file_name) > 37:
@@ -524,7 +540,9 @@ class MusicLibraryProcessor:
 
                 preview_table.add_row(str(i), file_name, artist, genre)
             except Exception:
-                preview_table.add_row(str(i), file_name, "[red]Error[/red]", "[red]Can't read[/red]")
+                preview_table.add_row(
+                    str(i), file_name, "[red]Error[/red]", "[red]Can't read[/red]"
+                )
 
         console.print(preview_table)
 
@@ -537,13 +555,23 @@ class MusicLibraryProcessor:
 
     # _process_files_in_batches replaced by _process_files_with_limit above
 
-    def _process_single_batch(self, current_batch: List[str], batch_start: int,
-                              batch_size: int, total_files: int,
-                              progress, batch_task, main_task, dry_run: bool) -> None:
+    def _process_single_batch(
+        self,
+        current_batch: List[str],
+        batch_start: int,
+        batch_size: int,
+        total_files: int,
+        progress,
+        batch_task,
+        main_task,
+        dry_run: bool,
+    ) -> None:
         """Process a single batch of files with database tracking."""
         batch_num = batch_start // batch_size + 1
         total_batches = (total_files - 1) // batch_size + 1
-        console.print(f"\n[cyan]Processing batch {batch_num}/{total_batches} ({len(current_batch)} files)[/cyan]")
+        console.print(
+            f"\n[cyan]Processing batch {batch_num}/{total_batches} ({len(current_batch)} files)[/cyan]"
+        )
 
         progress.update(batch_task, completed=0, total=len(current_batch), visible=True)
 
@@ -553,14 +581,17 @@ class MusicLibraryProcessor:
         )
 
         # Phase 2: Research artists in single batch call
-        country_results = self._research_artists_batch(
-            artists_to_research, progress, batch_task
-        )
+        country_results = self._research_artists_batch(artists_to_research, progress, batch_task)
 
         # Phase 3: Update files with results
         self._update_files_with_results(
-            current_batch, file_artist_map, country_results,
-            progress, batch_task, main_task, dry_run
+            current_batch,
+            file_artist_map,
+            country_results,
+            progress,
+            batch_task,
+            main_task,
+            dry_run,
         )
 
     def _parse_filename(self, filename: str) -> Tuple[Optional[str], Optional[str]]:
@@ -585,7 +616,9 @@ class MusicLibraryProcessor:
         except Exception:
             return None, None
 
-    def _collect_metadata(self, current_batch: List[str], progress, batch_task) -> Tuple[Dict, List]:
+    def _collect_metadata(
+        self, current_batch: List[str], progress, batch_task
+    ) -> Tuple[Dict, List]:
         """Collect metadata and check cache for batch"""
         file_artist_map = {}
         artists_to_research = []
@@ -599,28 +632,30 @@ class MusicLibraryProcessor:
                 metadata = self.metadata_handler.extract_metadata(file_path)
 
                 # Fallback: Parse filename if metadata is missing artist
-                if not metadata or not metadata.get('artist'):
+                if not metadata or not metadata.get("artist"):
                     artist, title = self._parse_filename(file_name)
                     if artist and title:
                         if not metadata:
                             metadata = {}
-                        metadata['artist'] = artist
-                        metadata['title'] = title
+                        metadata["artist"] = artist
+                        metadata["title"] = title
                         # Ensure other fields exist to prevent errors
-                        if 'genre' not in metadata:
-                            metadata['genre'] = ''
-                        if 'grouping' not in metadata:
-                            metadata['grouping'] = ''
+                        if "genre" not in metadata:
+                            metadata["genre"] = ""
+                        if "grouping" not in metadata:
+                            metadata["grouping"] = ""
                         console.print(f"[dim]Inferring from filename: {artist} - {title}[/dim]")
                     else:
-                        console.print(f"[yellow]Skipping {file_name}: No artist information and filename parse failed[/yellow]")
+                        console.print(
+                            f"[yellow]Skipping {file_name}: No artist information and filename parse failed[/yellow]"
+                        )
                         if self.tagging_db:
                             self.tagging_db.mark_skipped(file_path, "No artist information")
                         self.processed_count += 1
                         continue
 
-                artist = metadata['artist']
-                title = metadata.get('title', 'Unknown')
+                artist = metadata["artist"]
+                title = metadata.get("title", "Unknown")
                 # Mark as processing in database
                 if self.tagging_db:
                     self.tagging_db.mark_processing(file_path, artist, title, metadata)
@@ -633,7 +668,7 @@ class MusicLibraryProcessor:
                     cached_country = self.cache_manager.get_country(artist)
 
                 # Check if file needs genre (cache doesn't store genre)
-                needs_genre = not metadata.get('genre') or self.config.overwrite_existing_tags
+                needs_genre = not metadata.get("genre") or self.config.overwrite_existing_tags
 
                 if not cached_country and artist not in [a[0] for a in artists_to_research]:
                     # No cache - need full research
@@ -658,23 +693,34 @@ class MusicLibraryProcessor:
 
         return file_artist_map, artists_to_research
 
-    def _research_artists_batch(self, artists_to_research: List[Tuple[str, str]],
-                                progress, batch_task) -> Dict[str, Any]:
+    def _research_artists_batch(
+        self, artists_to_research: List[Tuple[str, str]], progress, batch_task
+    ) -> Dict[str, Any]:
         """Research all artists in single batch call"""
         if not artists_to_research:
             return {}
 
-        progress.update(batch_task, description=f"Web searching {len(artists_to_research)} artists...")
-        console.print(f"[blue]🔍 Single batch call researching ALL {len(artists_to_research)} artists...[/blue]")
+        progress.update(
+            batch_task, description=f"Web searching {len(artists_to_research)} artists..."
+        )
+        console.print(
+            f"[blue]🔍 Single batch call researching ALL {len(artists_to_research)} artists...[/blue]"
+        )
         console.print("[dim]One comprehensive research call - may take 3-8 minutes...[/dim]")
-        console.print("[yellow]💡 If this hangs, ensure Claude CLI is installed and working (try 'claude --version')[/yellow]")
+        console.print(
+            "[yellow]💡 If this hangs, ensure Claude CLI is installed and working (try 'claude --version')[/yellow]"
+        )
 
         try:
             country_results = self.ai_researcher.research_artists_batch(artists_to_research)
             if country_results:
-                console.print(f"[green]✓ Single call completed! Got results for {len(country_results)} artists[/green]")
+                console.print(
+                    f"[green]✓ Single call completed! Got results for {len(country_results)} artists[/green]"
+                )
             else:
-                console.print("[yellow]⚠ No results returned. Check Claude CLI configuration.[/yellow]")
+                console.print(
+                    "[yellow]⚠ No results returned. Check Claude CLI configuration.[/yellow]"
+                )
                 self.error_count += len(artists_to_research)
             return country_results
         except KeyboardInterrupt:
@@ -682,15 +728,26 @@ class MusicLibraryProcessor:
             raise
         except Exception as e:
             console.print(f"[red]Single batch call failed: {e}[/red]")
-            console.print("[yellow]💡 Tip: Check that 'claude' command works in your terminal[/yellow]")
+            console.print(
+                "[yellow]💡 Tip: Check that 'claude' command works in your terminal[/yellow]"
+            )
             self.error_count += len(artists_to_research)
             return {}
 
-    def _update_files_with_results(self, current_batch: List[str], file_artist_map: Dict,
-                                   country_results: Dict, progress, batch_task,
-                                   main_task, dry_run: bool) -> None:
+    def _update_files_with_results(
+        self,
+        current_batch: List[str],
+        file_artist_map: Dict,
+        country_results: Dict,
+        progress,
+        batch_task,
+        main_task,
+        dry_run: bool,
+    ) -> None:
         """Update files with research results"""
-        progress.update(batch_task, description="Updating files...", completed=0, total=len(current_batch))
+        progress.update(
+            batch_task, description="Updating files...", completed=0, total=len(current_batch)
+        )
 
         for file_path in current_batch:
             if file_path not in file_artist_map:
@@ -705,8 +762,9 @@ class MusicLibraryProcessor:
             progress.advance(batch_task)
             progress.advance(main_task)
 
-    def _update_single_file(self, file_path: str, artist: str, metadata: Dict,
-                            country_results: Dict, dry_run: bool) -> None:
+    def _update_single_file(
+        self, file_path: str, artist: str, metadata: Dict, country_results: Dict, dry_run: bool
+    ) -> None:
         """Update a single file with metadata"""
         os.path.basename(file_path)
 
@@ -727,16 +785,20 @@ class MusicLibraryProcessor:
         )
 
         if self.verbose:
-            console.print(f"[dim]Debug {artist}: genre={genre_info}, grouping={grouping_info}, year={year_info}[/dim]")
+            console.print(
+                f"[dim]Debug {artist}: genre={genre_info}, grouping={grouping_info}, year={year_info}[/dim]"
+            )
 
         if dry_run:
             self._display_dry_run_update(artist, genre_info, grouping_info, year_info, metadata)
         else:
-            self._apply_metadata_update(file_path, artist, metadata,
-                                        genre_info, grouping_info, year_info)
+            self._apply_metadata_update(
+                file_path, artist, metadata, genre_info, grouping_info, year_info
+            )
 
-    def _extract_metadata_fields(self, cached_grouping: Optional[str],
-                                 artist_info: Optional[Dict]) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def _extract_metadata_fields(
+        self, cached_grouping: Optional[str], artist_info: Optional[Dict]
+    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """Extract and clean genre, grouping, and year information"""
         genre_info = None
         grouping_info = None
@@ -750,13 +812,13 @@ class MusicLibraryProcessor:
         if artist_info:
             # Get genre from AI results (not stored in cache)
             if not genre_info:
-                genre_info = self._clean_field(artist_info.get('genre'))
+                genre_info = self._clean_field(artist_info.get("genre"))
             # Get grouping from AI results if not cached
             if not grouping_info:
-                grouping_info = self._clean_field(artist_info.get('grouping'))
+                grouping_info = self._clean_field(artist_info.get("grouping"))
             # Get year from AI results (not stored in cache)
             if not year_info:
-                year_info = self._clean_year_field(artist_info.get('year'))
+                year_info = self._clean_year_field(artist_info.get("year"))
 
         return genre_info, grouping_info, year_info
 
@@ -765,15 +827,15 @@ class MusicLibraryProcessor:
         if not field_value:
             return None
 
-        cleaned = re.sub(r'^\*\*|\*\*$', '', field_value).strip()
+        cleaned = re.sub(r"^\*\*|\*\*$", "", field_value).strip()
 
         # Filter out "Unknown" values or groupings like "Unknown | Unknown | Unknown"
-        if cleaned.lower() == 'unknown':
+        if cleaned.lower() == "unknown":
             return None
-        if 'unknown' in cleaned.lower() and '|' in cleaned:
+        if "unknown" in cleaned.lower() and "|" in cleaned:
             # Check if all parts are "Unknown"
-            parts = [p.strip().lower() for p in cleaned.split('|')]
-            if all(p == 'unknown' for p in parts):
+            parts = [p.strip().lower() for p in cleaned.split("|")]
+            if all(p == "unknown" for p in parts):
                 return None
 
         return cleaned
@@ -783,16 +845,21 @@ class MusicLibraryProcessor:
         if not year_value:
             return None
 
-        cleaned = re.sub(r'^\*\*|\*\*$', '', year_value).strip()
+        cleaned = re.sub(r"^\*\*|\*\*$", "", year_value).strip()
 
-        if cleaned.lower() == 'unknown' or not cleaned.isdigit():
+        if cleaned.lower() == "unknown" or not cleaned.isdigit():
             return None
 
         return cleaned
 
-    def _display_dry_run_update(self, artist: str, genre_info: Optional[str],
-                                grouping_info: Optional[str], year_info: Optional[str],
-                                metadata: Dict) -> None:
+    def _display_dry_run_update(
+        self,
+        artist: str,
+        genre_info: Optional[str],
+        grouping_info: Optional[str],
+        year_info: Optional[str],
+        metadata: Dict,
+    ) -> None:
         """Display what would be updated in dry run mode (UX-2: Enhanced table view)"""
 
         # Create before/after comparison table
@@ -801,7 +868,7 @@ class MusicLibraryProcessor:
             show_header=True,
             box=ROUNDED,
             header_style="bold blue",
-            show_lines=True
+            show_lines=True,
         )
         table.add_column("Field", style="cyan bold", width=12)
         table.add_column("Before", style="dim", width=35)
@@ -812,25 +879,25 @@ class MusicLibraryProcessor:
 
         # GENRE comparison
         if genre_info:
-            old_genre = metadata.get('genre', '[empty]')
+            old_genre = metadata.get("genre", "[empty]")
             if old_genre != genre_info:
-                change_icon = "✓ NEW" if old_genre == '[empty]' else "→ CHG"
+                change_icon = "✓ NEW" if old_genre == "[empty]" else "→ CHG"
                 table.add_row("Genre", old_genre, genre_info, change_icon)
                 has_changes = True
 
         # GROUPING comparison
         if grouping_info:
-            old_grouping = metadata.get('grouping', '[empty]')
+            old_grouping = metadata.get("grouping", "[empty]")
             if old_grouping != grouping_info:
-                change_icon = "✓ NEW" if old_grouping == '[empty]' else "→ CHG"
+                change_icon = "✓ NEW" if old_grouping == "[empty]" else "→ CHG"
                 table.add_row("Grouping", old_grouping, grouping_info, change_icon)
                 has_changes = True
 
         # YEAR comparison
         if year_info:
-            old_year = str(metadata.get('year', '[empty]'))
+            old_year = str(metadata.get("year", "[empty]"))
             if old_year != year_info:
-                change_icon = "✓ NEW" if old_year == '[empty]' else "→ CHG"
+                change_icon = "✓ NEW" if old_year == "[empty]" else "→ CHG"
                 table.add_row("Year", old_year, year_info, change_icon)
                 has_changes = True
 
@@ -839,9 +906,15 @@ class MusicLibraryProcessor:
         else:
             console.print(f"[dim]No changes needed for {artist}[/dim]")
 
-    def _apply_metadata_update(self, file_path: str, artist: str, metadata: Dict,
-                               genre_info: Optional[str], grouping_info: Optional[str],
-                               year_info: Optional[str]) -> None:
+    def _apply_metadata_update(
+        self,
+        file_path: str,
+        artist: str,
+        metadata: Dict,
+        genre_info: Optional[str],
+        grouping_info: Optional[str],
+        year_info: Optional[str],
+    ) -> None:
         """Apply metadata updates to file"""
         updates = {}
 
@@ -850,15 +923,15 @@ class MusicLibraryProcessor:
 
         if genre_info:
             # Always update genre if we have new valid data
-            updates['genre'] = genre_info
+            updates["genre"] = genre_info
 
         if grouping_info:
             # Always update grouping if we have new valid data
-            updates['grouping'] = grouping_info
+            updates["grouping"] = grouping_info
 
         if year_info:
             # Always update year if we have new valid data
-            updates['year'] = year_info
+            updates["year"] = year_info
 
         # Apply updates if any
         if updates:
@@ -870,19 +943,19 @@ class MusicLibraryProcessor:
                 if self.tagging_db:
                     self.tagging_db.mark_completed(
                         file_path,
-                        genre=updates.get('genre'),
-                        grouping=updates.get('grouping'),
-                        year=updates.get('year'),
-                        artist=artist
+                        genre=updates.get("genre"),
+                        grouping=updates.get("grouping"),
+                        year=updates.get("year"),
+                        artist=artist,
                     )
 
                 # Show concise success message
                 changes = []
-                if 'genre' in updates:
+                if "genre" in updates:
                     changes.append("Genre")
-                if 'grouping' in updates:
+                if "grouping" in updates:
                     changes.append("Grouping")
-                if 'year' in updates:
+                if "year" in updates:
                     changes.append("Year")
 
                 console.print(f"[green]✓ Updated {artist}: {', '.join(changes)}[/green]")
@@ -917,21 +990,23 @@ class MusicLibraryProcessor:
         # Show database stats
         if self.tagging_db:
             stats = self.tagging_db.get_statistics()
-            remaining = stats['pending']
+            remaining = stats["pending"]
             if remaining > 0:
                 console.print(f"\n[cyan]Remaining to process: {remaining} files[/cyan]")
                 console.print("[dim]Run again to continue processing.[/dim]")
             else:
-                console.print("\n[bold green]✓ All files in library have been processed![/bold green]")
+                console.print(
+                    "\n[bold green]✓ All files in library have been processed![/bold green]"
+                )
 
     def _get_results_summary(self, dry_run: bool) -> Dict[str, Any]:
         """Get summary of processing results"""
         return {
-            'processed': self.processed_count,
-            'updated': self.updated_count,
-            'cached': self.cached_count,
-            'errors': self.error_count,
-            'dry_run': dry_run
+            "processed": self.processed_count,
+            "updated": self.updated_count,
+            "cached": self.cached_count,
+            "errors": self.error_count,
+            "dry_run": dry_run,
         }
 
     def _handle_failed_files(self) -> None:
@@ -942,8 +1017,10 @@ class MusicLibraryProcessor:
 
         if Confirm.ask("Save failed files list to log?", default=True):
             try:
-                log_path = os.path.join(self.config.config_dir, 'logs', f'failed_files_{int(time.time())}.log')
-                with open(log_path, 'w') as f:
+                log_path = os.path.join(
+                    self.config.config_dir, "logs", f"failed_files_{int(time.time())}.log"
+                )
+                with open(log_path, "w") as f:
                     for file_path, error in self.failed_files:
                         f.write(f"{file_path}\t{error}\n")
                 console.print(f"[green]Saved to {log_path}[/green]")
@@ -966,4 +1043,6 @@ class MusicLibraryProcessor:
             console.print(f"  ✗ Errors: {self.error_count}")
             console.print(f"  ⏭️  Skipped: {total_files - self.processed_count}")
 
-        console.print("\n[yellow]💡 Progress has been saved. Re-run to continue from where you left off.[/yellow]")
+        console.print(
+            "\n[yellow]💡 Progress has been saved. Re-run to continue from where you left off.[/yellow]"
+        )

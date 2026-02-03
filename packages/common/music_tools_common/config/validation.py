@@ -1,12 +1,13 @@
 """
 Configuration validation utilities.
 """
+
 import logging
 import os
 import re
 from typing import Any, Dict, List
 
-logger = logging.getLogger('music_tools_common.config.validation')
+logger = logging.getLogger("music_tools_common.config.validation")
 
 
 def validate_spotify_config(config: Dict[str, Any]) -> List[str]:
@@ -20,9 +21,9 @@ def validate_spotify_config(config: Dict[str, Any]) -> List[str]:
     """
     errors = []
 
-    client_id = config.get('client_id', '')
-    client_secret = config.get('client_secret', '')
-    redirect_uri = config.get('redirect_uri', '')
+    client_id = config.get("client_id", "")
+    client_secret = config.get("client_secret", "")
+    redirect_uri = config.get("redirect_uri", "")
 
     if not client_id:
         errors.append("Missing Spotify client_id")
@@ -36,7 +37,7 @@ def validate_spotify_config(config: Dict[str, Any]) -> List[str]:
 
     if not redirect_uri:
         errors.append("Missing Spotify redirect_uri")
-    elif not redirect_uri.startswith(('http://', 'https://')):
+    elif not redirect_uri.startswith(("http://", "https://")):
         errors.append("Spotify redirect_uri must start with http:// or https://")
 
     return errors
@@ -53,13 +54,13 @@ def validate_deezer_config(config: Dict[str, Any]) -> List[str]:
     """
     errors = []
 
-    email = config.get('email', '')
+    email = config.get("email", "")
 
     if not email:
         errors.append("Missing Deezer email")
     else:
         # Basic email validation
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_pattern, email):
             errors.append(f"Invalid Deezer email format: {email}")
 
@@ -77,12 +78,12 @@ def validate_anthropic_config(config: Dict[str, Any]) -> List[str]:
     """
     errors = []
 
-    api_key = config.get('api_key', '')
-    model = config.get('model', '')
+    api_key = config.get("api_key", "")
+    model = config.get("model", "")
 
     if not api_key:
         errors.append("Missing Anthropic api_key")
-    elif not api_key.startswith('sk-'):
+    elif not api_key.startswith("sk-"):
         errors.append("Invalid Anthropic api_key format (should start with 'sk-')")
 
     if not model:
@@ -102,9 +103,9 @@ def validate_config(service: str, config: Dict[str, Any]) -> List[str]:
         List of validation errors (empty if valid)
     """
     validators = {
-        'spotify': validate_spotify_config,
-        'deezer': validate_deezer_config,
-        'anthropic': validate_anthropic_config,
+        "spotify": validate_spotify_config,
+        "deezer": validate_deezer_config,
+        "anthropic": validate_anthropic_config,
     }
 
     validator = validators.get(service)
@@ -115,7 +116,9 @@ def validate_config(service: str, config: Dict[str, Any]) -> List[str]:
         return []
 
 
-def validate_path(path: str, must_exist: bool = False, create_if_missing: bool = False) -> List[str]:
+def validate_path(
+    path: str, must_exist: bool = False, create_if_missing: bool = False
+) -> List[str]:
     """Validate a file or directory path.
 
     Args:

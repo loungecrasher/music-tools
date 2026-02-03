@@ -74,7 +74,7 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
             cursor = conn.cursor()
 
             # Create artist_country table
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS artist_country (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     artist_name TEXT NOT NULL UNIQUE,
@@ -84,10 +84,10 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                     updated_at TEXT NOT NULL,
                     hit_count INTEGER DEFAULT 0
                 )
-            ''')
+            """)
 
             # Create processing_log table
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS processing_log (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     file_path TEXT NOT NULL,
@@ -97,23 +97,23 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                     processed_at TEXT NOT NULL,
                     error_message TEXT
                 )
-            ''')
+            """)
 
             # Create indexes for better performance
-            cursor.execute('''
+            cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_artist_name
                 ON artist_country(artist_name)
-            ''')
+            """)
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_processing_log_artist
                 ON processing_log(artist_name)
-            ''')
+            """)
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_processing_log_status
                 ON processing_log(status)
-            ''')
+            """)
 
             conn.commit()
             logger.info(f"Cache database initialized at {self.db_path}")
@@ -128,10 +128,13 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute('''
+                cursor.execute(
+                    """
                     SELECT country, hit_count FROM artist_country
                     WHERE LOWER(artist_name) = LOWER(?)
-                ''', (artist_name.strip(),))
+                """,
+                    (artist_name.strip(),),
+                )
 
                 result = cursor.fetchone()
 
@@ -139,11 +142,14 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                     country, hit_count = result
 
                     # Update hit count
-                    cursor.execute('''
+                    cursor.execute(
+                        """
                         UPDATE artist_country
                         SET hit_count = hit_count + 1, updated_at = ?
                         WHERE LOWER(artist_name) = LOWER(?)
-                    ''', (datetime.now().isoformat(), artist_name.strip()))
+                    """,
+                        (datetime.now().isoformat(), artist_name.strip()),
+                    )
 
                     conn.commit()
 
@@ -170,19 +176,30 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                 cursor = conn.cursor()
 
                 # Use INSERT OR REPLACE to handle duplicates
-                cursor.execute('''
+                cursor.execute(
+                    """
                     INSERT OR REPLACE INTO artist_country
                     (artist_name, country, confidence, created_at, updated_at, hit_count)
                     VALUES (?, ?, ?, ?, ?,
                         COALESCE((SELECT hit_count FROM artist_country WHERE LOWER(artist_name) = LOWER(?)), 0))
-                ''', (
-                    entry.artist_name.strip(),
-                    entry.country,
-                    entry.confidence,
-                    entry.created_at.isoformat() if entry.created_at else datetime.now().isoformat(),
-                    entry.updated_at.isoformat() if entry.updated_at else datetime.now().isoformat(),
-                    entry.artist_name.strip()
-                ))
+                """,
+                    (
+                        entry.artist_name.strip(),
+                        entry.country,
+                        entry.confidence,
+                        (
+                            entry.created_at.isoformat()
+                            if entry.created_at
+                            else datetime.now().isoformat()
+                        ),
+                        (
+                            entry.updated_at.isoformat()
+                            if entry.updated_at
+                            else datetime.now().isoformat()
+                        ),
+                        entry.artist_name.strip(),
+                    ),
+                )
 
                 conn.commit()
                 logger.debug(f"Stored in cache: {entry.artist_name} -> {entry.country}")
@@ -202,11 +219,14 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute('''
+                cursor.execute(
+                    """
                     SELECT artist_name, country, confidence, created_at, updated_at, hit_count
                     FROM artist_country
                     WHERE LOWER(artist_name) = LOWER(?)
-                ''', (artist_name.strip(),))
+                """,
+                    (artist_name.strip(),),
+                )
 
                 result = cursor.fetchone()
 
@@ -218,7 +238,7 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                         confidence=confidence,
                         created_at=datetime.fromisoformat(created_at) if created_at else None,
                         updated_at=datetime.fromisoformat(updated_at) if updated_at else None,
-                        hit_count=hit_count
+                        hit_count=hit_count,
                     )
 
                 return None
@@ -236,10 +256,13 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
+                cursor.execute(
+                    """
                     DELETE FROM artist_country
                     WHERE LOWER(artist_name) = LOWER(?)
-                ''', (artist_name.strip(),))
+                """,
+                    (artist_name.strip(),),
+                )
 
                 deleted_count = cursor.rowcount
                 conn.commit()
@@ -259,11 +282,11 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
+                cursor.execute("""
                     SELECT artist_name, country, confidence, created_at, updated_at, hit_count
                     FROM artist_country
                     ORDER BY updated_at DESC
-                ''')
+                """)
 
                 results = []
                 for row in cursor.fetchall():
@@ -274,7 +297,7 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                         confidence=confidence,
                         created_at=datetime.fromisoformat(created_at) if created_at else None,
                         updated_at=datetime.fromisoformat(updated_at) if updated_at else None,
-                        hit_count=hit_count
+                        hit_count=hit_count,
                     )
                     results.append(entry)
 
@@ -290,8 +313,8 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                cursor.execute('DELETE FROM artist_country')
-                cursor.execute('DELETE FROM processing_log')
+                cursor.execute("DELETE FROM artist_country")
+                cursor.execute("DELETE FROM processing_log")
                 conn.commit()
 
                 # Reset statistics
@@ -312,22 +335,22 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                 cursor = conn.cursor()
 
                 # Get cache entry count
-                cursor.execute('SELECT COUNT(*) FROM artist_country')
+                cursor.execute("SELECT COUNT(*) FROM artist_country")
                 cache_count = cursor.fetchone()[0]
 
                 # Get processing log statistics
-                cursor.execute('''
+                cursor.execute("""
                     SELECT status, COUNT(*) FROM processing_log
                     GROUP BY status
-                ''')
+                """)
 
                 status_counts = dict(cursor.fetchall())
 
                 # Update statistics object
                 self.statistics.cache_entries = cache_count
-                self.statistics.files_processed = status_counts.get('success', 0)
-                self.statistics.files_with_errors = status_counts.get('error', 0)
-                self.statistics.files_skipped = status_counts.get('skipped', 0)
+                self.statistics.files_processed = status_counts.get("success", 0)
+                self.statistics.files_with_errors = status_counts.get("error", 0)
+                self.statistics.files_skipped = status_counts.get("skipped", 0)
 
                 return self.statistics
 
@@ -341,18 +364,25 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
+                cursor.execute(
+                    """
                     INSERT INTO processing_log
                     (file_path, artist_name, country, status, processed_at, error_message)
                     VALUES (?, ?, ?, ?, ?, ?)
-                ''', (
-                    entry.file_path,
-                    entry.artist_name,
-                    entry.country,
-                    entry.status.value,
-                    entry.processed_at.isoformat() if entry.processed_at else datetime.now().isoformat(),
-                    entry.error_message
-                ))
+                """,
+                    (
+                        entry.file_path,
+                        entry.artist_name,
+                        entry.country,
+                        entry.status.value,
+                        (
+                            entry.processed_at.isoformat()
+                            if entry.processed_at
+                            else datetime.now().isoformat()
+                        ),
+                        entry.error_message,
+                    ),
+                )
                 conn.commit()
                 return True
 
@@ -370,10 +400,13 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
 
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
+                cursor.execute(
+                    """
                     DELETE FROM artist_country
                     WHERE updated_at < ? AND hit_count = 0
-                ''', (cutoff_str,))
+                """,
+                    (cutoff_str,),
+                )
 
                 deleted_count = cursor.rowcount
                 conn.commit()

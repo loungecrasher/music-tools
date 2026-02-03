@@ -19,7 +19,9 @@ console = Console()
 def _load_module() -> ModuleType:
     global _MODULE
     if _MODULE is None:
-        module_path = Path(__file__).resolve().parents[2] / "Soundiz File Maker" / "process_music.py"
+        module_path = (
+            Path(__file__).resolve().parents[2] / "Soundiz File Maker" / "process_music.py"
+        )
         spec = importlib.util.spec_from_file_location("soundiz_processor", module_path)
         if spec is None or spec.loader is None:
             raise ImportError(f"Unable to load Soundiz processor from {module_path}")
@@ -39,14 +41,16 @@ def SoundizResult():  # pragma: no cover - helper for type hints
 
 def run_soundiz_processor():
     """Interactive wrapper for Soundiiz CSV processor."""
-    console.print(Panel(
-        "[bold green]Soundiiz File Processor[/bold green]\n\n"
-        "Generate a Soundiiz-ready text file from a CSV export.\n"
-        "The tool will extract track titles and artists from your CSV\n"
-        "and format them for import into Soundiiz.",
-        title="[bold]Soundiiz CSV Processor[/bold]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            "[bold green]Soundiiz File Processor[/bold green]\n\n"
+            "Generate a Soundiiz-ready text file from a CSV export.\n"
+            "The tool will extract track titles and artists from your CSV\n"
+            "and format them for import into Soundiiz.",
+            title="[bold]Soundiiz CSV Processor[/bold]",
+            border_style="green",
+        )
+    )
 
     input_path = Prompt.ask("\nEnter path to CSV file")
     input_path = input_path.strip("'\"")
@@ -76,7 +80,7 @@ def run_soundiz_processor():
             title_field=title_field,
             artist_field=artist_field,
             delimiter=delimiter,
-            encoding=encoding
+            encoding=encoding,
         )
 
         console.print("\n[bold green]✓ Processing complete![/bold green]")

@@ -15,18 +15,18 @@ def get_database(db_path=None):
     return Database(db_path)
 
 
-def get_cache(cache_dir='cache', ttl_days=30):
+def get_cache(cache_dir="cache", ttl_days=30):
     """Get a cache manager instance."""
     return CacheManager(cache_dir, ttl_days)
 
 
 __all__ = [
-    'Database',
-    'get_database',
-    'CacheManager',
-    'get_cache',
-    'Playlist',
-    'Track',
-    'PlaylistTrack',
-    'Setting',
+    "Database",
+    "get_database",
+    "CacheManager",
+    "get_cache",
+    "Playlist",
+    "Track",
+    "PlaylistTrack",
+    "Setting",
 ]

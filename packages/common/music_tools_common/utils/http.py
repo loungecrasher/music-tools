@@ -19,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 # Default user agents for web scraping
 DEFAULT_USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0",
 ]
 
 
@@ -55,7 +55,7 @@ def create_resilient_session(
     pool_connections: int = 10,
     pool_maxsize: int = 10,
     timeout: int = 30,
-    user_agent: Optional[str] = None
+    user_agent: Optional[str] = None,
 ) -> requests.Session:
     """
     Create a requests session with retry logic and connection pooling.
@@ -90,14 +90,12 @@ def create_resilient_session(
         backoff_factor=backoff_factor,
         status_forcelist=status_forcelist,
         allowed_methods=["HEAD", "GET", "OPTIONS", "POST", "PUT", "DELETE"],
-        raise_on_status=False
+        raise_on_status=False,
     )
 
     # Create adapter with retry strategy and connection pooling
     adapter = HTTPAdapter(
-        max_retries=retry_strategy,
-        pool_connections=pool_connections,
-        pool_maxsize=pool_maxsize
+        max_retries=retry_strategy, pool_connections=pool_connections, pool_maxsize=pool_maxsize
     )
 
     # Mount adapter for both HTTP and HTTPS
@@ -108,24 +106,22 @@ def create_resilient_session(
     if user_agent is None:
         user_agent = get_random_user_agent()
 
-    session.headers.update({
-        'User-Agent': user_agent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-    })
+    session.headers.update(
+        {
+            "User-Agent": user_agent,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+        }
+    )
 
     return session
 
 
 def _safe_request_with_session(
-    session: requests.Session,
-    url: str,
-    method: str = 'GET',
-    timeout: int = 30,
-    **kwargs
+    session: requests.Session, url: str, method: str = "GET", timeout: int = 30, **kwargs
 ) -> Optional[requests.Response]:
     """
     Make a safe HTTP request with error handling and rate limit handling (internal).
@@ -164,14 +160,14 @@ def _safe_request_with_session(
         return response
 
     except requests.exceptions.HTTPError as e:
-        status_code = e.response.status_code if e.response else 'unknown'
+        status_code = e.response.status_code if e.response else "unknown"
 
         if status_code == 404:
             logger.debug(f"Page not found (404): {url}")
         elif status_code == 403:
             logger.warning(f"Access forbidden (403): {url}")
             # Try with different user agent
-            session.headers['User-Agent'] = get_random_user_agent()
+            session.headers["User-Agent"] = get_random_user_agent()
         else:
             logger.error(f"HTTP error {status_code} for {url}: {e}")
 
@@ -213,7 +209,7 @@ def handle_rate_limit(response: requests.Response) -> Optional[float]:
     """
     if response.status_code == 429:
         # Check for Retry-After header
-        retry_after = response.headers.get('Retry-After')
+        retry_after = response.headers.get("Retry-After")
 
         if retry_after:
             try:
@@ -223,6 +219,7 @@ def handle_rate_limit(response: requests.Response) -> Optional[float]:
                 # Parse HTTP date format
                 from datetime import datetime
                 from email.utils import parsedate_to_datetime
+
                 try:
                     retry_date = parsedate_to_datetime(retry_after)
                     delay = (retry_date - datetime.now()).total_seconds()
@@ -238,10 +235,7 @@ def handle_rate_limit(response: requests.Response) -> Optional[float]:
 
 
 def get_json(
-    session: requests.Session,
-    url: str,
-    timeout: int = 30,
-    **kwargs
+    session: requests.Session, url: str, timeout: int = 30, **kwargs
 ) -> Optional[Dict[str, Any]]:
     """
     Make a GET request and parse JSON response.
@@ -261,7 +255,7 @@ def get_json(
         >>> if data:
         ...     print(f"Received {len(data)} items")
     """
-    response = _safe_request_with_session(session, url, method='GET', timeout=timeout, **kwargs)
+    response = _safe_request_with_session(session, url, method="GET", timeout=timeout, **kwargs)
 
     if not response:
         return None
@@ -274,11 +268,7 @@ def get_json(
 
 
 def post_json(
-    session: requests.Session,
-    url: str,
-    data: Dict[str, Any],
-    timeout: int = 30,
-    **kwargs
+    session: requests.Session, url: str, data: Dict[str, Any], timeout: int = 30, **kwargs
 ) -> Optional[Dict[str, Any]]:
     """
     Make a POST request with JSON data and parse JSON response.
@@ -299,17 +289,12 @@ def post_json(
         >>> response = post_json(session, 'https://api.example.com/artists', payload)
     """
     # Set content-type header for JSON
-    if 'headers' not in kwargs:
-        kwargs['headers'] = {}
-    kwargs['headers']['Content-Type'] = 'application/json'
+    if "headers" not in kwargs:
+        kwargs["headers"] = {}
+    kwargs["headers"]["Content-Type"] = "application/json"
 
     response = _safe_request_with_session(
-        session,
-        url,
-        method='POST',
-        json=data,
-        timeout=timeout,
-        **kwargs
+        session, url, method="POST", json=data, timeout=timeout, **kwargs
     )
 
     if not response:
@@ -412,8 +397,7 @@ class RateLimiter:
         now = time.time()
 
         # Clean up calls outside the time window
-        self.calls = [call_time for call_time in self.calls
-                      if now - call_time < self.time_window]
+        self.calls = [call_time for call_time in self.calls if now - call_time < self.time_window]
 
         # Check if we can make another call
         if len(self.calls) < self.max_calls:
@@ -432,16 +416,17 @@ class RateLimiter:
             time.sleep(0.1)  # Check every 100ms
 
 
-def make_request(url: str, method: str = 'GET', headers: Optional[Dict] = None,
-                 data: Optional[Dict] = None, timeout: int = 30) -> Optional[requests.Response]:
+def make_request(
+    url: str,
+    method: str = "GET",
+    headers: Optional[Dict] = None,
+    data: Optional[Dict] = None,
+    timeout: int = 30,
+) -> Optional[requests.Response]:
     """Make HTTP request with error handling (legacy compatibility)."""
     try:
         response = requests.request(
-            method=method,
-            url=url,
-            headers=headers,
-            json=data,
-            timeout=timeout
+            method=method, url=url, headers=headers, json=data, timeout=timeout
         )
         response.raise_for_status()
         return response
@@ -457,7 +442,7 @@ def setup_session(
     pool_connections: int = 10,
     pool_maxsize: int = 20,
     timeout: int = 30,
-    backoff_factor: float = 1.0
+    backoff_factor: float = 1.0,
 ) -> requests.Session:
     """
     Setup HTTP session with retry logic (convenience wrapper).
@@ -485,7 +470,7 @@ def setup_session(
         backoff_factor=backoff_factor,
         pool_connections=pool_connections,
         pool_maxsize=pool_maxsize,
-        timeout=timeout
+        timeout=timeout,
     )
 
     # Add custom headers if provided
@@ -498,14 +483,14 @@ def setup_session(
 # Standalone safe_request function for testing/simple use cases
 def safe_request(
     url: str,
-    method: str = 'GET',
+    method: str = "GET",
     max_retries: int = 3,
     timeout: int = 30,
     headers: Optional[Dict[str, str]] = None,
     json: Optional[Dict] = None,
     data: Optional[Dict] = None,
     backoff_factor: float = 1.0,
-    **kwargs
+    **kwargs,
 ) -> Optional[requests.Response]:
     """
     Make a safe HTTP request with automatic retry logic (standalone version).
@@ -539,34 +524,34 @@ def safe_request(
     while retry_count < max_retries:
         try:
             # Prepare request kwargs
-            request_kwargs = {'timeout': timeout}
+            request_kwargs = {"timeout": timeout}
             if headers:
-                request_kwargs['headers'] = headers
+                request_kwargs["headers"] = headers
             if json is not None:
-                request_kwargs['json'] = json
+                request_kwargs["json"] = json
             if data is not None:
-                request_kwargs['data'] = data
+                request_kwargs["data"] = data
             request_kwargs.update(kwargs)
 
             # Make the request using requests module directly
-            if method.upper() == 'GET':
+            if method.upper() == "GET":
                 response = requests.get(url, **request_kwargs)
-            elif method.upper() == 'POST':
+            elif method.upper() == "POST":
                 response = requests.post(url, **request_kwargs)
-            elif method.upper() == 'PUT':
+            elif method.upper() == "PUT":
                 response = requests.put(url, **request_kwargs)
-            elif method.upper() == 'DELETE':
+            elif method.upper() == "DELETE":
                 response = requests.delete(url, **request_kwargs)
-            elif method.upper() == 'PATCH':
+            elif method.upper() == "PATCH":
                 response = requests.patch(url, **request_kwargs)
-            elif method.upper() == 'HEAD':
+            elif method.upper() == "HEAD":
                 response = requests.head(url, **request_kwargs)
             else:
                 response = requests.request(method, url, **request_kwargs)
 
             # Handle rate limiting
             if response.status_code == 429:
-                retry_after = response.headers.get('Retry-After')
+                retry_after = response.headers.get("Retry-After")
                 if retry_after:
                     try:
                         delay = float(retry_after)

@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional
 # Import security utilities
 try:
     from .core.security import SecurityValidator
+
     SECURITY_AVAILABLE = True
 except ImportError:
     SECURITY_AVAILABLE = False
@@ -55,10 +56,10 @@ class CacheManager:
         self._connection_lock = threading.Lock()
 
         self.statistics = {
-            'cache_hits': 0,
-            'cache_misses': 0,
-            'entries_added': 0,
-            'entries_updated': 0
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "entries_added": 0,
+            "entries_updated": 0,
         }
 
         # Initialize database with optimizations
@@ -78,7 +79,7 @@ class CacheManager:
                 cursor.execute("PRAGMA temp_store=MEMORY")
 
                 # Create artist_country table
-                cursor.execute('''
+                cursor.execute("""
                     CREATE TABLE IF NOT EXISTS artist_country (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         artist_name TEXT NOT NULL UNIQUE,
@@ -88,10 +89,10 @@ class CacheManager:
                         updated_at TEXT NOT NULL,
                         hit_count INTEGER DEFAULT 0
                     )
-                ''')
+                """)
 
                 # Create processing_log table
-                cursor.execute('''
+                cursor.execute("""
                     CREATE TABLE IF NOT EXISTS processing_log (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         file_path TEXT NOT NULL,
@@ -101,58 +102,58 @@ class CacheManager:
                         processed_at TEXT NOT NULL,
                         error_message TEXT
                     )
-                ''')
+                """)
 
                 # Create single-column indexes
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_artist_name
                     ON artist_country(artist_name)
-                ''')
+                """)
 
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_processing_log_artist
                     ON processing_log(artist_name)
-                ''')
+                """)
 
                 # Create high-impact composite indexes for performance optimization
 
                 # CRITICAL: Composite index for TTL-aware lookups (most common query pattern)
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_artist_updated
                     ON artist_country(artist_name, updated_at DESC)
-                ''')
+                """)
 
                 # Analytics and reporting indexes
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_confidence
                     ON artist_country(confidence DESC)
-                ''')
+                """)
 
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_hit_count
                     ON artist_country(hit_count DESC)
-                ''')
+                """)
 
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_country
                     ON artist_country(country)
-                ''')
+                """)
 
                 # Processing log indexes for file history and status tracking
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_processing_log_file
                     ON processing_log(file_path, processed_at DESC)
-                ''')
+                """)
 
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_processing_log_status
                     ON processing_log(status, processed_at DESC)
-                ''')
+                """)
 
-                cursor.execute('''
+                cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_processing_log_date
                     ON processing_log(processed_at DESC)
-                ''')
+                """)
 
                 conn.commit()
                 logger.info(f"Cache database initialized at {self.db_path}")
@@ -163,25 +164,25 @@ class CacheManager:
     def _setup_prepared_statements(self):
         """Setup prepared statements for better performance."""
         self._prepared_statements = {
-            'get_country': '''
+            "get_country": """
                 SELECT country, confidence, hit_count FROM artist_country
                 WHERE artist_name = ? AND updated_at > ?
-            ''',
-            'get_hit_count': '''
+            """,
+            "get_hit_count": """
                 SELECT hit_count FROM artist_country WHERE artist_name = ?
-            ''',
-            'insert_country': '''
+            """,
+            "insert_country": """
                 INSERT OR REPLACE INTO artist_country
                 (artist_name, country, confidence, created_at, updated_at, hit_count)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''',
-            'update_hit_count': '''
+            """,
+            "update_hit_count": """
                 UPDATE artist_country SET hit_count = hit_count + 1, updated_at = ?
                 WHERE artist_name = ?
-            ''',
-            'cleanup_expired': '''
+            """,
+            "cleanup_expired": """
                 DELETE FROM artist_country WHERE updated_at < ?
-            '''
+            """,
         }
 
     def _get_optimized_connection(self):
@@ -215,8 +216,9 @@ class CacheManager:
                     ttl_cutoff = (datetime.now() - timedelta(days=self.ttl_days)).isoformat()
 
                     # Case-insensitive search with TTL check using prepared statement
-                    cursor.execute(self._prepared_statements['get_country'],
-                                   (artist_name.strip(), ttl_cutoff))
+                    cursor.execute(
+                        self._prepared_statements["get_country"], (artist_name.strip(), ttl_cutoff)
+                    )
 
                     result = cursor.fetchone()
 
@@ -227,16 +229,18 @@ class CacheManager:
                         country = self._ensure_pipes_in_grouping(country)
 
                         # Update hit count using prepared statement
-                        cursor.execute(self._prepared_statements['update_hit_count'],
-                                       (datetime.now().isoformat(), artist_name.strip()))
+                        cursor.execute(
+                            self._prepared_statements["update_hit_count"],
+                            (datetime.now().isoformat(), artist_name.strip()),
+                        )
 
                         conn.commit()
 
-                        self.statistics['cache_hits'] += 1
+                        self.statistics["cache_hits"] += 1
                         logger.debug(f"Cache hit for artist: {artist_name} -> {country}")
                         return country
                     else:
-                        self.statistics['cache_misses'] += 1
+                        self.statistics["cache_misses"] += 1
                         logger.debug(f"Cache miss for artist: {artist_name}")
                         return None
 
@@ -258,7 +262,7 @@ class CacheManager:
             return grouping
 
         # If already has pipes, return as-is
-        if '|' in grouping:
+        if "|" in grouping:
             return grouping
 
         # Legacy format without pipes - try to add them
@@ -269,8 +273,8 @@ class CacheManager:
         if len(parts) >= 4:
             # Format: [Region Region] [Country] [Language]
             # First 2 words = region, second-to-last = country, last = language
-            region = ' '.join(parts[:2])  # e.g., "Western Europe"
-            country = ' '.join(parts[2:-1])  # e.g., "France" or "United States"
+            region = " ".join(parts[:2])  # e.g., "Western Europe"
+            country = " ".join(parts[2:-1])  # e.g., "France" or "United States"
             language = parts[-1]  # e.g., "Romance"
             fixed = f"{region} | {country} | {language}"
             logger.info(f"Fixed legacy cache entry: '{grouping}' -> '{fixed}'")
@@ -312,7 +316,9 @@ class CacheManager:
         # Sanitize inputs using security validator if available
         if self.security_validator:
             artist_name = self.security_validator.sanitize_artist_name(artist_name)
-            country = self.security_validator.sanitize_artist_name(country)  # Same sanitization rules
+            country = self.security_validator.sanitize_artist_name(
+                country
+            )  # Same sanitization rules
 
         # Additional validation
         if not artist_name or not country:
@@ -327,8 +333,9 @@ class CacheManager:
                     now = datetime.now().isoformat()
 
                     # Get existing hit count using prepared statement
-                    cursor.execute(self._prepared_statements['get_hit_count'],
-                                   (artist_name.strip(),))
+                    cursor.execute(
+                        self._prepared_statements["get_hit_count"], (artist_name.strip(),)
+                    )
 
                     existing_hit_count = 0
                     result = cursor.fetchone()
@@ -336,17 +343,19 @@ class CacheManager:
                         existing_hit_count = result[0]
 
                     # Insert or replace using prepared statement
-                    cursor.execute(self._prepared_statements['insert_country'],
-                                   (artist_name.strip(), country, confidence, now, now, existing_hit_count))
+                    cursor.execute(
+                        self._prepared_statements["insert_country"],
+                        (artist_name.strip(), country, confidence, now, now, existing_hit_count),
+                    )
 
                 conn.commit()
 
                 if cursor.rowcount > 0:
                     if cursor.lastrowid:
-                        self.statistics['entries_added'] += 1
+                        self.statistics["entries_added"] += 1
                         logger.debug(f"Added to cache: {artist_name} -> {country}")
                     else:
-                        self.statistics['entries_updated'] += 1
+                        self.statistics["entries_updated"] += 1
                         logger.debug(f"Updated cache: {artist_name} -> {country}")
                     return True
                 else:
@@ -373,7 +382,7 @@ class CacheManager:
                     cutoff_date = (datetime.now() - timedelta(days=self.ttl_days)).isoformat()
 
                     # Remove expired entries using prepared statement
-                    cursor.execute(self._prepared_statements['cleanup_expired'], (cutoff_date,))
+                    cursor.execute(self._prepared_statements["cleanup_expired"], (cutoff_date,))
 
                     removed_count = cursor.rowcount
                     conn.commit()
@@ -400,8 +409,14 @@ class CacheManager:
         except sqlite3.Error as e:
             logger.error(f"Error optimizing database: {e}")
 
-    def log_processing(self, file_path: str, artist_name: str, country: Optional[str],
-                       status: str, error_message: Optional[str] = None):
+    def log_processing(
+        self,
+        file_path: str,
+        artist_name: str,
+        country: Optional[str],
+        status: str,
+        error_message: Optional[str] = None,
+    ):
         """
         Log file processing results.
 
@@ -416,12 +431,21 @@ class CacheManager:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute('''
+                cursor.execute(
+                    """
                     INSERT INTO processing_log
                     (file_path, artist_name, country, status, processed_at, error_message)
                     VALUES (?, ?, ?, ?, ?, ?)
-                ''', (file_path, artist_name, country, status,
-                      datetime.now().isoformat(), error_message))
+                """,
+                    (
+                        file_path,
+                        artist_name,
+                        country,
+                        status,
+                        datetime.now().isoformat(),
+                        error_message,
+                    ),
+                )
 
                 conn.commit()
 
@@ -440,34 +464,38 @@ class CacheManager:
                 cursor = conn.cursor()
 
                 # Total entries
-                cursor.execute('SELECT COUNT(*) FROM artist_country')
+                cursor.execute("SELECT COUNT(*) FROM artist_country")
                 total_entries = cursor.fetchone()[0]
 
                 # Cache hit rate calculation
-                total_requests = self.statistics['cache_hits'] + self.statistics['cache_misses']
-                hit_rate = (self.statistics['cache_hits'] / total_requests * 100) if total_requests > 0 else 0
+                total_requests = self.statistics["cache_hits"] + self.statistics["cache_misses"]
+                hit_rate = (
+                    (self.statistics["cache_hits"] / total_requests * 100)
+                    if total_requests > 0
+                    else 0
+                )
 
                 # Most recent update
-                cursor.execute('SELECT MAX(updated_at) FROM artist_country')
+                cursor.execute("SELECT MAX(updated_at) FROM artist_country")
                 last_updated = cursor.fetchone()[0] or "Never"
 
                 # Top countries
-                cursor.execute('''
+                cursor.execute("""
                     SELECT country, COUNT(*) as count
                     FROM artist_country
                     GROUP BY country
                     ORDER BY count DESC
                     LIMIT 10
-                ''')
+                """)
                 top_countries = cursor.fetchall()
 
                 # Recent entries
-                cursor.execute('''
+                cursor.execute("""
                     SELECT artist_name, country, created_at
                     FROM artist_country
                     ORDER BY created_at DESC
                     LIMIT 5
-                ''')
+                """)
                 recent_entries = [
                     {"artist": row[0], "country": row[1], "timestamp": row[2]}
                     for row in cursor.fetchall()
@@ -478,27 +506,27 @@ class CacheManager:
                 cache_size_mb = db_size / (1024 * 1024)
 
                 return {
-                    'total_entries': total_entries,
-                    'hit_rate': hit_rate,
-                    'last_updated': last_updated,
-                    'cache_size_mb': cache_size_mb,
-                    'top_countries': top_countries,
-                    'recent_entries': recent_entries,
-                    'total_api_requests': self.statistics['cache_misses'],
-                    **self.statistics
+                    "total_entries": total_entries,
+                    "hit_rate": hit_rate,
+                    "last_updated": last_updated,
+                    "cache_size_mb": cache_size_mb,
+                    "top_countries": top_countries,
+                    "recent_entries": recent_entries,
+                    "total_api_requests": self.statistics["cache_misses"],
+                    **self.statistics,
                 }
 
         except sqlite3.Error as e:
             logger.error(f"Error getting statistics: {e}")
             return {
-                'total_entries': 0,
-                'hit_rate': 0,
-                'last_updated': 'Error',
-                'cache_size_mb': 0,
-                'top_countries': [],
-                'recent_entries': [],
-                'total_api_requests': 0,
-                **self.statistics
+                "total_entries": 0,
+                "hit_rate": 0,
+                "last_updated": "Error",
+                "cache_size_mb": 0,
+                "top_countries": [],
+                "recent_entries": [],
+                "total_api_requests": 0,
+                **self.statistics,
             }
 
     def clear_cache(self, confirm: bool = False) -> bool:
@@ -515,17 +543,17 @@ class CacheManager:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute('DELETE FROM artist_country')
-                cursor.execute('DELETE FROM processing_log')
+                cursor.execute("DELETE FROM artist_country")
+                cursor.execute("DELETE FROM processing_log")
 
                 conn.commit()
 
                 # Reset statistics
                 self.statistics = {
-                    'cache_hits': 0,
-                    'cache_misses': 0,
-                    'entries_added': 0,
-                    'entries_updated': 0
+                    "cache_hits": 0,
+                    "cache_misses": 0,
+                    "entries_added": 0,
+                    "entries_updated": 0,
                 }
 
                 logger.info("Cache cleared successfully")
@@ -551,17 +579,23 @@ class CacheManager:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute('''
+                cursor.execute(
+                    """
                     DELETE FROM artist_country
                     WHERE created_at < ?
-                ''', (cutoff_date,))
+                """,
+                    (cutoff_date,),
+                )
 
                 removed_count = cursor.rowcount
 
-                cursor.execute('''
+                cursor.execute(
+                    """
                     DELETE FROM processing_log
                     WHERE processed_at < ?
-                ''', (cutoff_date,))
+                """,
+                    (cutoff_date,),
+                )
 
                 conn.commit()
 
@@ -587,35 +621,37 @@ class CacheManager:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute('''
+                cursor.execute("""
                     SELECT artist_name, country, confidence, created_at, hit_count
                     FROM artist_country
                     ORDER BY hit_count DESC
-                ''')
+                """)
 
                 data = cursor.fetchall()
 
                 if format.lower() == "json":
                     import json
+
                     export_data = [
                         {
                             "artist": row[0],
                             "country": row[1],
                             "confidence": row[2],
                             "created_at": row[3],
-                            "hit_count": row[4]
+                            "hit_count": row[4],
                         }
                         for row in data
                     ]
 
-                    with open(export_path, 'w') as f:
+                    with open(export_path, "w") as f:
                         json.dump(export_data, f, indent=2)
 
                 elif format.lower() == "csv":
                     import csv
-                    with open(export_path, 'w', newline='') as f:
+
+                    with open(export_path, "w", newline="") as f:
                         writer = csv.writer(f)
-                        writer.writerow(['Artist', 'Country', 'Confidence', 'Created', 'Hit Count'])
+                        writer.writerow(["Artist", "Country", "Confidence", "Created", "Hit Count"])
                         writer.writerows(data)
 
                 logger.info(f"Exported {len(data)} cache entries to {export_path}")

@@ -51,7 +51,7 @@ class DuplicateChecker:
         file_path: str,
         fuzzy_threshold: float = DEFAULT_FUZZY_THRESHOLD,
         use_fuzzy: bool = True,
-        use_content_hash: bool = True
+        use_content_hash: bool = True,
     ) -> DuplicateResult:
         """Check if a file is a duplicate.
 
@@ -90,18 +90,18 @@ class DuplicateChecker:
                 return DuplicateResult(
                     is_duplicate=False,
                     confidence=0.0,
-                    match_type='none',
+                    match_type="none",
                     matched_file=None,
-                    all_matches=[]
+                    all_matches=[],
                 )
         except (OSError, ValueError) as e:
             logger.error(f"Invalid file path {file_path}: {e}")
             return DuplicateResult(
                 is_duplicate=False,
                 confidence=0.0,
-                match_type='none',
+                match_type="none",
                 matched_file=None,
-                all_matches=[]
+                all_matches=[],
             )
 
         # Extract metadata from file
@@ -111,9 +111,9 @@ class DuplicateChecker:
             return DuplicateResult(
                 is_duplicate=False,
                 confidence=0.0,
-                match_type='none',
+                match_type="none",
                 matched_file=None,
-                all_matches=[]
+                all_matches=[],
             )
 
         # Level 1: Check exact metadata hash
@@ -122,9 +122,9 @@ class DuplicateChecker:
             return DuplicateResult(
                 is_duplicate=True,
                 confidence=1.0,
-                match_type='exact_metadata',
+                match_type="exact_metadata",
                 matched_file=exact_match,
-                all_matches=[(exact_match, 1.0)]
+                all_matches=[(exact_match, 1.0)],
             )
 
         # Level 2: Check file content hash
@@ -134,9 +134,9 @@ class DuplicateChecker:
                 return DuplicateResult(
                     is_duplicate=True,
                     confidence=1.0,
-                    match_type='exact_file',
+                    match_type="exact_file",
                     matched_file=content_match,
-                    all_matches=[(content_match, 1.0)]
+                    all_matches=[(content_match, 1.0)],
                 )
 
         # Level 3: Fuzzy metadata matching
@@ -150,18 +150,14 @@ class DuplicateChecker:
                 return DuplicateResult(
                     is_duplicate=best_score >= fuzzy_threshold,
                     confidence=best_score,
-                    match_type='fuzzy_metadata',
+                    match_type="fuzzy_metadata",
                     matched_file=best_match,
-                    all_matches=fuzzy_matches
+                    all_matches=fuzzy_matches,
                 )
 
         # No match found
         return DuplicateResult(
-            is_duplicate=False,
-            confidence=0.0,
-            match_type='none',
-            matched_file=None,
-            all_matches=[]
+            is_duplicate=False, confidence=0.0, match_type="none", matched_file=None, all_matches=[]
         )
 
     def _extract_metadata(self, file_path: Path) -> Optional[LibraryFile]:
@@ -194,11 +190,11 @@ class DuplicateChecker:
                 return None
 
             # Extract common tags (using local helper methods for tag extraction)
-            artist = self._extract_tag(audio, 'artist')
-            title = self._extract_tag(audio, 'title')
-            album = self._extract_tag(audio, 'album')
+            artist = self._extract_tag(audio, "artist")
+            title = self._extract_tag(audio, "title")
+            album = self._extract_tag(audio, "album")
             year = self._extract_year(audio)
-            duration = audio.info.length if hasattr(audio.info, 'length') else None
+            duration = audio.info.length if hasattr(audio.info, "length") else None
 
             # Calculate hashes using shared hash_utils
             # Pass filename to prevent false matches for files without metadata
@@ -218,10 +214,10 @@ class DuplicateChecker:
                 album=album,
                 year=year,
                 duration=duration,
-                file_format=file_path.suffix.lower().lstrip('.'),
+                file_format=file_path.suffix.lower().lstrip("."),
                 file_size=file_size,
                 metadata_hash=metadata_hash,
-                file_content_hash=file_content_hash
+                file_content_hash=file_content_hash,
             )
 
         except Exception as e:
@@ -245,9 +241,9 @@ class DuplicateChecker:
             return None
         # Try common tag names
         tag_variants = {
-            'artist': ['artist', 'TPE1', '\xa9ART'],
-            'title': ['title', 'TIT2', '\xa9nam'],
-            'album': ['album', 'TALB', '\xa9alb'],
+            "artist": ["artist", "TPE1", "\xa9ART"],
+            "title": ["title", "TIT2", "\xa9nam"],
+            "album": ["album", "TALB", "\xa9alb"],
         }
 
         variants = tag_variants.get(tag_name, [tag_name])
@@ -278,7 +274,7 @@ class DuplicateChecker:
         if audio is None:
             return None
 
-        year_tags = ['date', 'year', 'TDRC', '\xa9day']
+        year_tags = ["date", "year", "TDRC", "\xa9day"]
 
         for tag in year_tags:
             if tag in audio:
@@ -310,7 +306,7 @@ class DuplicateChecker:
         Note:
             Returns None if file is None or has no metadata_hash.
         """
-        if file is None or not hasattr(file, 'metadata_hash') or file.metadata_hash is None:
+        if file is None or not hasattr(file, "metadata_hash") or file.metadata_hash is None:
             return None
 
         return self.db.get_file_by_metadata_hash(file.metadata_hash)
@@ -327,16 +323,13 @@ class DuplicateChecker:
         Note:
             Returns None if file is None or has no file_content_hash.
         """
-        if file is None or not hasattr(file, 'file_content_hash') or file.file_content_hash is None:
+        if file is None or not hasattr(file, "file_content_hash") or file.file_content_hash is None:
             return None
 
         return self.db.get_file_by_content_hash(file.file_content_hash)
 
     def _check_fuzzy_metadata(
-        self,
-        file: LibraryFile,
-        threshold: float,
-        cached_tracks: Optional[List[LibraryFile]] = None
+        self, file: LibraryFile, threshold: float, cached_tracks: Optional[List[LibraryFile]] = None
     ) -> List[Tuple[LibraryFile, float]]:
         """Check for fuzzy metadata matches.
 
@@ -382,8 +375,7 @@ class DuplicateChecker:
 
             # Calculate similarity between titles
             similarity = self._calculate_similarity(
-                self._normalize_string(file.title),
-                self._normalize_string(candidate.title)
+                self._normalize_string(file.title), self._normalize_string(candidate.title)
             )
 
             if similarity >= threshold:
@@ -414,13 +406,13 @@ class DuplicateChecker:
 
         # Remove common prefixes/suffixes
         replacements = [
-            (' (original mix)', ''),
-            (' (radio edit)', ''),
-            (' (album version)', ''),
-            (' (extended)', ''),
-            (' [official]', ''),
-            (' [hd]', ''),
-            (' - remastered', ''),
+            (" (original mix)", ""),
+            (" (radio edit)", ""),
+            (" (album version)", ""),
+            (" (extended)", ""),
+            (" [official]", ""),
+            (" [hd]", ""),
+            (" - remastered", ""),
         ]
 
         for old, new in replacements:
@@ -454,7 +446,7 @@ class DuplicateChecker:
         file_paths: List[str],
         fuzzy_threshold: float = DEFAULT_FUZZY_THRESHOLD,
         use_fuzzy: bool = True,
-        use_content_hash: bool = True
+        use_content_hash: bool = True,
     ) -> List[Tuple[str, DuplicateResult]]:
         """Check multiple files for duplicates.
 
@@ -494,19 +486,24 @@ class DuplicateChecker:
                     file_path,
                     fuzzy_threshold=fuzzy_threshold,
                     use_fuzzy=use_fuzzy,
-                    use_content_hash=use_content_hash
+                    use_content_hash=use_content_hash,
                 )
                 results.append((file_path, result))
             except Exception as e:
                 logger.error(f"Error checking file {file_path} in batch: {e}")
                 # Create a "no duplicate" result for failed files
-                results.append((file_path, DuplicateResult(
-                    is_duplicate=False,
-                    confidence=0.0,
-                    match_type='none',
-                    matched_file=None,
-                    all_matches=[]
-                )))
+                results.append(
+                    (
+                        file_path,
+                        DuplicateResult(
+                            is_duplicate=False,
+                            confidence=0.0,
+                            match_type="none",
+                            matched_file=None,
+                            all_matches=[],
+                        ),
+                    )
+                )
 
         return results
 
@@ -515,7 +512,7 @@ class DuplicateChecker:
         file_paths: List[str],
         fuzzy_threshold: float = DEFAULT_FUZZY_THRESHOLD,
         use_content_hash: bool = True,
-        batch_size: int = 500
+        batch_size: int = 500,
     ) -> Dict[str, DuplicateResult]:
         """Check multiple files for duplicates using batch operations for 10-30x performance improvement.
 
@@ -566,9 +563,9 @@ class DuplicateChecker:
                     results[file_path] = DuplicateResult(
                         is_duplicate=False,
                         confidence=0.0,
-                        match_type='none',
+                        match_type="none",
                         matched_file=None,
-                        all_matches=[]
+                        all_matches=[],
                     )
                     continue
 
@@ -579,18 +576,18 @@ class DuplicateChecker:
                     results[file_path] = DuplicateResult(
                         is_duplicate=False,
                         confidence=0.0,
-                        match_type='none',
+                        match_type="none",
                         matched_file=None,
-                        all_matches=[]
+                        all_matches=[],
                     )
             except Exception as e:
                 logger.error(f"Error extracting metadata from {file_path}: {e}")
                 results[file_path] = DuplicateResult(
                     is_duplicate=False,
                     confidence=0.0,
-                    match_type='none',
+                    match_type="none",
                     matched_file=None,
-                    all_matches=[]
+                    all_matches=[],
                 )
 
         if not files_metadata:
@@ -599,9 +596,7 @@ class DuplicateChecker:
         # Batch lookup metadata hashes (10-30x faster than individual lookups)
         metadata_hashes = [f.metadata_hash for _, f in files_metadata]
         metadata_matches = self.db.batch_get_files_by_hashes(
-            metadata_hashes,
-            hash_type='metadata',
-            batch_size=batch_size
+            metadata_hashes, hash_type="metadata", batch_size=batch_size
         )
 
         # Batch lookup content hashes if enabled
@@ -609,9 +604,7 @@ class DuplicateChecker:
         if use_content_hash:
             content_hashes = [f.file_content_hash for _, f in files_metadata if f.file_content_hash]
             content_matches = self.db.batch_get_files_by_hashes(
-                content_hashes,
-                hash_type='content',
-                batch_size=batch_size
+                content_hashes, hash_type="content", batch_size=batch_size
             )
 
         # Optimization: Pre-fetch tracks for all artists in this batch
@@ -637,9 +630,9 @@ class DuplicateChecker:
                     results[file_path] = DuplicateResult(
                         is_duplicate=True,
                         confidence=1.0,
-                        match_type='exact_metadata',
+                        match_type="exact_metadata",
                         matched_file=match,
-                        all_matches=[(match, 1.0)]
+                        all_matches=[(match, 1.0)],
                     )
                     continue
 
@@ -647,14 +640,16 @@ class DuplicateChecker:
             if use_content_hash and library_file.file_content_hash:
                 content_hash_matches = content_matches.get(library_file.file_content_hash, [])
                 if content_hash_matches:
-                    match = next((m for m in content_hash_matches if m.file_path != file_path), None)
+                    match = next(
+                        (m for m in content_hash_matches if m.file_path != file_path), None
+                    )
                     if match:
                         results[file_path] = DuplicateResult(
                             is_duplicate=True,
                             confidence=1.0,
-                            match_type='exact_file',
+                            match_type="exact_file",
                             matched_file=match,
-                            all_matches=[(match, 1.0)]
+                            all_matches=[(match, 1.0)],
                         )
                         continue
 
@@ -664,9 +659,7 @@ class DuplicateChecker:
                 cached_tracks = artist_tracks_cache.get(library_file.artist)
 
                 fuzzy_matches = self._check_fuzzy_metadata(
-                    library_file,
-                    fuzzy_threshold,
-                    cached_tracks=cached_tracks
+                    library_file, fuzzy_threshold, cached_tracks=cached_tracks
                 )
 
                 if fuzzy_matches:
@@ -674,9 +667,9 @@ class DuplicateChecker:
                     results[file_path] = DuplicateResult(
                         is_duplicate=best_score >= fuzzy_threshold,
                         confidence=best_score,
-                        match_type='fuzzy_metadata',
+                        match_type="fuzzy_metadata",
                         matched_file=best_match,
-                        all_matches=fuzzy_matches
+                        all_matches=fuzzy_matches,
                     )
                     continue
 
@@ -684,9 +677,9 @@ class DuplicateChecker:
             results[file_path] = DuplicateResult(
                 is_duplicate=False,
                 confidence=0.0,
-                match_type='none',
+                match_type="none",
                 matched_file=None,
-                all_matches=[]
+                all_matches=[],
             )
 
         logger.info(f"Batch duplicate check complete: {len(results)} files processed")

@@ -40,28 +40,26 @@ logger = logging.getLogger(__name__)
 
 # Page configuration
 st.set_page_config(
-    page_title="Music Tools",
-    page_icon="🎵",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="Music Tools", page_icon="🎵", layout="wide", initial_sidebar_state="expanded"
 )
 
 # Color scheme
 COLORS = {
-    'spotify_green': '#1DB954',
-    'deezer_pink': '#FF5500',
-    'background': '#121212',
-    'card_bg': '#282828',
-    'text_primary': '#FFFFFF',
-    'text_secondary': '#B3B3B3',
-    'success': '#1DB954',
-    'warning': '#FFA500',
-    'error': '#FF0000',
-    'info': '#00D4FF'
+    "spotify_green": "#1DB954",
+    "deezer_pink": "#FF5500",
+    "background": "#121212",
+    "card_bg": "#282828",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#B3B3B3",
+    "success": "#1DB954",
+    "warning": "#FFA500",
+    "error": "#FF0000",
+    "info": "#00D4FF",
 }
 
 # Custom CSS
-st.markdown(f"""
+st.markdown(
+    f"""
 <style>
     .main {{
         background-color: {COLORS['background']};
@@ -106,25 +104,27 @@ st.markdown(f"""
         color: {COLORS['text_secondary']};
     }}
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
 # Initialize session state
 def init_session_state():
     """Initialize Streamlit session state variables"""
-    if 'db_path' not in st.session_state:
-        st.session_state.db_path = str(Path.home() / '.music_tools' / 'library.db')
-    if 'library_path' not in st.session_state:
-        st.session_state.library_path = str(Path.home() / 'Music')
-    if 'scan_results' not in st.session_state:
+    if "db_path" not in st.session_state:
+        st.session_state.db_path = str(Path.home() / ".music_tools" / "library.db")
+    if "library_path" not in st.session_state:
+        st.session_state.library_path = str(Path.home() / "Music")
+    if "scan_results" not in st.session_state:
         st.session_state.scan_results = None
-    if 'duplicate_groups' not in st.session_state:
+    if "duplicate_groups" not in st.session_state:
         st.session_state.duplicate_groups = []
-    if 'cleanup_step' not in st.session_state:
+    if "cleanup_step" not in st.session_state:
         st.session_state.cleanup_step = 1
-    if 'scan_mode' not in st.session_state:
-        st.session_state.scan_mode = 'deep'
-    if 'confirmed_groups' not in st.session_state:
+    if "scan_mode" not in st.session_state:
+        st.session_state.scan_mode = "deep"
+    if "confirmed_groups" not in st.session_state:
         st.session_state.confirmed_groups = set()
 
 
@@ -133,7 +133,9 @@ def get_library_db() -> Optional[LibraryDatabase]:
     try:
         db_path = Path(st.session_state.db_path)
         if not db_path.exists():
-            st.warning(f"Database not found at {db_path}. Please configure database path in Settings.")
+            st.warning(
+                f"Database not found at {db_path}. Please configure database path in Settings."
+            )
             return None
         return LibraryDatabase(str(db_path))
     except Exception as e:
@@ -145,6 +147,7 @@ def get_library_db() -> Optional[LibraryDatabase]:
 # ============================================================================
 # DASHBOARD PAGE
 # ============================================================================
+
 
 def render_dashboard():
     """Render main dashboard with library statistics and charts"""
@@ -166,35 +169,27 @@ def render_dashboard():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric(
-            label="Total Playlists",
-            value=stats.playlists_count or "N/A",
-            delta=None
-        )
+        st.metric(label="Total Playlists", value=stats.playlists_count or "N/A", delta=None)
 
     with col2:
         st.metric(
             label="Total Tracks",
             value=f"{stats.total_files:,}" if stats.total_files else "0",
-            delta=None
+            delta=None,
         )
 
     with col3:
         st.metric(
             label="Library Size",
             value=f"{stats.total_size_gb:.2f} GB" if stats.total_size_gb else "0 GB",
-            delta=None
+            delta=None,
         )
 
     with col4:
         last_scan = stats.last_scan_date or "Never"
         if isinstance(last_scan, datetime):
             last_scan = last_scan.strftime("%Y-%m-%d")
-        st.metric(
-            label="Last Scan",
-            value=last_scan,
-            delta=None
-        )
+        st.metric(label="Last Scan", value=last_scan, delta=None)
 
     st.markdown("---")
 
@@ -205,28 +200,25 @@ def render_dashboard():
         st.subheader("📊 Playlist Distribution")
 
         # Mock data - replace with actual Spotify/Deezer playlist counts
-        playlist_data = {
-            'Source': ['Spotify', 'Deezer', 'Local'],
-            'Count': [45, 23, 12]
-        }
+        playlist_data = {"Source": ["Spotify", "Deezer", "Local"], "Count": [45, 23, 12]}
 
         fig = px.pie(
             playlist_data,
-            values='Count',
-            names='Source',
-            color='Source',
+            values="Count",
+            names="Source",
+            color="Source",
             color_discrete_map={
-                'Spotify': COLORS['spotify_green'],
-                'Deezer': COLORS['deezer_pink'],
-                'Local': '#888888'
+                "Spotify": COLORS["spotify_green"],
+                "Deezer": COLORS["deezer_pink"],
+                "Local": "#888888",
             },
-            hole=0.4
+            hole=0.4,
         )
         fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font_color=COLORS['text_primary'],
-            showlegend=True
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font_color=COLORS["text_primary"],
+            showlegend=True,
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -234,25 +226,35 @@ def render_dashboard():
         st.subheader("📈 Library Growth Over Time")
 
         # Mock data - replace with actual growth tracking
-        dates = pd.date_range(end=datetime.now(), periods=12, freq='ME')
-        growth_data = pd.DataFrame({
-            'Date': dates,
-            'Tracks': [1200, 1350, 1420, 1580, 1650, 1720, 1800, 1920, 2050, 2180, 2300, stats.total_files or 2400]
-        })
-
-        fig = px.line(
-            growth_data,
-            x='Date',
-            y='Tracks',
-            markers=True
+        dates = pd.date_range(end=datetime.now(), periods=12, freq="ME")
+        growth_data = pd.DataFrame(
+            {
+                "Date": dates,
+                "Tracks": [
+                    1200,
+                    1350,
+                    1420,
+                    1580,
+                    1650,
+                    1720,
+                    1800,
+                    1920,
+                    2050,
+                    2180,
+                    2300,
+                    stats.total_files or 2400,
+                ],
+            }
         )
-        fig.update_traces(line_color=COLORS['spotify_green'], marker_size=8)
+
+        fig = px.line(growth_data, x="Date", y="Tracks", markers=True)
+        fig.update_traces(line_color=COLORS["spotify_green"], marker_size=8)
         fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font_color=COLORS['text_primary'],
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font_color=COLORS["text_primary"],
             xaxis_title="Month",
-            yaxis_title="Total Tracks"
+            yaxis_title="Total Tracks",
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -262,23 +264,28 @@ def render_dashboard():
     st.subheader("📝 Recent Playlists")
 
     # Mock data - replace with actual recent playlists
-    recent_playlists = pd.DataFrame({
-        'Playlist': ['Workout Mix', 'Chill Vibes', 'Electronic Focus', 'Jazz Classics', 'Rock Essentials'],
-        'Source': ['Spotify', 'Deezer', 'Spotify', 'Local', 'Spotify'],
-        'Tracks': [45, 32, 67, 28, 52],
-        'Last Updated': ['2026-01-08', '2026-01-07', '2026-01-06', '2026-01-05', '2026-01-04']
-    })
-
-    st.dataframe(
-        recent_playlists,
-        use_container_width=True,
-        hide_index=True
+    recent_playlists = pd.DataFrame(
+        {
+            "Playlist": [
+                "Workout Mix",
+                "Chill Vibes",
+                "Electronic Focus",
+                "Jazz Classics",
+                "Rock Essentials",
+            ],
+            "Source": ["Spotify", "Deezer", "Spotify", "Local", "Spotify"],
+            "Tracks": [45, 32, 67, 28, 52],
+            "Last Updated": ["2026-01-08", "2026-01-07", "2026-01-06", "2026-01-05", "2026-01-04"],
+        }
     )
+
+    st.dataframe(recent_playlists, use_container_width=True, hide_index=True)
 
 
 # ============================================================================
 # SMART CLEANUP PAGE
 # ============================================================================
+
 
 def render_smart_cleanup():
     """Render Smart Cleanup 8-step workflow"""
@@ -291,11 +298,20 @@ def render_smart_cleanup():
     for i in range(8):
         with progress_cols[i]:
             if i + 1 < step:
-                st.markdown(f"<div style='text-align: center; color: {COLORS['success']};'>✓ {i+1}</div>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<div style='text-align: center; color: {COLORS['success']};'>✓ {i+1}</div>",
+                    unsafe_allow_html=True,
+                )
             elif i + 1 == step:
-                st.markdown(f"<div style='text-align: center; color: {COLORS['info']};'>● {i+1}</div>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<div style='text-align: center; color: {COLORS['info']};'>● {i+1}</div>",
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown(f"<div style='text-align: center; color: {COLORS['text_secondary']};'>○ {i+1}</div>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<div style='text-align: center; color: {COLORS['text_secondary']};'>○ {i+1}</div>",
+                    unsafe_allow_html=True,
+                )
 
     st.markdown("---")
 
@@ -341,7 +357,7 @@ def render_cleanup_step1():
     library_path = st.text_input(
         "Library Path",
         value=st.session_state.library_path,
-        help="Enter the full path to your music library"
+        help="Enter the full path to your music library",
     )
 
     if library_path and Path(library_path).exists():
@@ -361,19 +377,19 @@ def render_cleanup_step2():
 
     scan_mode = st.radio(
         "Choose scan mode:",
-        options=['quick', 'deep', 'custom'],
+        options=["quick", "deep", "custom"],
         format_func=lambda x: {
-            'quick': '⚡ Quick Scan - Fast metadata-based detection (Speed: ★★★★★, Accuracy: ★★★☆☆)',
-            'deep': '🔍 Deep Scan - Content hash + metadata analysis (Speed: ★★★☆☆, Accuracy: ★★★★★)',
-            'custom': '⚙️ Custom Scan - Configure parameters (Speed: Variable, Accuracy: Variable)'
+            "quick": "⚡ Quick Scan - Fast metadata-based detection (Speed: ★★★★★, Accuracy: ★★★☆☆)",
+            "deep": "🔍 Deep Scan - Content hash + metadata analysis (Speed: ★★★☆☆, Accuracy: ★★★★★)",
+            "custom": "⚙️ Custom Scan - Configure parameters (Speed: Variable, Accuracy: Variable)",
         }[x],
-        index=1  # Default to deep scan
+        index=1,  # Default to deep scan
     )
 
     st.session_state.scan_mode = scan_mode
 
     # Custom mode configuration
-    if scan_mode == 'custom':
+    if scan_mode == "custom":
         st.markdown("#### Custom Configuration")
         col1, col2 = st.columns(2)
 
@@ -383,11 +399,7 @@ def render_cleanup_step2():
 
         with col2:
             fuzzy_threshold = st.slider(
-                "Fuzzy match threshold",
-                min_value=0.0,
-                max_value=1.0,
-                value=0.85,
-                step=0.05
+                "Fuzzy match threshold", min_value=0.0, max_value=1.0, value=0.85, step=0.05
             )
             st.session_state.fuzzy_threshold = fuzzy_threshold
 
@@ -433,7 +445,9 @@ def render_cleanup_step3():
 
         # Filter groups with duplicates
         duplicate_hash_groups = {k: v for k, v in hash_groups.items() if len(v) > 1}
-        status_text.text(f"Analyzing quality for {len(duplicate_hash_groups):,} duplicate groups...")
+        status_text.text(
+            f"Analyzing quality for {len(duplicate_hash_groups):,} duplicate groups..."
+        )
 
         duplicate_groups = []
         for idx, (hash_key, files) in enumerate(duplicate_hash_groups.items()):
@@ -447,13 +461,15 @@ def render_cleanup_step3():
             if len(files_metadata) > 1:
                 keep, delete = rank_duplicate_group(files_metadata)
 
-                duplicate_groups.append({
-                    'group_id': f"dup_{len(duplicate_groups) + 1:04d}",
-                    'files': files_metadata,
-                    'keep': keep,
-                    'delete': delete,
-                    'space_savings_mb': sum(f.file_size for f in delete) / (1024 * 1024)
-                })
+                duplicate_groups.append(
+                    {
+                        "group_id": f"dup_{len(duplicate_groups) + 1:04d}",
+                        "files": files_metadata,
+                        "keep": keep,
+                        "delete": delete,
+                        "space_savings_mb": sum(f.file_size for f in delete) / (1024 * 1024),
+                    }
+                )
 
             # Update progress
             progress_bar.progress(0.5 + (0.5 * (idx + 1) / len(duplicate_hash_groups)))
@@ -464,9 +480,9 @@ def render_cleanup_step3():
         # Store results in session state
         st.session_state.duplicate_groups = duplicate_groups
         st.session_state.scan_results = {
-            'total_files': total_files,
-            'duplicate_groups': len(duplicate_groups),
-            'total_duplicates': sum(len(g['delete']) for g in duplicate_groups)
+            "total_files": total_files,
+            "duplicate_groups": len(duplicate_groups),
+            "total_duplicates": sum(len(g["delete"]) for g in duplicate_groups),
         }
 
         # Display summary
@@ -478,7 +494,7 @@ def render_cleanup_step3():
         with col2:
             st.metric("Duplicate Groups", len(duplicate_groups))
         with col3:
-            total_space = sum(g['space_savings_mb'] for g in duplicate_groups)
+            total_space = sum(g["space_savings_mb"] for g in duplicate_groups)
             st.metric("Potential Space Savings", f"{total_space:.2f} MB")
 
         if duplicate_groups:
@@ -510,31 +526,37 @@ def render_cleanup_step4():
 
     # Display each group in expander
     for idx, group in enumerate(duplicate_groups):
-        with st.expander(f"Group {idx + 1}/{len(duplicate_groups)} - {group['group_id']}", expanded=(idx < 3)):
+        with st.expander(
+            f"Group {idx + 1}/{len(duplicate_groups)} - {group['group_id']}", expanded=(idx < 3)
+        ):
             # Create comparison table
             comparison_data = []
 
             # Add keep file
-            keep = group['keep']
-            comparison_data.append({
-                'Action': '✅ KEEP',
-                'File': Path(keep.filepath).name,
-                'Format': keep.format.upper(),
-                'Quality': f"{keep.quality_score}/100",
-                'Size (MB)': f"{keep.file_size / (1024*1024):.1f}",
-                'Bitrate': f"{keep.bitrate or 'N/A'} kbps"
-            })
+            keep = group["keep"]
+            comparison_data.append(
+                {
+                    "Action": "✅ KEEP",
+                    "File": Path(keep.filepath).name,
+                    "Format": keep.format.upper(),
+                    "Quality": f"{keep.quality_score}/100",
+                    "Size (MB)": f"{keep.file_size / (1024*1024):.1f}",
+                    "Bitrate": f"{keep.bitrate or 'N/A'} kbps",
+                }
+            )
 
             # Add delete files
-            for file in group['delete']:
-                comparison_data.append({
-                    'Action': '❌ DELETE',
-                    'File': Path(file.filepath).name,
-                    'Format': file.format.upper(),
-                    'Quality': f"{file.quality_score}/100",
-                    'Size (MB)': f"{file.file_size / (1024*1024):.1f}",
-                    'Bitrate': f"{file.bitrate or 'N/A'} kbps"
-                })
+            for file in group["delete"]:
+                comparison_data.append(
+                    {
+                        "Action": "❌ DELETE",
+                        "File": Path(file.filepath).name,
+                        "Format": file.format.upper(),
+                        "Quality": f"{file.quality_score}/100",
+                        "Size (MB)": f"{file.file_size / (1024*1024):.1f}",
+                        "Bitrate": f"{file.bitrate or 'N/A'} kbps",
+                    }
+                )
 
             df = pd.DataFrame(comparison_data)
             st.dataframe(df, use_container_width=True, hide_index=True)
@@ -546,13 +568,13 @@ def render_cleanup_step4():
             confirmed = st.checkbox(
                 f"Confirm deletion for group {idx + 1}",
                 key=confirm_key,
-                value=group['group_id'] in st.session_state.confirmed_groups
+                value=group["group_id"] in st.session_state.confirmed_groups,
             )
 
             if confirmed:
-                st.session_state.confirmed_groups.add(group['group_id'])
+                st.session_state.confirmed_groups.add(group["group_id"])
             else:
-                st.session_state.confirmed_groups.discard(group['group_id'])
+                st.session_state.confirmed_groups.discard(group["group_id"])
 
     # Navigation
     col1, col2 = st.columns([1, 5])
@@ -562,7 +584,11 @@ def render_cleanup_step4():
             st.rerun()
     with col2:
         confirmed_count = len(st.session_state.confirmed_groups)
-        if st.button(f"Next ({confirmed_count} groups selected) →", type="primary", disabled=confirmed_count == 0):
+        if st.button(
+            f"Next ({confirmed_count} groups selected) →",
+            type="primary",
+            disabled=confirmed_count == 0,
+        ):
             st.session_state.cleanup_step = 5
             st.rerun()
 
@@ -572,15 +598,17 @@ def render_cleanup_step5():
     st.subheader("Step 5: Deletion Summary")
 
     duplicate_groups = st.session_state.duplicate_groups
-    confirmed_groups = [g for g in duplicate_groups if g['group_id'] in st.session_state.confirmed_groups]
+    confirmed_groups = [
+        g for g in duplicate_groups if g["group_id"] in st.session_state.confirmed_groups
+    ]
 
     if not confirmed_groups:
         st.warning("No groups confirmed for deletion.")
         return
 
     # Summary metrics
-    total_files_to_delete = sum(len(g['delete']) for g in confirmed_groups)
-    total_space_to_free = sum(g['space_savings_mb'] for g in confirmed_groups)
+    total_files_to_delete = sum(len(g["delete"]) for g in confirmed_groups)
+    total_space_to_free = sum(g["space_savings_mb"] for g in confirmed_groups)
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -595,25 +623,32 @@ def render_cleanup_step5():
     # Quality distribution chart
     st.subheader("Quality Distribution of Files to Delete")
 
-    quality_tiers = {'Excellent': 0, 'Good': 0, 'Fair': 0, 'Poor': 0}
+    quality_tiers = {"Excellent": 0, "Good": 0, "Fair": 0, "Poor": 0}
     for group in confirmed_groups:
-        for file in group['delete']:
+        for file in group["delete"]:
             tier = get_quality_tier(file.quality_score)
             quality_tiers[tier] = quality_tiers.get(tier, 0) + 1
 
-    fig = go.Figure(data=[
-        go.Bar(
-            x=list(quality_tiers.keys()),
-            y=list(quality_tiers.values()),
-            marker_color=[COLORS['success'], COLORS['spotify_green'], COLORS['warning'], COLORS['error']]
-        )
-    ])
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=list(quality_tiers.keys()),
+                y=list(quality_tiers.values()),
+                marker_color=[
+                    COLORS["success"],
+                    COLORS["spotify_green"],
+                    COLORS["warning"],
+                    COLORS["error"],
+                ],
+            )
+        ]
+    )
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font_color=COLORS['text_primary'],
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font_color=COLORS["text_primary"],
         xaxis_title="Quality Tier",
-        yaxis_title="Number of Files"
+        yaxis_title="Number of Files",
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -636,8 +671,12 @@ def render_cleanup_step6():
     st.warning("⚠️ **Safety Checkpoint** - This action will permanently delete files.")
     st.info("A backup will be created before deletion.")
 
-    confirmed_groups = [g for g in st.session_state.duplicate_groups if g['group_id'] in st.session_state.confirmed_groups]
-    total_files = sum(len(g['delete']) for g in confirmed_groups)
+    confirmed_groups = [
+        g
+        for g in st.session_state.duplicate_groups
+        if g["group_id"] in st.session_state.confirmed_groups
+    ]
+    total_files = sum(len(g["delete"]) for g in confirmed_groups)
 
     st.markdown(f"**Files to delete:** {total_files}")
     st.markdown(f"**Groups:** {len(confirmed_groups)}")
@@ -645,10 +684,7 @@ def render_cleanup_step6():
     # Confirmation input
     st.markdown("---")
     confirmation_phrase = "DELETE DUPLICATES"
-    user_input = st.text_input(
-        f"Type '{confirmation_phrase}' to confirm:",
-        type="default"
-    )
+    user_input = st.text_input(f"Type '{confirmation_phrase}' to confirm:", type="default")
 
     confirmation_checkbox = st.checkbox("I understand this action cannot be undone")
 
@@ -672,19 +708,23 @@ def render_cleanup_step7():
     progress_bar = st.progress(0)
     status_text = st.empty()
 
-    confirmed_groups = [g for g in st.session_state.duplicate_groups if g['group_id'] in st.session_state.confirmed_groups]
+    confirmed_groups = [
+        g
+        for g in st.session_state.duplicate_groups
+        if g["group_id"] in st.session_state.confirmed_groups
+    ]
 
     try:
         # Create deletion plan
         status_text.text("Creating deletion plan...")
-        backup_dir = Path(st.session_state.library_path) / '.cleanup_backups'
+        backup_dir = Path(st.session_state.library_path) / ".cleanup_backups"
         deletion_plan = SafeDeletionPlan(backup_dir=str(backup_dir))
 
         for group in confirmed_groups:
             deletion_plan.add_group(
-                keep_file=group['keep'].filepath,
-                delete_files=[f.filepath for f in group['delete']],
-                reason=f"Duplicate group {group['group_id']}"
+                keep_file=group["keep"].filepath,
+                delete_files=[f.filepath for f in group["delete"]],
+                reason=f"Duplicate group {group['group_id']}",
             )
 
         progress_bar.progress(0.2)
@@ -736,7 +776,7 @@ def render_cleanup_step8():
 
     st.balloons()
 
-    deletion_stats = st.session_state.get('deletion_stats')
+    deletion_stats = st.session_state.get("deletion_stats")
 
     if deletion_stats:
         st.success("Smart Cleanup completed successfully!")
@@ -760,9 +800,9 @@ def render_cleanup_step8():
         if st.button("Export Detailed Report"):
             # Generate report
             report_data = {
-                'session_id': datetime.now().strftime("%Y%m%d_%H%M%S"),
-                'timestamp': datetime.now().isoformat(),
-                'statistics': deletion_stats.to_dict()
+                "session_id": datetime.now().strftime("%Y%m%d_%H%M%S"),
+                "timestamp": datetime.now().isoformat(),
+                "statistics": deletion_stats.to_dict(),
             }
 
             report_json = json.dumps(report_data, indent=2)
@@ -770,7 +810,7 @@ def render_cleanup_step8():
                 label="Download JSON Report",
                 data=report_json,
                 file_name=f"cleanup_report_{report_data['session_id']}.json",
-                mime="application/json"
+                mime="application/json",
             )
 
     # Reset button
@@ -784,6 +824,7 @@ def render_cleanup_step8():
 # ============================================================================
 # LIBRARY STATS PAGE
 # ============================================================================
+
 
 def render_library_stats():
     """Render detailed library statistics and analytics"""
@@ -820,25 +861,28 @@ def render_library_stats():
     st.subheader("🎵 Format Distribution")
 
     if stats.formats_breakdown:
-        formats_df = pd.DataFrame([
-            {'Format': fmt.upper(), 'Count': count, 'Percentage': f"{(count / stats.total_files * 100):.1f}%"}
-            for fmt, count in sorted(stats.formats_breakdown.items(), key=lambda x: x[1], reverse=True)
-        ])
+        formats_df = pd.DataFrame(
+            [
+                {
+                    "Format": fmt.upper(),
+                    "Count": count,
+                    "Percentage": f"{(count / stats.total_files * 100):.1f}%",
+                }
+                for fmt, count in sorted(
+                    stats.formats_breakdown.items(), key=lambda x: x[1], reverse=True
+                )
+            ]
+        )
 
         col1, col2 = st.columns([1, 1])
 
         with col1:
             # Pie chart
-            fig = px.pie(
-                formats_df,
-                values='Count',
-                names='Format',
-                title='Format Distribution'
-            )
+            fig = px.pie(formats_df, values="Count", names="Format", title="Format Distribution")
             fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font_color=COLORS['text_primary']
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font_color=COLORS["text_primary"],
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -853,26 +897,28 @@ def render_library_stats():
 
     # Mock bitrate data - replace with actual DB query
     bitrate_ranges = {
-        '< 128 kbps': 120,
-        '128-192 kbps': 340,
-        '192-256 kbps': 580,
-        '256-320 kbps': 920,
-        '> 320 kbps (Lossless)': 440
+        "< 128 kbps": 120,
+        "128-192 kbps": 340,
+        "192-256 kbps": 580,
+        "256-320 kbps": 920,
+        "> 320 kbps (Lossless)": 440,
     }
 
-    fig = go.Figure(data=[
-        go.Bar(
-            x=list(bitrate_ranges.keys()),
-            y=list(bitrate_ranges.values()),
-            marker_color=COLORS['spotify_green']
-        )
-    ])
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=list(bitrate_ranges.keys()),
+                y=list(bitrate_ranges.values()),
+                marker_color=COLORS["spotify_green"],
+            )
+        ]
+    )
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font_color=COLORS['text_primary'],
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font_color=COLORS["text_primary"],
         xaxis_title="Bitrate Range",
-        yaxis_title="Number of Files"
+        yaxis_title="Number of Files",
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -882,10 +928,10 @@ def render_library_stats():
     st.subheader("⭐ Quality Tier Breakdown")
 
     quality_tiers = {
-        'Excellent (80-100)': 850,
-        'Good (60-79)': 720,
-        'Fair (40-59)': 340,
-        'Poor (0-39)': 90
+        "Excellent (80-100)": 850,
+        "Good (60-79)": 720,
+        "Fair (40-59)": 340,
+        "Poor (0-39)": 90,
     }
 
     col1, col2 = st.columns([2, 1])
@@ -894,28 +940,29 @@ def render_library_stats():
         fig = px.bar(
             x=list(quality_tiers.values()),
             y=list(quality_tiers.keys()),
-            orientation='h',
+            orientation="h",
             color=list(quality_tiers.values()),
-            color_continuous_scale=['red', 'orange', 'yellow', 'green']
+            color_continuous_scale=["red", "orange", "yellow", "green"],
         )
         fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font_color=COLORS['text_primary'],
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font_color=COLORS["text_primary"],
             xaxis_title="Number of Files",
-            showlegend=False
+            showlegend=False,
         )
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         for tier, count in quality_tiers.items():
-            percentage = (count / sum(quality_tiers.values()) * 100)
+            percentage = count / sum(quality_tiers.values()) * 100
             st.metric(tier, f"{count:,}", f"{percentage:.1f}%")
 
 
 # ============================================================================
 # SETTINGS PAGE
 # ============================================================================
+
 
 def render_settings():
     """Render settings and configuration page"""
@@ -925,9 +972,7 @@ def render_settings():
     st.subheader("💾 Database Configuration")
 
     db_path = st.text_input(
-        "Database Path",
-        value=st.session_state.db_path,
-        help="Path to the SQLite database file"
+        "Database Path", value=st.session_state.db_path, help="Path to the SQLite database file"
     )
 
     if db_path != st.session_state.db_path:
@@ -941,29 +986,22 @@ def render_settings():
     st.subheader("🟢 Spotify Configuration")
 
     spotify_client_id = st.text_input(
-        "Spotify Client ID",
-        type="password",
-        help="Your Spotify API client ID"
+        "Spotify Client ID", type="password", help="Your Spotify API client ID"
     )
 
     spotify_client_secret = st.text_input(
-        "Spotify Client Secret",
-        type="password",
-        help="Your Spotify API client secret"
+        "Spotify Client Secret", type="password", help="Your Spotify API client secret"
     )
 
     if st.button("Save Spotify Config"):
         # Save to config file
-        config_dir = Path.home() / '.music_tools'
+        config_dir = Path.home() / ".music_tools"
         config_dir.mkdir(exist_ok=True)
 
-        config_file = config_dir / 'spotify_config.json'
-        config_data = {
-            'client_id': spotify_client_id,
-            'client_secret': spotify_client_secret
-        }
+        config_file = config_dir / "spotify_config.json"
+        config_data = {"client_id": spotify_client_id, "client_secret": spotify_client_secret}
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config_data, f)
 
         st.success("Spotify configuration saved!")
@@ -973,21 +1011,16 @@ def render_settings():
     # Deezer Configuration
     st.subheader("🟠 Deezer Configuration")
 
-    deezer_email = st.text_input(
-        "Deezer Email",
-        help="Your Deezer account email"
-    )
+    deezer_email = st.text_input("Deezer Email", help="Your Deezer account email")
 
     if st.button("Save Deezer Config"):
-        config_dir = Path.home() / '.music_tools'
+        config_dir = Path.home() / ".music_tools"
         config_dir.mkdir(exist_ok=True)
 
-        config_file = config_dir / 'deezer_config.json'
-        config_data = {
-            'email': deezer_email
-        }
+        config_file = config_dir / "deezer_config.json"
+        config_data = {"email": deezer_email}
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config_data, f)
 
         st.success("Deezer configuration saved!")
@@ -999,9 +1032,11 @@ def render_settings():
 
     default_scan_mode = st.selectbox(
         "Default Scan Mode",
-        options=['quick', 'deep', 'custom'],
-        format_func=lambda x: {'quick': 'Quick Scan', 'deep': 'Deep Scan', 'custom': 'Custom Scan'}[x],
-        index=1
+        options=["quick", "deep", "custom"],
+        format_func=lambda x: {"quick": "Quick Scan", "deep": "Deep Scan", "custom": "Custom Scan"}[
+            x
+        ],
+        index=1,
     )
 
     auto_backup = st.checkbox("Always create backup before deletion", value=True)
@@ -1011,21 +1046,21 @@ def render_settings():
         min_value=1,
         max_value=365,
         value=30,
-        help="Number of days to keep backup files"
+        help="Number of days to keep backup files",
     )
 
     if st.button("Save Preferences"):
         preferences = {
-            'default_scan_mode': default_scan_mode,
-            'auto_backup': auto_backup,
-            'backup_retention_days': backup_retention_days
+            "default_scan_mode": default_scan_mode,
+            "auto_backup": auto_backup,
+            "backup_retention_days": backup_retention_days,
         }
 
-        config_dir = Path.home() / '.music_tools'
+        config_dir = Path.home() / ".music_tools"
         config_dir.mkdir(exist_ok=True)
 
-        config_file = config_dir / 'preferences.json'
-        with open(config_file, 'w') as f:
+        config_file = config_dir / "preferences.json"
+        with open(config_file, "w") as f:
             json.dump(preferences, f)
 
         st.success("Preferences saved!")
@@ -1034,6 +1069,7 @@ def render_settings():
 # ============================================================================
 # MAIN APP
 # ============================================================================
+
 
 def main():
     """Main application entry point"""
@@ -1046,9 +1082,7 @@ def main():
     st.sidebar.markdown("---")
 
     page = st.sidebar.radio(
-        "Navigation",
-        options=["Dashboard", "Smart Cleanup", "Library Stats", "Settings"],
-        index=0
+        "Navigation", options=["Dashboard", "Smart Cleanup", "Library Stats", "Settings"], index=0
     )
 
     st.sidebar.markdown("---")

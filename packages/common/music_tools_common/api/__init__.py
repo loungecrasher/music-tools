@@ -7,7 +7,7 @@ from .deezer import DeezerClient
 from .spotify import SpotifyClient
 
 __all__ = [
-    'BaseAPIClient',
-    'SpotifyClient',
-    'DeezerClient',
+    "BaseAPIClient",
+    "SpotifyClient",
+    "DeezerClient",
 ]

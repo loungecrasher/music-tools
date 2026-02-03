@@ -72,7 +72,7 @@ class LibraryPathManager:
         if not path:
             return
 
-        path = path.strip('"\'')
+        path = path.strip("\"'")
         expanded_path = os.path.expanduser(path)
 
         if expanded_path in self.paths:
@@ -100,9 +100,7 @@ class LibraryPathManager:
 
         try:
             remove_idx = IntPrompt.ask(
-                "Path number to remove (0 to cancel)",
-                default=0,
-                show_default=True
+                "Path number to remove (0 to cancel)", default=0, show_default=True
             )
             if 0 < remove_idx <= len(self.paths):
                 removed_path = self.paths.pop(remove_idx - 1)
@@ -125,7 +123,7 @@ class LibraryPathManager:
             "~/Downloads/Music",
             "/Users/patrickoliver/Track Library",
             "/Users/patrickoliver/Music Library",
-            "/Volumes/*/Music"
+            "/Volumes/*/Music",
         ]
 
         found_dirs = self._find_existing_directories(common_dirs)
@@ -140,7 +138,7 @@ class LibraryPathManager:
         found_dirs = []
         for dir_pattern in common_dirs:
             expanded = os.path.expanduser(dir_pattern)
-            if '*' in expanded:
+            if "*" in expanded:
                 for path in glob.glob(expanded):
                     if os.path.isdir(path) and path not in self.paths:
                         found_dirs.append(path)
@@ -167,7 +165,7 @@ class LibraryPathManager:
             return
 
         try:
-            indices = [int(x.strip()) - 1 for x in selections.split(',')]
+            indices = [int(x.strip()) - 1 for x in selections.split(",")]
             added = 0
             for idx in indices:
                 if 0 <= idx < len(found_dirs):

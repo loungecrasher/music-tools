@@ -25,20 +25,20 @@ def main():
     manager = ConfigManager(app_name="music_tools_example")
 
     print("\n1. Loading configuration without environment variables...")
-    spotify_config = manager.load_config('spotify', use_cache=False)
+    spotify_config = manager.load_config("spotify", use_cache=False)
     print(f"   Client ID: {spotify_config.get('client_id', 'Not set')}")
     print(f"   Redirect URI: {spotify_config.get('redirect_uri', 'Not set')}")
 
     # Simulate setting environment variables
     print("\n2. Setting environment variables...")
-    os.environ['SPOTIPY_CLIENT_ID'] = 'test_client_id_from_env'
-    os.environ['SPOTIPY_REDIRECT_URI'] = 'http://env-override.com/callback'
+    os.environ["SPOTIPY_CLIENT_ID"] = "test_client_id_from_env"
+    os.environ["SPOTIPY_REDIRECT_URI"] = "http://env-override.com/callback"
     print("   SPOTIPY_CLIENT_ID=test_client_id_from_env")
     print("   SPOTIPY_REDIRECT_URI=http://env-override.com/callback")
 
     # Load configuration again - environment variables should override
     print("\n3. Reloading configuration...")
-    spotify_config = manager.load_config('spotify', use_cache=False)
+    spotify_config = manager.load_config("spotify", use_cache=False)
     print(f"   Client ID: {spotify_config.get('client_id')}")
     print(f"   Redirect URI: {spotify_config.get('redirect_uri')}")
 
@@ -46,8 +46,8 @@ def main():
 
     # Clean up environment variables
     print("\n4. Cleaning up environment variables...")
-    del os.environ['SPOTIPY_CLIENT_ID']
-    del os.environ['SPOTIPY_REDIRECT_URI']
+    del os.environ["SPOTIPY_CLIENT_ID"]
+    del os.environ["SPOTIPY_REDIRECT_URI"]
 
     print("\n" + "=" * 60)
     print("Key Takeaways:")
@@ -57,5 +57,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

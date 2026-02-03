@@ -15,6 +15,7 @@ def _run_spotify_feature(func_name: str, label: str) -> None:
     clear_screen()
     try:
         import src.services.spotify_tracks as st
+
         func = getattr(st, func_name)
         func()
     except ImportError as e:

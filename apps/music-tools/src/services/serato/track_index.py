@@ -1,4 +1,5 @@
 """Build and persist a searchable index of track metadata for Serato matching."""
+
 import json
 import logging
 from datetime import datetime
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_INDEX_PATH = Path.home() / ".music-tools" / "serato_track_index.json"
 
 # Common audio extensions used when scanning directories
-DEFAULT_AUDIO_EXTENSIONS = ['.mp3', '.m4a', '.flac', '.wav', '.aiff', '.aif']
+DEFAULT_AUDIO_EXTENSIONS = [".mp3", ".m4a", ".flac", ".wav", ".aiff", ".aif"]
 
 
 class SeratoTrackIndex:
@@ -47,17 +48,16 @@ class SeratoTrackIndex:
         self.index_path.parent.mkdir(parents=True, exist_ok=True)
 
         index_data = {
-            'version': 1,
-            'built_at': self.built_at or datetime.now().isoformat(),
-            'source': self.source or '',
-            'track_count': len(self.tracks),
-            'tracks': {
-                search_string: meta.to_dict()
-                for search_string, meta in self.tracks.items()
+            "version": 1,
+            "built_at": self.built_at or datetime.now().isoformat(),
+            "source": self.source or "",
+            "track_count": len(self.tracks),
+            "tracks": {
+                search_string: meta.to_dict() for search_string, meta in self.tracks.items()
             },
         }
 
-        with open(self.index_path, 'w', encoding='utf-8') as fh:
+        with open(self.index_path, "w", encoding="utf-8") as fh:
             json.dump(index_data, fh, indent=2)
 
         logger.info("Index saved to %s (%d tracks)", self.index_path, len(self.tracks))
@@ -81,27 +81,23 @@ class SeratoTrackIndex:
             raise FileNotFoundError(f"Index file not found: {self.index_path}")
 
         try:
-            with open(self.index_path, 'r', encoding='utf-8') as fh:
+            with open(self.index_path, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
         except json.JSONDecodeError as exc:
             raise ValueError(f"Index file is corrupted: {exc}") from exc
 
-        version = data.get('version')
+        version = data.get("version")
         if version != 1:
-            raise ValueError(
-                f"Unsupported index version: {version}. Please rebuild the index."
-            )
+            raise ValueError(f"Unsupported index version: {version}. Please rebuild the index.")
 
-        self.source = data.get('source', '')
-        self.built_at = data.get('built_at', '')
+        self.source = data.get("source", "")
+        self.built_at = data.get("built_at", "")
 
         self.tracks = {}
-        for search_string, track_data in data.get('tracks', {}).items():
+        for search_string, track_data in data.get("tracks", {}).items():
             self.tracks[search_string] = TrackMetadata.from_dict(track_data)
 
-        logger.info(
-            "Loaded index with %d tracks (built %s)", len(self.tracks), self.built_at
-        )
+        logger.info("Loaded index with %d tracks (built %s)", len(self.tracks), self.built_at)
         return len(self.tracks)
 
     # ------------------------------------------------------------------
@@ -142,8 +138,7 @@ class SeratoTrackIndex:
 
         # Normalise extensions
         extensions = [
-            ext.lower() if ext.startswith('.') else f'.{ext.lower()}'
-            for ext in extensions
+            ext.lower() if ext.startswith(".") else f".{ext.lower()}" for ext in extensions
         ]
 
         logger.info("Scanning directory: %s (extensions: %s)", directory, extensions)
@@ -151,7 +146,7 @@ class SeratoTrackIndex:
         # Collect all matching files, deduplicating via resolved paths
         unique_files: Dict[str, Path] = {}
         for ext in extensions:
-            for file_path in dir_path.rglob(f'*{ext}'):
+            for file_path in dir_path.rglob(f"*{ext}"):
                 try:
                     resolved = file_path.resolve()
                     unique_files[str(resolved)] = resolved
@@ -173,12 +168,12 @@ class SeratoTrackIndex:
 
             meta = MetadataReader.read(file_str, fallback_to_filename=True)
 
-            if meta and meta.get('artist') and meta.get('title'):
+            if meta and meta.get("artist") and meta.get("title"):
                 parent_folder = file_path.parent.name
                 tm = TrackMetadata(
                     path=file_str,
-                    artist=meta['artist'],
-                    title=meta['title'],
+                    artist=meta["artist"],
+                    title=meta["title"],
                     crate_name=f"directory:{parent_folder}",
                 )
                 self.tracks[tm.search_string] = tm
