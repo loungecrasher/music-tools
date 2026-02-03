@@ -22,7 +22,8 @@ class BaseAPIClient:
         try:
             response = self.session.get(f"{self.base_url}/{endpoint}", params=params)
             response.raise_for_status()
-            return response.json()
+            result: Dict[str, Any] = response.json()
+            return result
         except Exception as e:
             logger.error(f"API request failed: {e}")
             return None

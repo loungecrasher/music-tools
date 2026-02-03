@@ -77,6 +77,9 @@ jobs:
           isort --check-only --diff apps/ packages/
 
       - name: Type check with mypy
-        continue-on-error: true
         run: |
           mypy packages/common/music_tools_common/ --ignore-missing-imports
+
+      - name: Security audit dependencies
+        run: |
+          pip-audit --strict --desc on 2>&1 || true

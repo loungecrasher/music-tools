@@ -340,7 +340,7 @@ def get_file_extension(file_path: str) -> str:
     return os.path.splitext(file_path)[1].lower().lstrip(".")
 
 
-def is_valid_file(file_path: str, allowed_extensions: List[str] = None) -> bool:
+def is_valid_file(file_path: str, allowed_extensions: Optional[List[str]] = None) -> bool:
     """Check if a file exists and has a valid extension.
 
     Args:
@@ -378,7 +378,10 @@ def truncate_string(s: str, max_length: int = 50, suffix: str = "...") -> str:
 
 
 def print_table(
-    data: List[Dict[str, Any]], columns: List[str], widths: Dict[str, int] = None, title: str = None
+    data: List[Dict[str, Any]],
+    columns: List[str],
+    widths: Optional[Dict[str, int]] = None,
+    title: Optional[str] = None,
 ) -> None:
     """Print a table of data.
 
@@ -402,7 +405,7 @@ def print_table(
     # Print title if provided
     if title:
         print(f"\n{title}")
-        print("=" * sum(widths.values() + len(columns) + 1))
+        print("=" * (sum(widths.values()) + len(columns) + 1))
 
     # Print header
     header = " | ".join(col.ljust(widths[col]) for col in columns)

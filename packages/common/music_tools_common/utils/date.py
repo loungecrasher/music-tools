@@ -96,7 +96,7 @@ def format_date(date_obj: Union[datetime, date, str], format_str: str = "%Y-%m-%
     if isinstance(date_obj, str):
         # Try to parse it first
         success, dt, error = parse_date(date_obj)
-        if not success:
+        if not success or dt is None:
             logger.warning(f"Could not parse date for formatting: {date_obj}")
             return date_obj  # Return original if can't parse
         date_obj = dt
@@ -158,7 +158,7 @@ def normalize_date(date_str: str, output_format: str = "%Y-%m-%d") -> str:
 
     # Try to parse with standard formats
     success, dt, error = parse_date(date_str)
-    if success:
+    if success and dt is not None:
         return format_date(dt, output_format)
 
     # If all else fails, return original
@@ -187,7 +187,7 @@ def get_year_from_date(date_str: str) -> Optional[int]:
 
     # Try to parse the date
     success, dt, error = parse_date(date_str)
-    if success:
+    if success and dt is not None:
         return dt.year
 
     # If parsing fails, try to extract 4-digit year
@@ -232,7 +232,7 @@ def is_valid_date(date_str: str, min_year: int = 1900, max_year: Optional[int] =
 
     # Try to parse the date
     success, dt, error = parse_date(date_str)
-    if not success:
+    if not success or dt is None:
         return False
 
     # Check year range
@@ -402,7 +402,7 @@ def is_recent_date(date_obj: Union[datetime, date, str], days: int = 30) -> bool
     # Parse if string
     if isinstance(date_obj, str):
         success, dt, error = parse_date(date_obj)
-        if not success:
+        if not success or dt is None:
             return False
         date_obj = dt
 

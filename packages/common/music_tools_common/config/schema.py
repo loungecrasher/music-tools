@@ -5,7 +5,7 @@ Uses Pydantic for validation and type safety.
 
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class SpotifyConfig(BaseModel):
@@ -21,8 +21,7 @@ class SpotifyConfig(BaseModel):
         description="OAuth scopes",
     )
 
-    class Config:
-        frozen = True  # Make immutable
+    model_config = ConfigDict(frozen=True)
 
 
 class DeezerConfig(BaseModel):
@@ -34,8 +33,7 @@ class DeezerConfig(BaseModel):
         description="User agent for API requests",
     )
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
 
 class AnthropicConfig(BaseModel):
@@ -45,8 +43,7 @@ class AnthropicConfig(BaseModel):
     model: str = Field(default="claude-3-5-sonnet-20241022", description="Claude model to use")
     max_tokens: int = Field(default=1024, description="Maximum tokens per request")
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
 
 class DatabaseConfig(BaseModel):
@@ -60,8 +57,7 @@ class DatabaseConfig(BaseModel):
         default=86400, description="Backup interval in seconds (default: 24 hours)"
     )
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
 
 class CacheConfig(BaseModel):
@@ -72,8 +68,7 @@ class CacheConfig(BaseModel):
     max_size: int = Field(default=1000, description="Maximum cache entries")
     path: str = Field(default="~/.music_tools/cache", description="Cache directory path")
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
 
 class ConfigSchema(BaseModel):
@@ -85,5 +80,4 @@ class ConfigSchema(BaseModel):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     cache: CacheConfig = Field(default_factory=CacheConfig)
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)

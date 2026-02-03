@@ -8,7 +8,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, ValidationInfo, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -45,30 +45,33 @@ class DownloadLink(BaseModel):
     size_mb: Optional[float] = None
     host: Optional[str] = None
 
-    @validator("host", pre=True, always=True)
-    def extract_host(cls, v, values):
+    @field_validator("host", mode="before")
+    @classmethod
+    def extract_host(cls, v: Any, info: ValidationInfo) -> Any:
         """Extract host from URL if not provided."""
-        if v is None and "url" in values:
+        if v is None and "url" in info.data:
             from urllib.parse import urlparse
 
-            return urlparse(str(values["url"])).netloc
+            return urlparse(str(info.data["url"])).netloc
         return v
 
-    @validator("format", pre=True)
-    def detect_format(cls, v, values):
+    @field_validator("format", mode="before")
+    @classmethod
+    def detect_format(cls, v: Any, info: ValidationInfo) -> Any:
         """Detect format from URL if not provided."""
-        if v is None and "url" in values:
-            url_str = str(values["url"]).lower()
+        if v is None and "url" in info.data:
+            url_str = str(info.data["url"]).lower()
             for fmt in FileFormat:
                 if f".{fmt.value}" in url_str:
                     return fmt
         return v
 
-    @validator("quality", pre=True)
-    def detect_quality(cls, v, values):
+    @field_validator("quality", mode="before")
+    @classmethod
+    def detect_quality(cls, v: Any, info: ValidationInfo) -> Any:
         """Detect quality from URL if not provided."""
-        if v is None and "url" in values:
-            url_str = str(values["url"]).lower()
+        if v is None and "url" in info.data:
+            url_str = str(info.data["url"]).lower()
             if "flac" in url_str or "lossless" in url_str:
                 return AudioQuality.LOSSLESS
             elif "320" in url_str:
@@ -97,13 +100,15 @@ class Genre(BaseModel):
     weight: Optional[int] = Field(default=1, ge=1, le=10)
     aliases: List[str] = Field(default_factory=list)
 
-    @validator("name")
-    def normalize_name(cls, v):
+    @field_validator("name")
+    @classmethod
+    def normalize_name(cls, v: str) -> str:
         """Normalize genre name."""
         return v.lower().strip()
 
-    @validator("aliases", pre=True)
-    def normalize_aliases(cls, v):
+    @field_validator("aliases", mode="before")
+    @classmethod
+    def normalize_aliases(cls, v: Any) -> Any:
         """Normalize aliases."""
         if isinstance(v, list):
             return [alias.lower().strip() for alias in v]
@@ -128,13 +133,15 @@ class BlogPost(BaseModel):
     download_links: List[DownloadLink] = Field(default_factory=list)
     score: Optional[int] = Field(default=0, ge=0)
 
-    @validator("genres", "matching_genres")
-    def normalize_genres(cls, v):
+    @field_validator("genres", "matching_genres")
+    @classmethod
+    def normalize_genres(cls, v: List[str]) -> List[str]:
         """Normalize genre lists."""
         return [genre.lower().strip() for genre in v]
 
-    @validator("post_date", pre=True)
-    def parse_date(cls, v):
+    @field_validator("post_date", mode="before")
+    @classmethod
+    def parse_date(cls, v: Any) -> Any:
         """Parse date from various formats."""
         if v is None:
             return None
@@ -170,7 +177,7 @@ class BlogPost(BaseModel):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
-        data = self.dict()
+        data = self.model_dump()
         # Convert date to ISO format string
         if data.get("post_date"):
             data["post_date"] = data["post_date"].isoformat()
@@ -179,9 +186,6 @@ class BlogPost(BaseModel):
         # Convert URL to string
         data["url"] = str(data["url"])
         return data
-
-    class Config:
-        json_encoders = {date: lambda v: v.isoformat(), HttpUrl: str}
 
 
 class ScraperConfig(BaseModel):
@@ -196,23 +200,26 @@ class ScraperConfig(BaseModel):
     end_date: Optional[date] = None
     save_json: bool = Field(default=False)
 
-    @validator("output_file")
-    def validate_output_file(cls, v):
+    @field_validator("output_file")
+    @classmethod
+    def validate_output_file(cls, v: str) -> str:
         """Ensure output file has proper extension."""
         if not v.endswith((".txt", ".json")):
             return v + ".txt"
         return v
 
-    @validator("end_date")
-    def validate_date_range(cls, v, values):
+    @field_validator("end_date")
+    @classmethod
+    def validate_date_range(cls, v: Any, info: ValidationInfo) -> Any:
         """Ensure end date is after start date."""
-        if v and "start_date" in values and values["start_date"]:
-            if v < values["start_date"]:
+        if v and "start_date" in info.data and info.data["start_date"]:
+            if v < info.data["start_date"]:
                 raise ValueError("End date must be after start date")
         return v
 
-    @validator("target_genres")
-    def normalize_target_genres(cls, v):
+    @field_validator("target_genres")
+    @classmethod
+    def normalize_target_genres(cls, v: List[str]) -> List[str]:
         """Normalize target genres."""
         return [genre.lower().strip() for genre in v]
 
@@ -227,18 +234,20 @@ class ScraperResult(BaseModel):
     execution_time: Optional[float] = None
     errors: List[str] = Field(default_factory=list)
 
-    @validator("total_posts", pre=True, always=True)
-    def calculate_total_posts(cls, v, values):
+    @field_validator("total_posts", mode="before")
+    @classmethod
+    def calculate_total_posts(cls, v: Any, info: ValidationInfo) -> Any:
         """Calculate total posts if not provided."""
-        if v == 0 and "posts" in values:
-            return len(values["posts"])
+        if v == 0 and "posts" in info.data:
+            return len(info.data["posts"])
         return v
 
-    @validator("total_links", pre=True, always=True)
-    def calculate_total_links(cls, v, values):
+    @field_validator("total_links", mode="before")
+    @classmethod
+    def calculate_total_links(cls, v: Any, info: ValidationInfo) -> Any:
         """Calculate total links if not provided."""
-        if v == 0 and "posts" in values:
-            return sum(len(post.download_links) for post in values["posts"])
+        if v == 0 and "posts" in info.data:
+            return sum(len(post.download_links) for post in info.data["posts"])
         return v
 
     def add_post(self, post: BlogPost):
@@ -270,11 +279,12 @@ class LinkExtractionResult(BaseModel):
     host_stats: Dict[str, int] = Field(default_factory=dict)
     format_stats: Dict[str, int] = Field(default_factory=dict)
 
-    @validator("total_links", pre=True, always=True)
-    def calculate_total(cls, v, values):
+    @field_validator("total_links", mode="before")
+    @classmethod
+    def calculate_total(cls, v: Any, info: ValidationInfo) -> Any:
         """Calculate total if not provided."""
-        if v == 0 and "unique_links" in values:
-            return len(values["unique_links"])
+        if v == 0 and "unique_links" in info.data:
+            return len(info.data["unique_links"])
         return v
 
     def add_link(self, link: str):
@@ -346,7 +356,7 @@ def validate_post_data(data: Dict[str, Any]) -> Optional[BlogPost]:
         return None
 
 
-def create_genre_model(name: str, weight: int = 5, aliases: List[str] = None) -> Genre:
+def create_genre_model(name: str, weight: int = 5, aliases: Optional[List[str]] = None) -> Genre:
     """Create a Genre model."""
     return Genre(name=name, weight=weight, aliases=aliases or [])
 

@@ -15,7 +15,7 @@ from spotipy.oauth2 import SpotifyOAuth
 class AuthManager:
     """Base authentication manager class for music services."""
 
-    def __init__(self, config_dir: str = None):
+    def __init__(self, config_dir: Optional[str] = None):
         """Initialize the authentication manager.
 
         Args:
@@ -31,8 +31,8 @@ class AuthManager:
         os.makedirs(self.config_dir, exist_ok=True)
 
         # Initialize clients
-        self.spotify_client = None
-        self.deezer_client = None
+        self.spotify_client: Optional[Any] = None
+        self.deezer_client: Optional[Any] = None
 
     def load_config(self, service: str) -> Dict[str, Any]:
         """Load configuration for a specific service.
@@ -51,7 +51,8 @@ class AuthManager:
 
         try:
             with open(config_path, "r") as f:
-                return json.load(f)
+                result: Dict[str, Any] = json.load(f)
+                return result
         except json.JSONDecodeError:
             print(f"Error: Invalid JSON in {service} configuration file")
             return {}
@@ -86,10 +87,10 @@ class AuthManager:
 class SpotifyAuth(AuthManager):
     """Authentication manager for Spotify."""
 
-    def __init__(self, config_dir: str = None):
+    def __init__(self, config_dir: Optional[str] = None):
         """Initialize the Spotify authentication manager."""
         super().__init__(config_dir)
-        self.client = None
+        self.client: Optional[spotipy.Spotify] = None
         self.scope = (
             "playlist-read-private playlist-modify-private playlist-modify-public user-library-read"
         )
@@ -160,7 +161,9 @@ class SpotifyAuth(AuthManager):
             print(f"\nError initializing Spotify client: {str(e)}")
             print("\nPlease verify in the Spotify Developer Dashboard:")
             print("1. The app settings show these credentials:")
-            print(f"   Client ID: {client_id[:5]}...{client_id[-5:] if client_id else ''}")
+            print(
+                f"   Client ID: {client_id[:5] if client_id else ''}...{client_id[-5:] if client_id else ''}"
+            )
             print(f"   Redirect URI: {redirect_uri}")
             print("2. Your Spotify account has been authorized for this application")
             print("3. The required scopes are enabled:")
@@ -186,10 +189,10 @@ class SpotifyAuth(AuthManager):
 class DeezerAuth(AuthManager):
     """Authentication manager for Deezer."""
 
-    def __init__(self, config_dir: str = None):
+    def __init__(self, config_dir: Optional[str] = None):
         """Initialize the Deezer authentication manager."""
         super().__init__(config_dir)
-        self.client = None
+        self.client: Optional[requests.Session] = None
         self.session = requests.Session()
 
     def get_client(self) -> Optional[requests.Session]:
@@ -235,7 +238,7 @@ class DeezerAuth(AuthManager):
             )
 
             # Store email in session for later use
-            session.email = email
+            session.email = email  # type: ignore[attr-defined]
 
             # Test the connection with a simple API call
             response = session.get("https://api.deezer.com/infos")

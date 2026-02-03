@@ -20,7 +20,7 @@ logger = logging.getLogger("music_tools.database")
 class Database:
     """SQLite database interface for Music Tools."""
 
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: Optional[str] = None):
         """Initialize the database.
 
         Args:
@@ -34,8 +34,8 @@ class Database:
         else:
             self.db_path = db_path
 
-        self.conn = None
-        self.cursor = None
+        self.conn: Optional[sqlite3.Connection] = None
+        self.cursor: Optional[sqlite3.Cursor] = None
 
         # Initialize database
         self._initialize_database()
@@ -60,6 +60,7 @@ class Database:
 
     def _apply_performance_pragmas(self) -> None:
         """Apply SQLite performance optimization PRAGMAs."""
+        assert self.cursor is not None
         # Enable Write-Ahead Logging for better concurrency
         self.cursor.execute("PRAGMA journal_mode=WAL")
 
@@ -79,6 +80,8 @@ class Database:
 
     def _create_tables(self) -> None:
         """Create database tables if they don't exist."""
+        assert self.conn is not None
+        assert self.cursor is not None
         # Playlists table
         self.cursor.execute(
             """
@@ -245,6 +248,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             now = datetime.now().isoformat()
 
@@ -283,6 +288,7 @@ class Database:
         Returns:
             Playlist data or None if not found
         """
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -300,7 +306,7 @@ class Database:
             return None
 
     def get_playlists(
-        self, service: str = None, algorithmic_only: bool = False
+        self, service: Optional[str] = None, algorithmic_only: bool = False
     ) -> List[Dict[str, Any]]:
         """Get playlists from the database.
 
@@ -311,6 +317,7 @@ class Database:
         Returns:
             List of playlist data
         """
+        assert self.cursor is not None
         try:
             query = "SELECT * FROM playlists"
             params = []
@@ -344,6 +351,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -369,6 +378,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             # Get current playlist data
             current = self.get_playlist(playlist_id)
@@ -417,6 +428,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             now = datetime.now().isoformat()
 
@@ -456,6 +469,7 @@ class Database:
         Returns:
             Track data or None if not found
         """
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -472,7 +486,9 @@ class Database:
             logger.error(f"Error getting track: {str(e)}")
             return None
 
-    def get_tracks(self, service: str = None, release_after: str = None) -> List[Dict[str, Any]]:
+    def get_tracks(
+        self, service: Optional[str] = None, release_after: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Get tracks from the database.
 
         Args:
@@ -482,6 +498,7 @@ class Database:
         Returns:
             List of track data
         """
+        assert self.cursor is not None
         try:
             query = "SELECT * FROM tracks"
             params = []
@@ -510,7 +527,11 @@ class Database:
     # Playlist track methods
 
     def add_track_to_playlist(
-        self, playlist_id: str, track_id: str, added_at: str = None, position: int = None
+        self,
+        playlist_id: str,
+        track_id: str,
+        added_at: Optional[str] = None,
+        position: Optional[int] = None,
     ) -> bool:
         """Add a track to a playlist.
 
@@ -523,6 +544,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             if added_at is None:
                 added_at = datetime.now().isoformat()
@@ -564,6 +587,7 @@ class Database:
         Returns:
             List of track data with added_at and position
         """
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -591,6 +615,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -628,6 +654,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -666,6 +694,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             now = datetime.now().isoformat()
 
@@ -699,6 +729,7 @@ class Database:
         Returns:
             Setting value (converted from JSON if possible)
         """
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -731,6 +762,8 @@ class Database:
         Returns:
             True if successful, False otherwise
         """
+        assert self.conn is not None
+        assert self.cursor is not None
         try:
             self.cursor.execute(
                 """
@@ -806,7 +839,7 @@ _db_instance: Optional[Database] = None
 _db_lock = __import__("threading").Lock()
 
 
-def get_database(db_path: str = None) -> Database:
+def get_database(db_path: Optional[str] = None) -> Database:
     """Get the database instance using lazy initialization.
 
     This uses a thread-safe singleton pattern to avoid creating

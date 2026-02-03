@@ -60,7 +60,7 @@ def apply_migration(version: str, db_path: str) -> Tuple[bool, str]:
     """
     try:
         module = get_migration_module(version)
-        return module.migrate(db_path)
+        return module.migrate(db_path)  # type: ignore[no-any-return]
     except Exception as e:
         error_msg = f"Failed to apply migration {version}: {str(e)}"
         logger.error(error_msg)
@@ -83,7 +83,7 @@ def rollback_migration(
     """
     try:
         module = get_migration_module(version)
-        return module.rollback(db_path, backup_path)
+        return module.rollback(db_path, backup_path)  # type: ignore[no-any-return]
     except Exception as e:
         error_msg = f"Failed to rollback migration {version}: {str(e)}"
         logger.error(error_msg)
@@ -103,7 +103,7 @@ def get_migration_status(version: str, db_path: str) -> dict:
     """
     try:
         module = get_migration_module(version)
-        return module.get_migration_status(db_path)
+        return module.get_migration_status(db_path)  # type: ignore[no-any-return]
     except Exception as e:
         return {"version": version, "error": str(e)}
 

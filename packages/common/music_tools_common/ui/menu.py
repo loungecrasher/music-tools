@@ -103,8 +103,8 @@ class Menu:
         Returns:
             Formatted breadcrumb string (e.g., "Main Menu > Library > Index")
         """
-        breadcrumb_parts = []
-        current_menu = self
+        breadcrumb_parts: List[str] = []
+        current_menu: Optional["Menu"] = self
 
         while current_menu is not None:
             title = current_menu.title
@@ -115,7 +115,7 @@ class Menu:
 
         return " › ".join(breadcrumb_parts)
 
-    def set_exit_option(self, name: str, action: Callable = None) -> None:
+    def set_exit_option(self, name: str, action: Optional[Callable] = None) -> None:
         """Set the exit option for the menu.
 
         Args:

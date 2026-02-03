@@ -8,7 +8,7 @@ Provides progress bars, spinners, and status displays with:
 """
 
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, Optional, TypeVar
+from typing import Any, Callable, Iterable, Iterator, Optional, TypeVar
 
 from rich.console import Console
 from rich.panel import Panel
@@ -103,7 +103,7 @@ def progress_context(
 
 
 def iterate_with_progress(
-    items: Iterator[T],
+    items: Iterable[T],
     total: Optional[int] = None,
     description: str = "Processing...",
     show_eta: bool = True,

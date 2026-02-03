@@ -36,7 +36,7 @@ class DeezerAuthManager:
                 "Accept": "application/json",
             }
         )
-        session.email = email
+        session.email = email  # type: ignore[attr-defined]
 
         self.session = session
         return session

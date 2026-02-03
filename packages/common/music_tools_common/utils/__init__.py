@@ -44,7 +44,9 @@ from .http import (
 )
 
 # Retry utilities (legacy retry function)
-from .retry import retry, safe_request, setup_logger  # noqa: F811
+from .retry import retry
+from .retry import safe_request as retry_safe_request  # noqa: F811
+from .retry import setup_logger
 
 # Security utilities
 from .security import (

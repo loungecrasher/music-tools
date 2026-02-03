@@ -11,6 +11,10 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+# Register explicit datetime adapters (default deprecated in Python 3.12)
+sqlite3.register_adapter(datetime, lambda dt: dt.isoformat())
+sqlite3.register_converter("timestamp", lambda b: datetime.fromisoformat(b.decode()))
+
 
 class HistoryDatabase:
     """
@@ -46,7 +50,7 @@ class HistoryDatabase:
     def _initialize_database(self):
         """Create tables if they don't exist."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES) as conn:
                 cursor = conn.cursor()
 
                 # Enable WAL mode for better concurrency
@@ -89,7 +93,7 @@ class HistoryDatabase:
             True if added, False if already exists
         """
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
                     "INSERT INTO history (filename, added_at, source_path) VALUES (?, ?, ?)",
@@ -115,7 +119,7 @@ class HistoryDatabase:
             datetime when it was added, or None if not found
         """
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES) as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT added_at FROM history WHERE filename = ?", (filename,))
                 result = cursor.fetchone()
@@ -136,7 +140,7 @@ class HistoryDatabase:
     def get_stats(self) -> dict:
         """Get database statistics."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES) as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT COUNT(*) FROM history")
                 count = cursor.fetchone()[0]

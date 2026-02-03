@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +261,8 @@ def get_json(
         return None
 
     try:
-        return response.json()
+        result: Dict[str, Any] = response.json()
+        return result
     except ValueError as e:
         logger.error(f"Invalid JSON response from {url}: {e}")
         return None
@@ -301,7 +302,8 @@ def post_json(
         return None
 
     try:
-        return response.json()
+        result: Dict[str, Any] = response.json()
+        return result
     except ValueError as e:
         logger.error(f"Invalid JSON response from {url}: {e}")
         return None
@@ -524,7 +526,7 @@ def safe_request(
     while retry_count < max_retries:
         try:
             # Prepare request kwargs
-            request_kwargs = {"timeout": timeout}
+            request_kwargs: Dict[str, Any] = {"timeout": timeout}
             if headers:
                 request_kwargs["headers"] = headers
             if json is not None:
