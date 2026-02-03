@@ -5,32 +5,29 @@ Tests SafeDeletionPlan, DeletionValidator, 7-point safety checklist,
 dry-run mode, backup functionality, and JSON export/import.
 """
 
-import pytest
 import json
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
 import sys
+from pathlib import Path
+
+import pytest
 
 # Add project to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.library.safe_delete import (
-    SafeDeletionPlan,
     DeletionGroup,
-    DeletionValidator,
-    ValidationResult,
-    ValidationLevel,
     DeletionStats,
+    DeletionValidator,
+    SafeDeletionPlan,
+    ValidationLevel,
+    ValidationResult,
     create_deletion_plan,
     validate_deletion,
 )
 
-
 # ==================== DeletionGroup Tests ====================
+
 
 class TestDeletionGroup:
     """Test DeletionGroup dataclass and validation."""

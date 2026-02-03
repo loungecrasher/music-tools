@@ -6,13 +6,12 @@ error reporting across all components.
 """
 
 import logging
+import sqlite3
 import time
 import traceback
-from functools import wraps
-from typing import Any, Callable, Optional, Type, Union, Tuple, List
 from enum import Enum
-import sqlite3
-from pathlib import Path
+from functools import wraps
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 

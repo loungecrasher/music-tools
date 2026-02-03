@@ -4,20 +4,19 @@ Duplicate detection for music files.
 Provides multi-level duplicate detection using metadata and file content hashing.
 """
 
-import hashlib
 import logging
-from pathlib import Path
-from typing import Optional, List, Tuple, Dict
 from difflib import SequenceMatcher
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 try:
     from mutagen import File as MutagenFile
 except ImportError:
     MutagenFile = None
 
-from .models import LibraryFile, DuplicateResult
 from .database import LibraryDatabase
-from .hash_utils import calculate_metadata_hash, calculate_file_hash
+from .hash_utils import calculate_file_hash, calculate_metadata_hash
+from .models import DuplicateResult, LibraryFile
 
 logger = logging.getLogger(__name__)
 
@@ -619,7 +618,7 @@ class DuplicateChecker:
         # This avoids querying the DB for every single file during fuzzy matching
         artist_tracks_cache = {}
         unique_artists = {f.artist for _, f in files_metadata if f.artist}
-        
+
         for artist in unique_artists:
             try:
                 tracks = self.db.search_by_artist_title(artist=artist)
@@ -663,13 +662,13 @@ class DuplicateChecker:
             if library_file.artist and library_file.title:
                 # Use pre-fetched tracks if available
                 cached_tracks = artist_tracks_cache.get(library_file.artist)
-                
+
                 fuzzy_matches = self._check_fuzzy_metadata(
-                    library_file, 
+                    library_file,
                     fuzzy_threshold,
                     cached_tracks=cached_tracks
                 )
-                
+
                 if fuzzy_matches:
                     best_match, best_score = fuzzy_matches[0]
                     results[file_path] = DuplicateResult(

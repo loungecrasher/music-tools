@@ -17,10 +17,9 @@ Author: Database Performance Specialist
 Created: November 2025
 """
 
-import sqlite3
 import logging
-from typing import List, Dict, Optional, Any
 from contextlib import contextmanager
+from typing import Dict, List, Optional
 
 from .models import LibraryFile
 

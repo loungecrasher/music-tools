@@ -3,16 +3,15 @@
 Tests multi-client scenarios, cross-platform operations, and complex workflows.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import requests
-from requests.exceptions import ConnectionError, Timeout
-import concurrent.futures
 import threading
+from unittest.mock import Mock, patch
 
+import pytest
+import requests
 from music_tools_common.api.base import BaseAPIClient
-from music_tools_common.api.spotify import SpotifyClient
 from music_tools_common.api.deezer import DeezerClient
+from music_tools_common.api.spotify import SpotifyClient
+from requests.exceptions import ConnectionError, Timeout
 
 
 class TestMultiClientOperations:
@@ -490,11 +489,7 @@ class TestModuleExports:
 
     def test_all_clients_importable(self):
         """Test that all API clients can be imported from module."""
-        from music_tools_common.api import (
-            BaseAPIClient,
-            SpotifyClient,
-            DeezerClient
-        )
+        from music_tools_common.api import BaseAPIClient, DeezerClient, SpotifyClient  # noqa: F811
 
         # Should not raise ImportError
         assert BaseAPIClient is not None
@@ -512,11 +507,7 @@ class TestModuleExports:
 
     def test_instantiate_all_exported_classes(self):
         """Test that all exported classes can be instantiated."""
-        from music_tools_common.api import (
-            BaseAPIClient,
-            SpotifyClient,
-            DeezerClient
-        )
+        from music_tools_common.api import BaseAPIClient, DeezerClient, SpotifyClient  # noqa: F811
 
         # Should be able to create instances
         base = BaseAPIClient("https://api.example.com")

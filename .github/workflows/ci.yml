@@ -40,7 +40,7 @@ jobs:
       - name: Run tests
         working-directory: apps/music-tools
         run: |
-          python -m pytest tests/ -v --tb=short --ignore=tests/database
+          python -m pytest tests/ -v --tb=short --ignore=tests/database --benchmark-disable
 
       - name: Run common package tests
         run: |

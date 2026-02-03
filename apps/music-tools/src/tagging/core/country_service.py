@@ -6,8 +6,8 @@ eliminating code duplication across the application.
 """
 
 import logging
-from typing import Optional, Set, Dict
 import re
+from typing import Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
 

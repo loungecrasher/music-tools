@@ -4,8 +4,8 @@ Environment Variables Example for music_tools_common.config
 This example demonstrates how environment variables override file-based configuration.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add parent directory to path for imports

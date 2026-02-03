@@ -3,25 +3,25 @@ CLI framework for Music Tools.
 """
 
 from .base import BaseCLI
-from .menu import InteractiveMenu
-from .prompts import prompt_user, prompt_choice
-from .progress import ProgressTracker
 from .console import console
 from .helpers import (
+    clear_screen,
+    confirm,
+    create_progress_bar,
+    format_error_details,
+    pause,
     print_error,
+    print_header,
+    print_info,
     print_success,
     print_warning,
-    print_info,
-    pause,
-    confirm,
     prompt,
     show_panel,
-    create_progress_bar,
     show_status,
-    clear_screen,
-    print_header,
-    format_error_details
 )
+from .menu import InteractiveMenu
+from .progress import ProgressTracker
+from .prompts import prompt_choice, prompt_user
 
 __all__ = [
     'BaseCLI',

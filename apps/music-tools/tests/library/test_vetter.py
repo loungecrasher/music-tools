@@ -1,13 +1,12 @@
 """Tests for ImportVetter - import folder vetting against library."""
 
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from io import StringIO
+from pathlib import Path
 
-from src.library.vetter import ImportVetter, SUPPORTED_AUDIO_FORMATS
+import pytest
+from conftest import make_duplicate_result, make_library_file
 from src.library.models import DuplicateResult, VettingReport
-from conftest import make_library_file, make_duplicate_result
+from src.library.vetter import SUPPORTED_AUDIO_FORMATS, ImportVetter
 
 
 class TestImportVetterInit:

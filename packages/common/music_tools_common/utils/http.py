@@ -5,10 +5,11 @@ This module provides utilities for creating resilient HTTP sessions,
 making safe requests, and handling rate limiting and retries.
 """
 
-import time
-import random
 import logging
-from typing import Optional, List, Dict, Any
+import random
+import time
+from typing import Any, Dict, List, Optional
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -220,8 +221,8 @@ def handle_rate_limit(response: requests.Response) -> Optional[float]:
                 delay = float(retry_after)
             except ValueError:
                 # Parse HTTP date format
-                from email.utils import parsedate_to_datetime
                 from datetime import datetime
+                from email.utils import parsedate_to_datetime
                 try:
                     retry_date = parsedate_to_datetime(retry_after)
                     delay = (retry_date - datetime.now()).total_seconds()
@@ -412,7 +413,7 @@ class RateLimiter:
 
         # Clean up calls outside the time window
         self.calls = [call_time for call_time in self.calls
-                     if now - call_time < self.time_window]
+                      if now - call_time < self.time_window]
 
         # Check if we can make another call
         if len(self.calls) < self.max_calls:
@@ -534,7 +535,6 @@ def safe_request(
     """
     # Use the method directly with requests module (for test mocking compatibility)
     retry_count = 0
-    last_exception = None
 
     while retry_count < max_retries:
         try:
@@ -602,7 +602,6 @@ def safe_request(
             return response
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-            last_exception = e
             retry_count += 1
 
             if retry_count < max_retries:

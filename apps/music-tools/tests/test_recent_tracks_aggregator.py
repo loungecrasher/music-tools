@@ -5,10 +5,10 @@ Tests the core logic: playlist fetching, date filtering, deduplication,
 playlist creation/update, and batch adding.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, call
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock
 
+import pytest
 from src.services.spotify_tracks import _get_all_playlists
 
 

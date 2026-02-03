@@ -3,7 +3,7 @@ import csv
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from music_tools_common.utils.fuzzy import find_best_match
 

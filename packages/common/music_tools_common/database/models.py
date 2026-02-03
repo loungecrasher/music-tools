@@ -2,9 +2,9 @@
 Database models for Music Tools.
 Defines data structures for playlists, tracks, and settings.
 """
-from typing import Optional, Dict, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 @dataclass

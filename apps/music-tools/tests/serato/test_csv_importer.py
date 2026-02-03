@@ -1,10 +1,11 @@
 """Tests for CSVImporter -- reading CSV playlists and importing to crates."""
 
 import csv
-import pytest
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add apps/music-tools to sys.path
 project_root = Path(__file__).parent.parent.parent

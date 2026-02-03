@@ -12,23 +12,27 @@ Author: Music Tools Dev Team
 Created: 2026-01-08
 """
 
-import streamlit as st
-import plotly.graph_objects as go
-import plotly.express as px
-from pathlib import Path
-from datetime import datetime, timedelta
-import pandas as pd
-import logging
-from typing import Optional, Dict, List, Any
 import json
-import os
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
 
 # Import Music Tools modules
 from src.library.database import LibraryDatabase
 from src.library.duplicate_checker import DuplicateChecker
-from src.library.quality_analyzer import extract_audio_metadata, rank_duplicate_group, get_quality_tier
-from src.library.safe_delete import SafeDeletionPlan, DeletionStats
 from src.library.models import LibraryFile
+from src.library.quality_analyzer import (
+    extract_audio_metadata,
+    get_quality_tier,
+    rank_duplicate_group,
+)
+from src.library.safe_delete import DeletionStats, SafeDeletionPlan
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

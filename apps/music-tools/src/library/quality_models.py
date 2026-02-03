@@ -2,11 +2,11 @@
 Data models for quality analysis and duplicate management.
 """
 
+import logging
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
-import uuid
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -170,9 +170,9 @@ class AudioQuality:
         """
         # Validate required fields
         required_fields = ['file_path', 'format', 'bitrate', 'sample_rate']
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+        for field_name in required_fields:
+            if field_name not in data:
+                raise ValueError(f"Missing required field: {field_name}")
 
         # Parse datetime if present
         last_modified = None
@@ -316,9 +316,9 @@ class DuplicateGroup:
         """
         # Validate required fields
         required_fields = ['id', 'track_hash']
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+        for field_name in required_fields:
+            if field_name not in data:
+                raise ValueError(f"Missing required field: {field_name}")
 
         # Parse files list
         files = []
@@ -464,9 +464,9 @@ class UpgradeCandidate:
         """
         # Validate required fields
         required_fields = ['current_file', 'target_format', 'quality_gap']
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+        for field_name in required_fields:
+            if field_name not in data:
+                raise ValueError(f"Missing required field: {field_name}")
 
         # Parse current_file
         try:
@@ -478,7 +478,7 @@ class UpgradeCandidate:
         # Parse available_services list
         available_services = data.get('available_services', [])
         if not isinstance(available_services, list):
-            logger.warning(f"available_services is not a list, converting to empty list")
+            logger.warning("available_services is not a list, converting to empty list")
             available_services = []
 
         return cls(

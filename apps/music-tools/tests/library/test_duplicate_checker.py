@@ -1,12 +1,11 @@
 """Tests for DuplicateChecker - multi-level duplicate detection."""
 
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
-from src.library.duplicate_checker import DuplicateChecker
-from src.library.models import LibraryFile, DuplicateResult
+import pytest
 from conftest import make_library_file
+from src.library.duplicate_checker import DuplicateChecker
+from src.library.models import DuplicateResult, LibraryFile
 
 
 class TestDuplicateCheckerInit:
@@ -115,7 +114,7 @@ class TestCheckFile:
         fake_file = tmp_path / "dup.flac"
         fake_file.write_bytes(b"fake audio data")
 
-        matched = make_library_file(metadata_hash='hash_a1')
+        make_library_file(metadata_hash='hash_a1')
 
         with patch.object(checker, '_extract_metadata') as mock_extract:
             mock_extract.return_value = make_library_file(

@@ -7,23 +7,23 @@ Provides progress bars, spinners, and status displays with:
 - Memory-efficient updates
 """
 
-import time
-from typing import Optional, Callable, Any, Iterator, TypeVar
+from contextlib import contextmanager
+from typing import Any, Callable, Iterator, Optional, TypeVar
+
 from rich.console import Console
+from rich.panel import Panel
 from rich.progress import (
-    Progress, 
-    SpinnerColumn, 
-    TextColumn, 
-    BarColumn, 
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
     TaskProgressColumn,
+    TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
-    MofNCompleteColumn,
-    TransferSpeedColumn
+    TransferSpeedColumn,
 )
-from rich.panel import Panel
 from rich.table import Table
-from contextlib import contextmanager
 
 from .menu import THEME, get_themed_style
 
@@ -43,14 +43,14 @@ def create_progress_bar(
     transient: bool = False
 ) -> Progress:
     """Create a customized progress bar with optional ETA and speed.
-    
+
     Args:
         description: Description text to show
         show_eta: Whether to show estimated time remaining
         show_speed: Whether to show processing speed
         show_percentage: Whether to show percentage complete
         transient: If True, progress bar disappears when done
-        
+
     Returns:
         Configured Rich Progress object
     """
@@ -59,17 +59,17 @@ def create_progress_bar(
         TextColumn(f"[{get_themed_style('primary')}]{{task.description}}[/]"),
         BarColumn(bar_width=40),
     ]
-    
+
     if show_percentage:
         columns.append(TaskProgressColumn())
-    
+
     columns.append(MofNCompleteColumn())
-    
+
     if show_eta:
         columns.append(TimeRemainingColumn())
-    
+
     columns.append(TimeElapsedColumn())
-    
+
     return Progress(
         *columns,
         console=console,
@@ -85,16 +85,16 @@ def progress_context(
     unit: str = "items"
 ):
     """Context manager for progress tracking with ETA.
-    
+
     Args:
         total: Total number of items to process
         description: Description text to show
         show_eta: Whether to show estimated time remaining
         unit: Unit name for display (e.g., "files", "tracks")
-        
+
     Yields:
         Tuple of (progress, task_id) for updating progress
-        
+
     Example:
         >>> with progress_context(1000, "Indexing files") as (progress, task):
         ...     for file in files:
@@ -102,7 +102,7 @@ def progress_context(
         ...         progress.advance(task)
     """
     progress = create_progress_bar(description, show_eta=show_eta)
-    
+
     with progress:
         task = progress.add_task(description, total=total)
         yield progress, task
@@ -115,16 +115,16 @@ def iterate_with_progress(
     show_eta: bool = True
 ) -> Iterator[T]:
     """Iterate over items with automatic progress tracking.
-    
+
     Args:
         items: Iterable to process
         total: Total count (if known, enables ETA)
         description: Description text to show
         show_eta: Whether to show estimated time remaining
-        
+
     Yields:
         Items from the iterator
-        
+
     Example:
         >>> for file in iterate_with_progress(files, len(files), "Scanning"):
         ...     process(file)
@@ -133,12 +133,12 @@ def iterate_with_progress(
     if total is None:
         items = list(items)
         total = len(items)
-    
+
     progress = create_progress_bar(description, show_eta=show_eta)
-    
+
     with progress:
         task = progress.add_task(description, total=total)
-        
+
         for item in items:
             yield item
             progress.advance(task)
@@ -150,14 +150,14 @@ def iterate_with_progress(
 
 class StatusBar:
     """Persistent status bar showing connection and library status."""
-    
+
     def __init__(self):
         self.services: dict = {}
         self.library_stats: dict = {}
-    
+
     def set_service_status(self, service: str, connected: bool, details: str = "") -> None:
         """Set connection status for a service.
-        
+
         Args:
             service: Service name (e.g., "Spotify", "Deezer")
             connected: Whether service is connected
@@ -167,10 +167,10 @@ class StatusBar:
             'connected': connected,
             'details': details
         }
-    
+
     def set_library_stats(self, total_files: int = 0, indexed: bool = False) -> None:
         """Set library statistics.
-        
+
         Args:
             total_files: Total files in library
             indexed: Whether library has been indexed
@@ -179,15 +179,15 @@ class StatusBar:
             'total_files': total_files,
             'indexed': indexed
         }
-    
+
     def render(self) -> Panel:
         """Render the status bar as a Rich Panel.
-        
+
         Returns:
             Rich Panel with status information
         """
         status_parts = []
-        
+
         # Service status
         for service, status in self.services.items():
             if status['connected']:
@@ -198,9 +198,9 @@ class StatusBar:
                 icon = "✗"
                 style = get_themed_style('error')
                 detail = ""
-            
+
             status_parts.append(f"[{style}]{service}: {icon}{detail}[/]")
-        
+
         # Library status
         if self.library_stats:
             if self.library_stats['indexed']:
@@ -208,15 +208,15 @@ class StatusBar:
                 status_parts.append(f"[{get_themed_style('info')}]Library: {files:,} files[/]")
             else:
                 status_parts.append(f"[{get_themed_style('warning')}]Library: Not indexed[/]")
-        
+
         status_text = " │ ".join(status_parts) if status_parts else "No services configured"
-        
+
         return Panel(
             status_text,
             border_style=get_themed_style('muted'),
             padding=(0, 1)
         )
-    
+
     def display(self) -> None:
         """Display the status bar."""
         console.print(self.render())
@@ -232,12 +232,12 @@ def show_operation_summary(
     duration: Optional[float] = None
 ) -> None:
     """Display a summary of an operation's results.
-    
+
     Args:
         operation: Name of the operation (e.g., "Library Index")
         results: Dictionary of result metrics
         duration: Optional duration in seconds
-        
+
     Example:
         >>> show_operation_summary("Library Index", {
         ...     "Added": 150,
@@ -249,7 +249,7 @@ def show_operation_summary(
     table = Table(title=f"{operation} Results", show_header=True)
     table.add_column("Metric", style=get_themed_style('primary'))
     table.add_column("Value", style=get_themed_style('success'), justify="right")
-    
+
     for metric, value in results.items():
         # Color errors differently
         if metric.lower() in ('errors', 'failed', 'error'):
@@ -263,7 +263,7 @@ def show_operation_summary(
             table.add_row(metric, f"[{get_themed_style('warning')}]{value:,}[/]")
         else:
             table.add_row(metric, f"{value:,}" if isinstance(value, int) else str(value))
-    
+
     if duration is not None:
         # Calculate throughput if we have a total
         total = sum(v for v in results.values() if isinstance(v, (int, float)))
@@ -272,7 +272,7 @@ def show_operation_summary(
             table.add_row("", "")  # Separator
             table.add_row("Duration", f"{duration:.1f}s")
             table.add_row("Throughput", f"{throughput:.1f}/sec")
-    
+
     console.print()
     console.print(table)
 
@@ -284,39 +284,39 @@ def show_confirmation_preview(
     item_formatter: Optional[Callable[[Any], str]] = None
 ) -> bool:
     """Show a preview of items and ask for confirmation.
-    
+
     Args:
         action: Action to be performed (e.g., "Delete")
         items: List of items that will be affected
         max_preview: Maximum items to preview
         item_formatter: Optional function to format items for display
-        
+
     Returns:
         True if user confirms, False otherwise
     """
     from rich.prompt import Confirm
     from rich.tree import Tree
-    
+
     # Format action with color
     action_style = get_themed_style('error') if 'delete' in action.lower() else get_themed_style('warning')
-    
+
     console.print(f"\n[{action_style}]{action}[/] - {len(items)} items will be affected:\n")
-    
+
     tree = Tree(f"📋 Items to {action.lower()}")
-    
+
     for i, item in enumerate(items[:max_preview]):
         if item_formatter:
             display = item_formatter(item)
         else:
             display = str(item)
         tree.add(display)
-    
+
     if len(items) > max_preview:
         tree.add(f"[{get_themed_style('muted')}]... and {len(items) - max_preview} more[/]")
-    
+
     console.print(tree)
     console.print()
-    
+
     return Confirm.ask(
         f"[{action_style}]Proceed with {action.lower()}?[/]",
         default=False

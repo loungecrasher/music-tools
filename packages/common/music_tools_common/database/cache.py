@@ -2,14 +2,12 @@
 Cache manager for Music Tools.
 Provides in-memory and file-based caching with TTL support.
 """
-import os
-import json
-import time
-import logging
 import hashlib
-from typing import Any, Optional, Dict
-from pathlib import Path
-from datetime import datetime, timedelta
+import json
+import logging
+import os
+import time
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger('music_tools_common.database.cache')
 

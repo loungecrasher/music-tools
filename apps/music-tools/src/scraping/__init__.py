@@ -6,8 +6,8 @@ genre information, and track metadata.
 """
 
 from .cli_scraper import main as cli_main
-from .music_scraper import MusicBlogScraper
 from .link_extractor import LinkExtractor
+from .music_scraper import MusicBlogScraper
 
 __all__ = [
     'cli_main',

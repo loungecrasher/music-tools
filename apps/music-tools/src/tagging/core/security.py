@@ -5,11 +5,11 @@ Provides security functions for input validation, path traversal prevention,
 and safe command execution.
 """
 
+import logging
 import os
 import re
 from pathlib import Path
 from typing import Optional, Tuple
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -156,15 +156,15 @@ class SecurityValidator:
         # Mask potential sensitive data patterns
         # Mask API keys (common patterns)
         sanitized = re.sub(r'(api[_\-]?key["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
-                          r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
+                           r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
 
         # Mask tokens
         sanitized = re.sub(r'(token["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9\-_]{20,})',
-                          r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
+                           r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
 
         # Mask passwords
         sanitized = re.sub(r'(password["\']?\s*[:=]\s*["\']?)([^\s"\']+)',
-                          r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
+                           r'\1***REDACTED***', sanitized, flags=re.IGNORECASE)
 
         return sanitized
 

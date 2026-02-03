@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Any
+from typing import Callable, Dict, List, Optional, Tuple
 
 from music_tools_common.metadata.reader import MetadataReader
 from music_tools_common.utils.fuzzy import find_best_match

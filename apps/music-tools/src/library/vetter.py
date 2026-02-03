@@ -4,21 +4,22 @@ Import vetting workflow for checking new music against library.
 Provides automated duplicate detection and categorization for import folders.
 """
 
+import logging
 import os
 import time
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional, Tuple, Set
+from typing import List, Optional, Set, Tuple
+
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
-from rich.table import Table
 from rich.panel import Panel
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
+from rich.table import Table
 from rich.tree import Tree
 
-from .models import VettingReport, DuplicateResult
 from .database import LibraryDatabase
 from .duplicate_checker import DuplicateChecker
+from .models import DuplicateResult, VettingReport
 
 logger = logging.getLogger(__name__)
 
@@ -697,7 +698,7 @@ class ImportVetter:
         # Display results
         self.console.print()
         if dry_run:
-            self.console.print(f"[bold cyan]DRY RUN RESULTS:[/bold cyan]")
+            self.console.print("[bold cyan]DRY RUN RESULTS:[/bold cyan]")
             self.console.print(f"  ✓ Would delete: {deleted_count} files")
             if failed_count > 0:
                 self.console.print(f"  ✗ Would fail: {failed_count} files")

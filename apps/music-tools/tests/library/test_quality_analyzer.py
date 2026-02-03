@@ -5,38 +5,38 @@ Tests audio quality scoring, metadata extraction, VBR detection,
 duplicate ranking, and filename normalization.
 """
 
-import pytest
-from pathlib import Path
-from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, patch, MagicMock
 import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Add project to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.library.quality_analyzer import (
-    AudioMetadata,
-    BitrateType,
-    calculate_quality_score,
-    extract_audio_metadata,
-    normalize_filename,
-    rank_duplicate_group,
-    compare_audio_quality,
-    get_quality_tier,
-    analyze_duplicate_set,
-    # Constants
-    FORMAT_SCORES,
+from src.library.quality_analyzer import (  # Constants
     BITRATE_REFERENCE,
+    FORMAT_SCORES,
+    MAX_QUALITY_SCORE,
+    MIN_QUALITY_SCORE,
     SAMPLE_RATE_HIGH,
     SAMPLE_RATE_MEDIUM,
     SAMPLE_RATE_STANDARD,
-    MAX_QUALITY_SCORE,
-    MIN_QUALITY_SCORE,
+    AudioMetadata,
+    BitrateType,
+    analyze_duplicate_set,
+    calculate_quality_score,
+    compare_audio_quality,
+    extract_audio_metadata,
+    get_quality_tier,
+    normalize_filename,
+    rank_duplicate_group,
 )
 
-
 # ==================== AudioMetadata Tests ====================
+
 
 class TestAudioMetadata:
     """Test AudioMetadata dataclass validation and initialization."""
@@ -101,7 +101,7 @@ class TestAudioMetadata:
             duration=-10.0  # Invalid
         )
 
-        assert metadata.duration == 0.0
+        assert metadata.duration is None
 
     def test_audio_metadata_format_from_filepath(self):
         """Test format extraction from filepath when format is empty."""
@@ -174,12 +174,13 @@ class TestCalculateQualityScore:
         # MP3 (20) + 320kbps (30) + 44.1kHz (10) + Recent (10) = 70
         assert score == 70
 
-    def test_quality_score_mp3_320_vbr_bonus(self):
-        """Test that VBR gets bonus points over CBR."""
+    def test_quality_score_mp3_vbr_bonus(self):
+        """Test that VBR gets bonus points over CBR at sub-max bitrate."""
+        # Use 256kbps so the +2 VBR bonus isn't capped at BITRATE_WEIGHT
         cbr_metadata = AudioMetadata(
             filepath='/music/cbr.mp3',
             format='mp3',
-            bitrate=320,
+            bitrate=256,
             sample_rate=44100,
             bitrate_type=BitrateType.CBR,
             modified_time=datetime.now(timezone.utc)
@@ -188,7 +189,7 @@ class TestCalculateQualityScore:
         vbr_metadata = AudioMetadata(
             filepath='/music/vbr.mp3',
             format='mp3',
-            bitrate=320,
+            bitrate=256,
             sample_rate=44100,
             bitrate_type=BitrateType.VBR,
             modified_time=datetime.now(timezone.utc)

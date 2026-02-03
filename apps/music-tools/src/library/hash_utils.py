@@ -10,9 +10,9 @@ Security Note:
 """
 
 import hashlib
+import logging
 from pathlib import Path
 from typing import Optional
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +134,7 @@ def calculate_file_hash(file_path: Path, chunk_size: int = DEFAULT_CHUNK_SIZE) -
 
     # Use SHA-256 for better collision resistance
     hasher = hashlib.sha256()
-    
+
     # Include file size in hash for additional collision resistance
     hasher.update(str(file_size).encode('utf-8'))
 

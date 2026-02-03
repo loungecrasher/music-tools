@@ -9,23 +9,22 @@ Provides unified UI components for the Music Tools suite:
 """
 
 from .menu import (
-    Menu, 
-    MenuOption,
     THEME,
+    Menu,
+    MenuOption,
     get_themed_style,
     show_error,
     show_success,
     show_warning,
 )
-
 from .progress import (
-    create_progress_bar,
-    progress_context,
-    iterate_with_progress,
     StatusBar,
-    status_bar,
-    show_operation_summary,
+    create_progress_bar,
+    iterate_with_progress,
+    progress_context,
     show_confirmation_preview,
+    show_operation_summary,
+    status_bar,
 )
 
 __all__ = [
@@ -35,7 +34,7 @@ __all__ = [
     'THEME',
     'get_themed_style',
     'show_error',
-    'show_success', 
+    'show_success',
     'show_warning',
     # Progress components
     'create_progress_bar',

@@ -3,16 +3,16 @@
 This module provides reusable fixtures and test utilities for API testing.
 """
 
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 import requests
-
 from music_tools_common.api.base import BaseAPIClient
-from music_tools_common.api.spotify import SpotifyClient
 from music_tools_common.api.deezer import DeezerClient
-
+from music_tools_common.api.spotify import SpotifyClient
 
 # Fixtures for API clients
+
 
 @pytest.fixture
 def base_client():

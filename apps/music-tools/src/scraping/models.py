@@ -3,10 +3,14 @@
 Pydantic models for data validation in the EDM Music Blog Scraper.
 """
 
-from pydantic import BaseModel, Field, HttpUrl, validator
-from typing import List, Optional, Dict, Any
+import logging
 from datetime import date, datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field, HttpUrl, validator
+
+logger = logging.getLogger(__name__)
 
 
 class FileFormat(str, Enum):
@@ -19,7 +23,7 @@ class FileFormat(str, Enum):
     ZIP = "zip"
     RAR = "rar"
     SEVEN_Z = "7z"
-    
+
 
 class AudioQuality(str, Enum):
     """Audio quality levels."""
@@ -37,7 +41,7 @@ class DownloadLink(BaseModel):
     quality: Optional[AudioQuality] = AudioQuality.UNKNOWN
     size_mb: Optional[float] = None
     host: Optional[str] = None
-    
+
     @validator('host', pre=True, always=True)
     def extract_host(cls, v, values):
         """Extract host from URL if not provided."""
@@ -45,7 +49,7 @@ class DownloadLink(BaseModel):
             from urllib.parse import urlparse
             return urlparse(str(values['url'])).netloc
         return v
-    
+
     @validator('format', pre=True)
     def detect_format(cls, v, values):
         """Detect format from URL if not provided."""
@@ -55,7 +59,7 @@ class DownloadLink(BaseModel):
                 if f".{fmt.value}" in url_str:
                     return fmt
         return v
-    
+
     @validator('quality', pre=True)
     def detect_quality(cls, v, values):
         """Detect quality from URL if not provided."""
@@ -70,7 +74,7 @@ class DownloadLink(BaseModel):
             elif '128' in url_str:
                 return AudioQuality.LOW
         return v
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dictionary."""
         return {
@@ -87,19 +91,19 @@ class Genre(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     weight: Optional[int] = Field(default=1, ge=1, le=10)
     aliases: List[str] = Field(default_factory=list)
-    
+
     @validator('name')
     def normalize_name(cls, v):
         """Normalize genre name."""
         return v.lower().strip()
-    
+
     @validator('aliases', pre=True)
     def normalize_aliases(cls, v):
         """Normalize aliases."""
         if isinstance(v, list):
             return [alias.lower().strip() for alias in v]
         return v
-    
+
     def matches(self, text: str) -> bool:
         """Check if genre matches text."""
         text_lower = text.lower()
@@ -117,12 +121,12 @@ class BlogPost(BaseModel):
     matching_genres: List[str] = Field(default_factory=list)
     download_links: List[DownloadLink] = Field(default_factory=list)
     score: Optional[int] = Field(default=0, ge=0)
-    
+
     @validator('genres', 'matching_genres')
     def normalize_genres(cls, v):
         """Normalize genre lists."""
         return [genre.lower().strip() for genre in v]
-    
+
     @validator('post_date', pre=True)
     def parse_date(cls, v):
         """Parse date from various formats."""
@@ -148,7 +152,7 @@ class BlogPost(BaseModel):
                 except (ValueError, TypeError):
                     continue
         return None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         data = self.dict()
@@ -160,7 +164,7 @@ class BlogPost(BaseModel):
         # Convert URL to string
         data['url'] = str(data['url'])
         return data
-    
+
     class Config:
         json_encoders = {
             date: lambda v: v.isoformat(),
@@ -178,14 +182,14 @@ class ScraperConfig(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     save_json: bool = Field(default=False)
-    
+
     @validator('output_file')
     def validate_output_file(cls, v):
         """Ensure output file has proper extension."""
         if not v.endswith(('.txt', '.json')):
             return v + '.txt'
         return v
-    
+
     @validator('end_date')
     def validate_date_range(cls, v, values):
         """Ensure end date is after start date."""
@@ -193,7 +197,7 @@ class ScraperConfig(BaseModel):
             if v < values['start_date']:
                 raise ValueError('End date must be after start date')
         return v
-    
+
     @validator('target_genres')
     def normalize_target_genres(cls, v):
         """Normalize target genres."""
@@ -208,27 +212,27 @@ class ScraperResult(BaseModel):
     total_links: int = Field(default=0)
     execution_time: Optional[float] = None
     errors: List[str] = Field(default_factory=list)
-    
+
     @validator('total_posts', pre=True, always=True)
     def calculate_total_posts(cls, v, values):
         """Calculate total posts if not provided."""
         if v == 0 and 'posts' in values:
             return len(values['posts'])
         return v
-    
+
     @validator('total_links', pre=True, always=True)
     def calculate_total_links(cls, v, values):
         """Calculate total links if not provided."""
         if v == 0 and 'posts' in values:
             return sum(len(post.download_links) for post in values['posts'])
         return v
-    
+
     def add_post(self, post: BlogPost):
         """Add a post to results."""
         self.posts.append(post)
         self.total_posts = len(self.posts)
         self.total_links = sum(len(p.download_links) for p in self.posts)
-    
+
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""
         return {
@@ -250,25 +254,25 @@ class LinkExtractionResult(BaseModel):
     quality_stats: Dict[str, int] = Field(default_factory=dict)
     host_stats: Dict[str, int] = Field(default_factory=dict)
     format_stats: Dict[str, int] = Field(default_factory=dict)
-    
+
     @validator('total_links', pre=True, always=True)
     def calculate_total(cls, v, values):
         """Calculate total if not provided."""
         if v == 0 and 'unique_links' in values:
             return len(values['unique_links'])
         return v
-    
+
     def add_link(self, link: str):
         """Add a link to results."""
         if link not in self.unique_links:
             self.unique_links.append(link)
             self.total_links = len(self.unique_links)
             self._update_stats(link)
-    
+
     def _update_stats(self, link: str):
         """Update statistics for a link."""
         link_lower = link.lower()
-        
+
         # Update quality stats
         if 'flac' in link_lower or 'lossless' in link_lower:
             self.quality_stats['flac'] = self.quality_stats.get('flac', 0) + 1
@@ -276,13 +280,13 @@ class LinkExtractionResult(BaseModel):
             self.quality_stats['mp3_320'] = self.quality_stats.get('mp3_320', 0) + 1
         else:
             self.quality_stats['other'] = self.quality_stats.get('other', 0) + 1
-        
+
         # Update host stats
         from urllib.parse import urlparse
         host = urlparse(link).netloc
         if host:
             self.host_stats[host] = self.host_stats.get(host, 0) + 1
-        
+
         # Update format stats
         for fmt in FileFormat:
             if f".{fmt.value}" in link_lower:
@@ -319,7 +323,7 @@ def validate_post_data(data: Dict[str, Any]) -> Optional[BlogPost]:
                         logger.debug(f"Skipping invalid link dict: {link}, error: {e}")
                         continue
             data['download_links'] = download_links
-        
+
         return BlogPost(**data)
     except Exception as e:
         print(f"Validation error: {e}")

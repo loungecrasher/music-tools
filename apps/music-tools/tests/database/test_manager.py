@@ -2,13 +2,12 @@
 Tests for DatabaseManager
 """
 
-import pytest
-import sqlite3
 import tempfile
 import threading
 from pathlib import Path
 
-from music_tools_common.database import DatabaseManager, DatabaseError
+import pytest
+from music_tools_common.database import DatabaseError, DatabaseManager
 
 
 @pytest.fixture
@@ -123,7 +122,7 @@ class TestDatabaseManager:
             with db.transaction():
                 db.execute('INSERT INTO test_table (id, name) VALUES (?, ?)', (3, 'Name 3'))
                 raise Exception("Test error")
-        except:
+        except Exception:
             pass
 
         results = db.fetch_all('SELECT * FROM test_table')

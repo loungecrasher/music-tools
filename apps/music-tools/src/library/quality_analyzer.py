@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Dict, List, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     from mutagen import File as MutagenFile
@@ -68,7 +68,7 @@ NORMALIZATION_PATTERNS = [
     (r'\s+', ' '),                          # Multiple spaces to single
     (r'[\[\(].*?[\]\)]', ''),              # Remove brackets and contents
     (r'[_-]+', ' '),                        # Underscores/hyphens to spaces
-    (r'(?i)(320|v0|vbr|cbr|flac|mp3)', ''), # Remove format/bitrate markers
+    (r'(?i)(320|v0|vbr|cbr|flac|mp3)', ''),  # Remove format/bitrate markers
     (r'\s+', ' '),                          # Clean up spaces again
 ]
 
@@ -380,8 +380,15 @@ def normalize_filename(filename: str) -> str:
     if not filename:
         return ""
 
+    # Separate extension from stem to avoid stripping it
+    name_part, _, ext = filename.rpartition('.')
+    if not name_part:
+        # No extension found (no dot), normalize the whole thing
+        name_part = filename
+        ext = ""
+
     # Convert to lowercase
-    normalized = filename.lower().strip()
+    normalized = name_part.lower().strip()
 
     # Apply normalization patterns
     for pattern, replacement in NORMALIZATION_PATTERNS:
@@ -390,6 +397,9 @@ def normalize_filename(filename: str) -> str:
     # Final cleanup: strip and remove multiple spaces
     normalized = ' '.join(normalized.split())
 
+    # Reattach extension
+    if ext:
+        return f"{normalized}.{ext.lower()}"
     return normalized
 
 

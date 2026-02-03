@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+
 sys.path.insert(0, 'src/tagging')
 
 from claude_code_researcher import ClaudeCodeResearcher

@@ -6,8 +6,8 @@ in various formats commonly found in music metadata and APIs.
 """
 
 import logging
-from datetime import datetime, date
-from typing import Optional, Union, Tuple
+from datetime import date, datetime
+from typing import Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ def parse_date(
             '%d/%m/%Y',           # 15/03/2024
             '%Y-%m-%d %H:%M:%S',  # 2024-03-15 14:30:00
             '%Y-%m-%dT%H:%M:%S',  # 2024-03-15T14:30:00 (ISO 8601)
-            '%Y-%m-%dT%H:%M:%SZ', # 2024-03-15T14:30:00Z (ISO 8601 UTC)
+            '%Y-%m-%dT%H:%M:%SZ',  # 2024-03-15T14:30:00Z (ISO 8601 UTC)
             '%Y',                 # 2024 (year only)
             '%Y-%m',              # 2024-03 (year-month)
             '%B %d, %Y',          # March 15, 2024

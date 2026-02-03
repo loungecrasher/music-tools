@@ -2,11 +2,11 @@
 Data models for library management and duplicate detection.
 """
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional, List, Tuple, Dict, Any
 from pathlib import Path
-import logging
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -154,10 +154,10 @@ class LibraryFile:
         """Create from database dictionary with comprehensive error handling."""
         # Validate required fields
         required_fields = ['file_path', 'filename', 'file_format', 'file_size',
-                          'metadata_hash', 'file_content_hash']
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+                           'metadata_hash', 'file_content_hash']
+        for field_name in required_fields:
+            if field_name not in data:
+                raise ValueError(f"Missing required field: {field_name}")
 
         # Convert timestamps with error handling
         def safe_datetime_parse(value: Optional[str]) -> Optional[datetime]:

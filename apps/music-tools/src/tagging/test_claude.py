@@ -4,8 +4,9 @@ Test script to debug Claude CLI integration issues.
 """
 
 import subprocess
-import time
 import sys
+import time
+
 
 def test_basic_claude():
     """Test basic Claude CLI functionality."""
@@ -27,6 +28,7 @@ def test_basic_claude():
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
         return False
+
 
 def test_claude_with_websearch():
     """Test Claude CLI with WebSearch tool."""
@@ -52,6 +54,7 @@ def test_claude_with_websearch():
         print(f"❌ Unexpected error: {e}")
         return False
 
+
 def test_batch_research():
     """Test a small batch research similar to the app."""
     print("\nTesting batch artist research...")
@@ -67,7 +70,7 @@ Keep it brief."""
 
     try:
         cmd = ["claude", "--allowed-tools", "WebSearch", "--print", prompt]
-        print(f"Running batch research for 2 artists...")
+        print("Running batch research for 2 artists...")
         start_time = time.time()
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         elapsed = time.time() - start_time
@@ -89,6 +92,7 @@ Keep it brief."""
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("=" * 50)

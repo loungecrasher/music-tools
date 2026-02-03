@@ -13,13 +13,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from music_tools_common.cli import BaseCLI, InteractiveMenu, ProgressTracker
-from music_tools_common.cli.prompts import prompt_user, prompt_choice
 from music_tools_common.cli.output import (
-    print_success,
     print_error,
-    print_warning,
+    print_success,
     print_table,
+    print_warning,
 )
+from music_tools_common.cli.prompts import prompt_choice, prompt_user
 
 
 class MyMusicTool(BaseCLI):

@@ -5,11 +5,11 @@ This module provides consistent validation rules and logic used across
 different components of the application.
 """
 
-import re
 import logging
-from typing import Optional, List, Dict, Any, Tuple
-from pathlib import Path
+import re
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,6 @@ class ValidationService:
 
     def __init__(self):
         """Initialize the validation service."""
-        pass
 
     def validate_file_path(self, file_path: str) -> ValidationResult:
         """Validate a file path for audio processing."""
@@ -90,7 +89,7 @@ class ValidationService:
             return ValidationResult(
                 is_valid=False,
                 error_message=f"Unsupported file type: {extension}. "
-                             f"Supported types: {', '.join(sorted(self.SUPPORTED_AUDIO_EXTENSIONS))}"
+                f"Supported types: {', '.join(sorted(self.SUPPORTED_AUDIO_EXTENSIONS))}"
             )
 
         # Check file size (warn if very large)

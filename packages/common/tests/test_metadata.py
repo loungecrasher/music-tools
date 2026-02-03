@@ -9,16 +9,14 @@ This test suite provides complete coverage for the metadata module including:
 - Performance and security testing
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-import tempfile
-import os
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
 from music_tools_common.metadata import (
-    read_metadata,
-    write_metadata,
     MetadataReader,
     MetadataWriter,
+    read_metadata,
+    write_metadata,
 )
 
 

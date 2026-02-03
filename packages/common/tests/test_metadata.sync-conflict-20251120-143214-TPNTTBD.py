@@ -1,14 +1,13 @@
 """Tests for metadata module (audio file tag reading/writing)."""
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from music_tools_common.metadata import (
-    read_metadata,
-    write_metadata,
     MetadataReader,
     MetadataWriter,
+    read_metadata,
+    write_metadata,
 )
 
 

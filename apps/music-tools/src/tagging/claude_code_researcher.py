@@ -5,25 +5,25 @@ Uses local Claude Code installation with Max plan instead of separate API keys.
 Integrates with the `claude` command to leverage existing subscription.
 """
 
-import subprocess
 import logging
 import re
+import shutil
+import subprocess
 import time
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, List
-import shutil
+from typing import Any, Dict, List, Optional
 
 # Import core services
 try:
-    from .core.country_service import country_service
-    from .core.error_handler import with_error_handling, APIError
-    from .core.validation_service import validate_artist_name, validate_confidence_score
     from .brave_search import BraveSearchClient
+    from .core.country_service import country_service
+    from .core.error_handler import APIError, with_error_handling
+    from .core.validation_service import validate_artist_name, validate_confidence_score
 except ImportError:
-    from src.tagging.core.country_service import country_service
-    from src.tagging.core.error_handler import with_error_handling, APIError
-    from src.tagging.core.validation_service import validate_artist_name, validate_confidence_score
     from src.tagging.brave_search import BraveSearchClient
+    from src.tagging.core.country_service import country_service
+    from src.tagging.core.error_handler import APIError, with_error_handling
+    from src.tagging.core.validation_service import validate_artist_name, validate_confidence_score
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Custom Exceptions
 class ClaudeCodeError(Exception):
     """Base exception for Claude Code operations."""
-    
+
     def __init__(self, message: str, error_code: Optional[str] = None):
         super().__init__(message)
         self.error_code = error_code
@@ -39,12 +39,11 @@ class ClaudeCodeError(Exception):
 
 class CommandNotFoundError(ClaudeCodeError):
     """Exception when claude command is not found."""
-    pass
 
 
 class ValidationError(ClaudeCodeError):
     """Exception for validation errors."""
-    
+
     def __init__(self, message: str, field: Optional[str] = None):
         super().__init__(message, error_code="VALIDATION_ERROR")
         self.field = field
@@ -68,7 +67,7 @@ class ClaudeCodeResearcher:
     """
     Researcher that uses local Claude Code installation with Max plan.
     """
-    
+
     def __init__(self, max_retries: int = 1, timeout: int = 600, cache_manager=None, model: str = None,
                  enable_websearch: bool = False, brave_api_key: Optional[str] = None,
                  brave_delay: float = 1.5, brave_max_retries: int = 3):
@@ -90,7 +89,7 @@ class ClaudeCodeResearcher:
         self.cache_manager = cache_manager
         self.model = model
         self.enable_websearch = enable_websearch
-        
+
         # Initialize Brave client with rate limiting
         if brave_api_key:
             self.brave_client = BraveSearchClient(
@@ -274,23 +273,23 @@ Be concise and accurate. Respond ONLY with the numbered list in the exact format
     def _parse_batch_response_internal(self, response: str, artists_titles: List[tuple]) -> Dict[str, Dict[str, str]]:
         """
         Parse batch response from Claude into a dictionary of artist data.
-        
+
         Args:
             response: Raw response string from Claude
             artists_titles: List of (artist, title) tuples for mapping results
-            
+
         Returns:
             Dictionary mapping artist names to their data
         """
         results = {}
         lines = response.strip().split('\n')
-        
+
         current_artist_idx = -1
         current_artist_data = {}
-        
+
         for line in lines:
             line = line.strip()
-            
+
             # Check for numbered entries (handle both regular and bold markdown)
             numbered_match = re.match(r'^(\d+)\.\s*(?:\*\*)?GENRE(?:\*\*)?\s*:\s*(.+)', line)
             if numbered_match:
@@ -298,26 +297,26 @@ Be concise and accurate. Respond ONLY with the numbered list in the exact format
                 if current_artist_idx >= 0 and current_artist_data and current_artist_idx < len(artists_titles):
                     artist_name = artists_titles[current_artist_idx][0]
                     results[artist_name] = current_artist_data
-                
+
                 # Start new artist
                 current_artist_idx = int(numbered_match.group(1)) - 1
                 genre_content = numbered_match.group(2)
                 genre_content = re.sub(r'^\*\*|\*\*$', '', genre_content).strip()
-                
+
                 if '|' not in genre_content:
                     current_artist_data = {'genre': f"{genre_content} | Unknown | Unknown | Unknown"}
                 else:
                     current_artist_data = {'genre': genre_content}
-            
+
             elif line.startswith('GENRE:') or line.startswith('**GENRE**:') or '**GENRE**:' in line:
                 genre_content = re.sub(r'.*(?:\*\*)?GENRE(?:\*\*)?\s*:\s*', '', line).strip()
                 genre_content = re.sub(r'^\*\*|\*\*$', '', genre_content).strip()
                 current_artist_data['genre'] = genre_content
-            
+
             elif line.startswith('GROUPING:') or line.startswith('**GROUPING**:') or '**GROUPING**:' in line:
                 grouping_line = re.sub(r'.*(?:\*\*)?GROUPING(?:\*\*)?\s*:\s*', '', line).strip()
                 grouping_line = re.sub(r'^\*\*|\*\*$', '', grouping_line).strip()
-                
+
                 if '|' in grouping_line:
                     parts = [part.strip() for part in grouping_line.split('|')]
                     if len(parts) >= 3:
@@ -335,22 +334,22 @@ Be concise and accurate. Respond ONLY with the numbered list in the exact format
                         current_artist_data['grouping'] = f"Unknown | {normalized_country.title()} | Unknown"
                     else:
                         current_artist_data['grouping'] = f"Unknown | {grouping_line} | Unknown"
-            
+
             elif line.startswith('YEAR:') or line.startswith('**YEAR**:') or '**YEAR**:' in line:
                 year_line = re.sub(r'.*(?:\*\*)?YEAR(?:\*\*)?\s*:\s*', '', line).strip()
                 year_line = re.sub(r'^\*\*|\*\*$', '', year_line).strip()
-                
+
                 year_match = re.search(r'\b(19\d{2}|20\d{2})\b', year_line)
                 if year_match:
                     current_artist_data['year'] = year_match.group(1)
                 else:
                     current_artist_data['year'] = year_line
-        
+
         # Save last artist
         if current_artist_idx >= 0 and current_artist_data and current_artist_idx < len(artists_titles):
             artist_name = artists_titles[current_artist_idx][0]
             results[artist_name] = current_artist_data
-        
+
         return results
 
     def _check_claude_available(self) -> bool:
@@ -364,7 +363,7 @@ Be concise and accurate. Respond ONLY with the numbered list in the exact format
             logger.warning("Please ensure Claude Code is installed and in your PATH")
             logger.warning("Visit https://claude.ai/code for installation instructions")
             return False
-    
+
     def _detect_current_model(self) -> str:
         """Detect which Claude model is currently being used."""
         try:
@@ -375,14 +374,14 @@ Be concise and accurate. Respond ONLY with the numbered list in the exact format
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0:
                 response = result.stdout.strip()
                 # Extract model info from response
                 if "claude-sonnet-4" in response.lower():
                     return "Claude Sonnet 4 (claude-sonnet-4-20250514)"
                 elif "claude-opus-4" in response.lower():
-                    return "Claude Opus 4"  
+                    return "Claude Opus 4"
                 elif "claude-3.5-sonnet" in response.lower():
                     return "Claude 3.5 Sonnet"
                 elif "claude-3.5-haiku" in response.lower():
@@ -393,7 +392,7 @@ Be concise and accurate. Respond ONLY with the numbered list in the exact format
                 return "Unknown (detection failed)"
         except Exception:
             return "Unknown"
-    
+
     def _execute_claude_command(self, prompt: str) -> str:
         """
         Execute claude command with the given prompt.
@@ -456,7 +455,7 @@ Guidelines:
 {prompt}
 
 Search for accurate information about each artist."""
-            
+
             # Don't append prompt to cmd - will pass via stdin
             # cmd.append(enhanced_prompt)
 
@@ -512,7 +511,7 @@ Search for accurate information about each artist."""
         except Exception as e:
             logger.error(f"Unexpected error executing claude command: {e}")
             raise ClaudeCodeError(f"Unexpected error executing claude command: {e}")
-    
+
     def _build_country_research_prompt(self, artist: str, title: str = "") -> str:
         """
         Build an optimized prompt for enhanced country, region, and language research.
@@ -572,44 +571,44 @@ YEAR: 2016
 Response:"""
 
         return prompt
-    
+
     def _parse_triple_response(self, response: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """
         Parse triple response with GENRE, GROUPING, and YEAR lines.
-        
+
         Args:
             response: Raw response from Claude with GENRE:, GROUPING:, and YEAR: lines
-            
+
         Returns:
             Tuple of (genre_info, grouping_info, year_info) or (None, None, None) if invalid
         """
         if not response:
             return None, None, None
-        
+
         # Clean the response
         response = response.strip()
         lines = response.split('\n')
-        
+
         genre_info = None
         grouping_info = None
         year_info = None
-        
+
         for line in lines:
             line = line.strip()
-            
+
             # Handle both regular and markdown bold formatting
             if line.startswith('GENRE:') or line.startswith('**GENRE**:'):
                 genre_info = re.sub(r'^\*\*GENRE\*\*:\s*|^GENRE:\s*', '', line).strip()
             elif line.startswith('GROUPING:') or line.startswith('**GROUPING**:'):
                 grouping_line = re.sub(r'^\*\*GROUPING\*\*:\s*|^GROUPING:\s*', '', line).strip()
-                
+
                 # Parse and ENFORCE pipe format: Region | Country | Language
                 if '|' in grouping_line:
                     parts = [part.strip() for part in grouping_line.split('|')]
-                    
+
                     if len(parts) >= 3:
                         region, country, language = parts[0], parts[1], parts[2]
-                        
+
                         # Validate country using centralized service
                         normalized_country = country_service.normalize_country_name(country)
                         if normalized_country:
@@ -637,7 +636,7 @@ Response:"""
                         grouping_info = f"Unknown | {grouping_line} | Unknown"
             elif line.startswith('YEAR:') or line.startswith('**YEAR**:'):
                 year_line = re.sub(r'^\*\*YEAR\*\*:\s*|^YEAR:\s*', '', line).strip()
-                
+
                 # Validate year format (should be 4-digit year)
                 import re
                 year_match = re.search(r'\b(19\d{2}|20\d{2})\b', year_line)
@@ -646,9 +645,9 @@ Response:"""
                 else:
                     logger.warning(f"Invalid year format: {year_line}")
                     year_info = year_line  # Use as-is if can't parse
-        
+
         return genre_info, grouping_info, year_info
-    
+
     def research_artists_batch(self, artists_titles: List[tuple], use_parallel: bool = True, max_retries: int = 2) -> Dict[str, Dict[str, str]]:
         """
         Research multiple artists with automatic retry logic and optional parallel processing.
@@ -713,13 +712,13 @@ Response:"""
         # Brave Search fallback for artists with missing/unknown data
         if self.brave_client:
             unknown_artists = []
-            
+
             # First: Find artists that are COMPLETELY MISSING from results
             for artist, title in artists_titles:
                 if artist not in all_results:
                     unknown_artists.append((artist, title))
                     logger.debug(f"Artist missing from results: {artist}")
-            
+
             # Second: Find artists with Unknown/invalid grouping
             for artist_name, data in all_results.items():
                 grouping = data.get('grouping', '')
@@ -747,18 +746,18 @@ Response:"""
                         if brave_data.get('grouping') and 'Unknown' not in brave_data.get('grouping', ''):
                             all_results[artist_name] = brave_data
                             logger.info(f"✓ Brave fallback found NEW data for: {artist_name}")
-                
+
                 # Check if any Brave queries failed and retry them at end of run
                 failed_queries = self.brave_client.get_failed_queries()
                 if failed_queries:
                     logger.warning(f"⚠️ {len(failed_queries)} Brave searches failed - retrying at end of run...")
-                    
+
                     # Retry failed queries with longer delays
                     retry_search_results = self.brave_client.retry_failed_queries(max_to_retry=len(failed_queries))
-                    
+
                     if retry_search_results:
                         logger.info(f"✓ Recovered {len(retry_search_results)} searches on retry - processing results...")
-                        
+
                         # Map recovered search results back to artists
                         for query, search_results in retry_search_results.items():
                             # Find which artist this query was for
@@ -769,13 +768,13 @@ Response:"""
                                     logger.info(f"Processing recovered results for: {artist}")
                                     # The search succeeded, so the data should be usable now
                                     break
-                    
+
                     # Log final Brave stats
                     stats = self.brave_client.get_stats()
                     logger.info(f"Brave Search stats: {stats['successful_requests']}/{stats['total_requests']} successful, "
-                               f"{stats['rate_limited_requests']} rate limited, "
-                               f"{stats['failed_after_retries']} failed after retries")
-                    
+                                f"{stats['rate_limited_requests']} rate limited, "
+                                f"{stats['failed_after_retries']} failed after retries")
+
                     # Report any remaining failures for next run
                     remaining_failed = self.brave_client.get_failed_queries()
                     if remaining_failed:
@@ -884,7 +883,7 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
             self.statistics['total_requests'] += 1
             logger.info(f"Executing batch Claude command for {len(artists_titles)} artists")
             response = self._execute_claude_command(prompt)
-            logger.info(f"Batch Claude command completed successfully")
+            logger.info("Batch Claude command completed successfully")
 
             # DEBUG: Log response to diagnose parsing issues
             logger.warning(f"RAW RESPONSE LENGTH: {len(response)} chars")
@@ -894,13 +893,13 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
             # Parse batch response
             results = {}
             lines = response.strip().split('\n')
-            
+
             current_artist_idx = -1
             current_artist_data = {}
-            
+
             for line in lines:
                 line = line.strip()
-                
+
                 # Check for numbered entries (handle both regular and bold markdown)
                 numbered_match = re.match(r'^(\d+)\.\s*(?:\*\*)?GENRE(?:\*\*)?\s*:\s*(.+)', line)
                 if numbered_match:
@@ -908,17 +907,17 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                     if current_artist_idx >= 0 and current_artist_data:
                         artist_name = artists_titles[current_artist_idx][0]
                         results[artist_name] = current_artist_data
-                        
+
                         # Cache results
                         if self.cache_manager and 'grouping' in current_artist_data:
                             self.cache_manager.store_country(artist_name, current_artist_data['grouping'])
-                    
+
                     # Start new artist
                     current_artist_idx = int(numbered_match.group(1)) - 1
                     genre_content = numbered_match.group(2)
                     # Clean any markdown artifacts
                     genre_content = re.sub(r'^\*\*|\*\*$', '', genre_content).strip()
-                    
+
                     # ENFORCE pipe format for genre: Main | Style | Regional | Era
                     if '|' not in genre_content:
                         logger.warning(f"No pipes in genre, adding structure: {genre_content}")
@@ -933,12 +932,12 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                             current_artist_data = {'genre': f"{parts[0]} | {parts[1]} | {parts[2]} | Unknown"}
                         else:
                             current_artist_data = {'genre': genre_content}
-                
+
                 elif line.startswith('GENRE:') or line.startswith('**GENRE**:') or '**GENRE**:' in line:
                     genre_content = re.sub(r'.*(?:\*\*)?GENRE(?:\*\*)?\s*:\s*', '', line).strip()
                     # Clean any remaining markdown artifacts
                     genre_content = re.sub(r'^\*\*|\*\*$', '', genre_content).strip()
-                    
+
                     # ENFORCE pipe format for genre: Main | Style | Regional | Era
                     if '|' not in genre_content:
                         # No pipes found - assume it's just main genre and add structure
@@ -955,18 +954,18 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                         else:
                             # Has 4+ parts, keep as-is (already has pipes)
                             current_artist_data['genre'] = genre_content
-                
+
                 elif line.startswith('GROUPING:') or line.startswith('**GROUPING**:') or '**GROUPING**:' in line:
                     grouping_line = re.sub(r'.*(?:\*\*)?GROUPING(?:\*\*)?\s*:\s*', '', line).strip()
                     # Clean any remaining markdown artifacts
                     grouping_line = re.sub(r'^\*\*|\*\*$', '', grouping_line).strip()
-                    
+
                     # Parse and ENFORCE pipe format: Region | Country | Language
                     if '|' in grouping_line:
                         parts = [part.strip() for part in grouping_line.split('|')]
                         if len(parts) >= 3:
                             region, country, language = parts[0], parts[1], parts[2]
-                            
+
                             # Validate country using centralized service
                             normalized_country = country_service.normalize_country_name(country)
                             if normalized_country:
@@ -992,12 +991,12 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                             current_artist_data['grouping'] = f"Unknown | {normalized_country.title()} | Unknown"
                         else:
                             current_artist_data['grouping'] = f"Unknown | {grouping_line} | Unknown"
-                
+
                 elif line.startswith('YEAR:') or line.startswith('**YEAR**:') or '**YEAR**:' in line:
                     year_line = re.sub(r'.*(?:\*\*)?YEAR(?:\*\*)?\s*:\s*', '', line).strip()
                     # Clean any remaining markdown artifacts
                     year_line = re.sub(r'^\*\*|\*\*$', '', year_line).strip()
-                    
+
                     # Validate year format (4-digit year)
                     year_match = re.search(r'\b(19\d{2}|20\d{2})\b', year_line)
                     if year_match:
@@ -1007,7 +1006,7 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                         if year_line.lower() not in ['unknown', 'n/a', 'not found']:
                             logger.warning(f"Invalid year format: {year_line}")
                         current_artist_data['year'] = year_line
-            
+
             # Save last artist
             if current_artist_idx >= 0 and current_artist_data and current_artist_idx < len(artists_titles):
                 artist_name = artists_titles[current_artist_idx][0]
@@ -1019,31 +1018,31 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
 
             self.statistics['successful_requests'] += 1
             return results
-            
+
         except Exception as e:
             self.statistics['failed_requests'] += 1
             logger.error(f"Batch research failed: {e}")
             return {}
-    
+
     def research_artist_dual_info(self, artist: str, title: str = "") -> Optional[Dict[str, str]]:
         """
         Research genre and geographic info for an artist using local Claude Code.
-        
+
         Args:
             artist: Artist name to research
             title: Optional song title for additional context
-            
+
         Returns:
             Dictionary with 'genre', 'grouping', and 'year' keys, or None if failed
-            
+
         Raises:
             ClaudeCodeError: If research fails
         """
         if not artist or not artist.strip():
             raise ValidationError("Artist name cannot be empty", field="artist")
-        
+
         artist = artist.strip()
-        
+
         # Check cache first
         if self.cache_manager:
             cached_result = self.cache_manager.get_country(artist)
@@ -1051,47 +1050,47 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                 self.statistics['cache_hits'] += 1
                 logger.info(f"Cache hit for artist: {artist} -> {cached_result}")
                 return cached_result
-        
+
         start_time = time.time()
-        
+
         for attempt in range(self.max_retries):
             try:
                 self.statistics['total_requests'] += 1
-                
+
                 logger.info(f"Researching artist: {artist} (attempt {attempt + 1})")
-                
+
                 # Build prompt
                 prompt = self._build_country_research_prompt(artist, title)
-                
+
                 # Execute claude command
                 response = self._execute_claude_command(prompt)
-                
+
                 # Parse response (now triple format with genre, grouping, and year)
                 genre_info, grouping_info, year_info = self._parse_triple_response(response)
-                
+
                 if genre_info and grouping_info:
                     # Cache the grouping result
                     if self.cache_manager:
                         self.cache_manager.store_country(artist, grouping_info)
-                    
+
                     # Update statistics
                     response_time = time.time() - start_time
                     self.statistics['successful_requests'] += 1
                     self.statistics['average_response_time'] = (
-                        (self.statistics['average_response_time'] * 
+                        (self.statistics['average_response_time'] *
                          (self.statistics['successful_requests'] - 1) + response_time) /
                         self.statistics['successful_requests']
                     )
-                    
+
                     result_dict = {'genre': genre_info, 'grouping': grouping_info}
                     if year_info:
                         result_dict['year'] = year_info
-                    
+
                     logger.info(f"Successfully researched: {artist} -> Genre: {genre_info}, Grouping: {grouping_info}, Year: {year_info}")
                     return result_dict
                 else:
                     logger.warning(f"Could not parse country from response: {response}")
-                    
+
             except ClaudeCodeError as e:
                 logger.error(f"Claude Code error on attempt {attempt + 1}: {e}")
                 if attempt == self.max_retries - 1:
@@ -1103,14 +1102,14 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
                 if attempt == self.max_retries - 1:
                     self.statistics['failed_requests'] += 1
                     raise ClaudeCodeError(f"Research failed after {self.max_retries} attempts: {e}")
-        
+
         self.statistics['failed_requests'] += 1
         return None
-    
+
     def test_connection(self) -> bool:
         """
         Test connection to Claude Code.
-        
+
         Returns:
             True if connection successful, False otherwise
         """
@@ -1120,16 +1119,16 @@ ACCURACY: Better to return "Unknown" than guess. Use WebSearch for accuracy."""
         except Exception as e:
             logger.error(f"Connection test failed: {e}")
             return False
-    
+
     def get_statistics(self) -> Dict[str, Any]:
         """
         Get usage statistics.
-        
+
         Returns:
             Dictionary containing usage statistics
         """
         return self.statistics.copy()
-    
+
     def reset_statistics(self):
         """Reset usage statistics."""
         self.statistics = {

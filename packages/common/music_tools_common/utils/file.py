@@ -2,9 +2,9 @@
 File handling utilities.
 """
 import json
+import logging
 import os
 from typing import Any, Optional
-import logging
 
 logger = logging.getLogger('music_tools_common.utils.file')
 

@@ -1,12 +1,17 @@
 """Tests for core library data models: LibraryFile, DuplicateResult, VettingReport, LibraryStatistics."""
 
+
 import pytest
-from datetime import datetime, timezone
+from conftest import make_duplicate_result, make_library_file, make_vetting_report
 from src.library.models import (
-    LibraryFile, DuplicateResult, VettingReport, LibraryStatistics,
-    METADATA_DELIMITER, MIN_VALID_YEAR, MAX_VALID_YEAR,
+    MAX_VALID_YEAR,
+    METADATA_DELIMITER,
+    MIN_VALID_YEAR,
+    DuplicateResult,
+    LibraryFile,
+    LibraryStatistics,
+    VettingReport,
 )
-from conftest import make_library_file, make_duplicate_result, make_vetting_report
 
 
 class TestLibraryFile:
@@ -162,7 +167,7 @@ class TestVettingReport:
         assert r.new_count == 0
 
     def test_duplicate_count(self):
-        matched = make_library_file()
+        make_library_file()
         dup_result = DuplicateResult(is_duplicate=True, confidence=1.0, match_type='exact_metadata')
         r = make_vetting_report(
             duplicates=[('/import/song.mp3', dup_result), ('/import/song2.mp3', dup_result)]

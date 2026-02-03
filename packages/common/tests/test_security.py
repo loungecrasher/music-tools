@@ -1,21 +1,19 @@
 """Tests for security utilities module."""
 
-import os
-import tempfile
 from pathlib import Path
-import pytest
 
+import pytest
 from music_tools_common.utils.security import (
-    validate_file_path,
+    SecureFileHandler,
     check_path_traversal,
     is_safe_filename,
-    sanitize_filename,
+    mask_sensitive_value,
     sanitize_artist_name,
     sanitize_command_args,
-    validate_batch_size,
-    mask_sensitive_value,
+    sanitize_filename,
     sanitize_log_message,
-    SecureFileHandler,
+    validate_batch_size,
+    validate_file_path,
 )
 
 

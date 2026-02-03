@@ -6,14 +6,13 @@ Guides users through initial configuration in <10 minutes.
 import os
 import sys
 from pathlib import Path
-from typing import Optional, Dict, Any
 
+from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
-from rich import print as rprint
 
 # Add paths for imports
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
@@ -22,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '..
 from music_tools_common.config import config_manager
 
 console = Console()
+
 
 class SetupWizard:
     """First-run setup wizard."""

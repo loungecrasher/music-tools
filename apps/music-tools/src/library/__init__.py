@@ -5,10 +5,10 @@ Provides functionality for indexing music libraries and detecting duplicates
 during import workflows.
 """
 
-from .models import LibraryFile, VettingReport, DuplicateResult
 from .database import LibraryDatabase
-from .indexer import LibraryIndexer
 from .duplicate_checker import DuplicateChecker
+from .indexer import LibraryIndexer
+from .models import DuplicateResult, LibraryFile, VettingReport
 from .vetter import ImportVetter
 
 __all__ = [

@@ -1,10 +1,11 @@
 """Tests for SeratoTrackIndex -- build, save, load, and match operations."""
 
 import json
-import pytest
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add apps/music-tools to sys.path
 project_root = Path(__file__).parent.parent.parent

@@ -5,39 +5,39 @@ Tests AudioQuality, DuplicateGroup, and UpgradeCandidate dataclasses
 including validation, serialization, and property calculations.
 """
 
-import pytest
-from pathlib import Path
-from datetime import datetime, timezone, timedelta
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pytest
 
 # Add project to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.library.quality_models import (
+from src.library.quality_models import (  # Constants
+    CD_QUALITY_BIT_DEPTH,
+    CD_QUALITY_SAMPLE_RATE,
+    HIGH_QUALITY_BITRATE,
+    HIGH_RES_SAMPLE_RATE,
+    LOSSLESS_FORMATS,
+    MAX_CHANNELS,
+    MAX_CONFIDENCE,
+    MAX_QUALITY_SCORE,
+    MIN_BITRATE,
+    MIN_CHANNELS,
+    MIN_CONFIDENCE,
+    MIN_DURATION,
+    MIN_FILE_SIZE,
+    MIN_QUALITY_SCORE,
+    MIN_SAMPLE_RATE,
     AudioQuality,
     DuplicateGroup,
     UpgradeCandidate,
-    # Constants
-    MIN_QUALITY_SCORE,
-    MAX_QUALITY_SCORE,
-    MIN_CONFIDENCE,
-    MAX_CONFIDENCE,
-    MIN_BITRATE,
-    MIN_SAMPLE_RATE,
-    MIN_CHANNELS,
-    MAX_CHANNELS,
-    MIN_DURATION,
-    MIN_FILE_SIZE,
-    LOSSLESS_FORMATS,
-    HIGH_QUALITY_BITRATE,
-    CD_QUALITY_SAMPLE_RATE,
-    CD_QUALITY_BIT_DEPTH,
-    HIGH_RES_SAMPLE_RATE,
 )
 
-
 # ==================== AudioQuality Tests ====================
+
 
 class TestAudioQuality:
     """Test AudioQuality dataclass validation and properties."""

@@ -10,18 +10,18 @@ Provides common fixtures for testing Serato service modules including:
 
 import csv
 import json
-import pytest
-from pathlib import Path
-from typing import Dict, Any
-from unittest.mock import Mock, MagicMock, patch
 import sys
+from pathlib import Path
+from typing import Any, Dict
+from unittest.mock import Mock
+
+import pytest
 
 # Add apps/music-tools to sys.path to allow importing from src
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.services.serato.models import TrackMetadata, CrateInfo
-
+from src.services.serato.models import CrateInfo, TrackMetadata
 
 # ==================== Track Metadata Fixtures ====================
 

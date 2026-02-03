@@ -1,10 +1,11 @@
 """
 Spotify authentication.
 """
+import logging
+from typing import Optional
+
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from typing import Optional
-import logging
 
 from ..config import config_manager
 
@@ -13,7 +14,7 @@ logger = logging.getLogger('music_tools_common.auth.spotify')
 
 class SpotifyAuthManager:
     """Spotify authentication manager."""
-    
+
     def __init__(self):
         self.client: Optional[spotipy.Spotify] = None
         # Comprehensive OAuth scopes for full functionality
@@ -35,7 +36,7 @@ class SpotifyAuthManager:
             "user-follow-read",
             "user-follow-modify",
         ])
-    
+
     def get_client(self) -> spotipy.Spotify:
         """Get authenticated Spotify client."""
         if self.client is not None:
@@ -47,17 +48,17 @@ class SpotifyAuthManager:
         client_secret = config.get('client_secret')
         # CRITICAL: Must use 127.0.0.1 instead of localhost (Spotify requirement as of Nov 27, 2025)
         redirect_uri = config.get('redirect_uri', 'http://127.0.0.1:8888/callback')
-        
+
         if not all([client_id, client_secret]):
             raise ValueError("Missing Spotify credentials")
-        
+
         auth_manager = SpotifyOAuth(
             client_id=client_id,
             client_secret=client_secret,
             redirect_uri=redirect_uri,
             scope=self.scope
         )
-        
+
         self.client = spotipy.Spotify(auth_manager=auth_manager)
         return self.client
 

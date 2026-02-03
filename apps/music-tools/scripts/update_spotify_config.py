@@ -2,8 +2,8 @@
 """
 Script to update Spotify configuration.
 """
-import os
 import json
+import os
 import sys
 
 # Get the current directory
@@ -23,10 +23,10 @@ try:
     # Write the new configuration
     with open(config_path, 'w') as f:
         json.dump(new_config, f, indent=2)
-    
+
     # Set secure permissions
     os.chmod(config_path, 0o600)
-    
+
     print(f"Spotify configuration updated successfully at {config_path}")
 except Exception as e:
     print(f"Error updating Spotify configuration: {str(e)}")

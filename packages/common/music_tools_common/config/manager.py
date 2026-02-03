@@ -8,10 +8,10 @@ SECURITY NOTE:
 - Ensure .env is listed in .gitignore
 """
 import json
-import os
 import logging
-from typing import Dict, Any, Optional, List
-from pathlib import Path
+import os
+from typing import Any, Dict, List, Optional
+
 from dotenv import load_dotenv
 
 # Load environment variables

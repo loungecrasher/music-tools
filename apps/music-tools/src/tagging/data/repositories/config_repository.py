@@ -8,8 +8,8 @@ supporting different storage backends (files, databases, etc.).
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from ...core.error_handler import ConfigurationError, with_error_handling
 from ...core.validation_service import validation_service
@@ -23,37 +23,30 @@ class ConfigRepositoryInterface(ABC):
     @abstractmethod
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from storage."""
-        pass
 
     @abstractmethod
     def save_config(self, config: Dict[str, Any]) -> bool:
         """Save configuration to storage."""
-        pass
 
     @abstractmethod
     def get_setting(self, key: str, default: Any = None) -> Any:
         """Get a specific setting value."""
-        pass
 
     @abstractmethod
     def set_setting(self, key: str, value: Any) -> bool:
         """Set a specific setting value."""
-        pass
 
     @abstractmethod
     def has_setting(self, key: str) -> bool:
         """Check if a setting exists."""
-        pass
 
     @abstractmethod
     def delete_setting(self, key: str) -> bool:
         """Delete a setting."""
-        pass
 
     @abstractmethod
     def backup_config(self, backup_path: Optional[Path] = None) -> bool:
         """Create a backup of the configuration."""
-        pass
 
 
 class JSONConfigRepository(ConfigRepositoryInterface):

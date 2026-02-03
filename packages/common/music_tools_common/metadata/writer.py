@@ -1,16 +1,17 @@
 """
 Metadata writer for music files.
 """
-from mutagen import File
-from typing import Dict, Any
 import logging
+from typing import Any, Dict
+
+from mutagen import File
 
 logger = logging.getLogger('music_tools_common.metadata')
 
 
 class MetadataWriter:
     """Write metadata to music files."""
-    
+
     @staticmethod
     def write(filepath: str, metadata: Dict[str, Any]) -> bool:
         """Write metadata to file."""
@@ -18,11 +19,11 @@ class MetadataWriter:
             audio = File(filepath, easy=True)
             if audio is None:
                 return False
-            
+
             for key, value in metadata.items():
                 if value:
                     audio[key] = value
-            
+
             audio.save()
             return True
         except Exception as e:

@@ -9,16 +9,15 @@ Author: Music Tools Dev Team
 Created: 2026-01-08
 """
 
-import os
-import shutil
 import json
 import logging
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Tuple, Optional, Any
-from pathlib import Path
+import os
+import shutil
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
-
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -56,7 +55,7 @@ class DeletionGroup:
     def __post_init__(self):
         """Generate group ID if not provided"""
         if self.group_id is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
             keep_basename = Path(self.keep_file).stem[:20]
             self.group_id = f"{keep_basename}_{timestamp}"
 
@@ -112,7 +111,7 @@ class DeletionStats:
     def __str__(self) -> str:
         """Human-readable statistics"""
         lines = [
-            f"Deletion Statistics:",
+            "Deletion Statistics:",
             f"  Total Groups: {self.total_groups}",
             f"  Successful: {self.successful_deletions}",
             f"  Failed: {self.failed_deletions}",

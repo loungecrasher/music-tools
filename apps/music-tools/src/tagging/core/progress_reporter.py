@@ -5,13 +5,13 @@ This module provides a unified progress tracking system that can be used
 across all components for consistent progress reporting.
 """
 
-import time
+import logging
 import threading
-from typing import Dict, List, Optional, Callable, Any
+import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from abc import ABC, abstractmethod
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,6 @@ class ProgressListener(ABC):
     @abstractmethod
     def on_progress(self, event: ProgressEvent):
         """Handle a progress event."""
-        pass
 
 
 class ConsoleProgressListener(ProgressListener):

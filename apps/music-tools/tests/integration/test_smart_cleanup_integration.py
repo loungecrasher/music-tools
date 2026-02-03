@@ -9,15 +9,11 @@ Tests the complete integration of:
 - Quality analyzer and safe delete coordination
 """
 
-import pytest
 import sys
-import os
-import tempfile
-import shutil
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import patch
+
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -55,8 +51,8 @@ class TestSmartCleanupWorkflowIntegration:
     def test_full_workflow_scan_to_delete(self, test_library_path, test_db_path):
         """Test complete workflow: scan -> review -> delete"""
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             # Initialize components
             db_manager = DatabaseManager(test_db_path)
@@ -92,9 +88,9 @@ class TestSmartCleanupWorkflowIntegration:
     def test_workflow_with_quality_analysis(self, test_library_path, test_db_path):
         """Test workflow with quality analyzer integration"""
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
-            from apps.music_tools.core.quality_analyzer import QualityAnalyzer
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.quality_analyzer import QualityAnalyzer
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             db_manager = DatabaseManager(test_db_path)
             workflow = SmartCleanupWorkflow(test_library_path, db_manager)
@@ -126,9 +122,9 @@ class TestSmartCleanupWorkflowIntegration:
     def test_safe_delete_integration(self, test_library_path, test_db_path):
         """Test safe delete integration with backup"""
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
-            from apps.music_tools.core.safe_delete import SafeDelete
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.safe_delete import SafeDelete
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             db_manager = DatabaseManager(test_db_path)
             workflow = SmartCleanupWorkflow(test_library_path, db_manager)
@@ -327,8 +323,8 @@ class TestReportingIntegration:
     def test_scan_report_generation(self, tmp_path):
         """Test that scan generates reports"""
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             library_path = tmp_path / "library"
             library_path.mkdir()
@@ -339,7 +335,7 @@ class TestReportingIntegration:
             workflow = SmartCleanupWorkflow(str(library_path), db_manager)
 
             # Run scan
-            results = workflow.scan_for_duplicates()
+            workflow.scan_for_duplicates()
 
             # Generate report
             report = workflow.generate_report()
@@ -362,8 +358,8 @@ class TestErrorHandlingIntegration:
     def test_invalid_library_path_handling(self):
         """Test handling of invalid library paths"""
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             db_manager = DatabaseManager(":memory:")
 
@@ -386,7 +382,7 @@ class TestErrorHandlingIntegration:
             invalid_path = "/root/cannot/write/here.db"
 
             try:
-                db_manager = DatabaseManager(invalid_path)
+                DatabaseManager(invalid_path)
                 # Should handle gracefully or raise appropriate error
             except (PermissionError, OSError):
                 # Expected behavior
@@ -404,9 +400,10 @@ class TestPerformanceIntegration:
     def test_scan_performance_with_large_library(self, tmp_path):
         """Test scan performance with larger library"""
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
-            from apps.music_tools.core.database_manager import DatabaseManager
             import time
+
+            from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             # Create library with multiple files
             library = tmp_path / "large_library"
@@ -426,7 +423,7 @@ class TestPerformanceIntegration:
 
             # Measure scan time
             start_time = time.time()
-            results = workflow.scan_for_duplicates()
+            workflow.scan_for_duplicates()
             scan_duration = time.time() - start_time
 
             # Should complete in reasonable time (< 30 seconds for 50 files)

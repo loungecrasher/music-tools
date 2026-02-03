@@ -1,16 +1,11 @@
 """Tests for base API client module."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import requests
-from requests.exceptions import (
-    ConnectionError,
-    Timeout,
-    HTTPError,
-    RequestException
-)
+from unittest.mock import Mock, patch
 
+import pytest
+import requests
 from music_tools_common.api.base import BaseAPIClient
+from requests.exceptions import ConnectionError, HTTPError, RequestException, Timeout
 
 
 class TestBaseAPIClient:

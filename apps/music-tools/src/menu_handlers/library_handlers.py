@@ -5,19 +5,20 @@ smart cleanup, and candidate history operations.
 """
 
 import os
-import logging
 from pathlib import Path
 
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.prompt import Prompt, Confirm
-
-from music_tools_common.config import config_manager
 from music_tools_common import setup_logger
 from music_tools_common.cli import (
-    print_error, pause, clear_screen, show_panel,
+    clear_screen,
+    pause,
+    print_error,
+    show_panel,
 )
+from music_tools_common.config import config_manager
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 
 logger = setup_logger('music_tools.menu.library')
 console = Console()
@@ -37,8 +38,8 @@ def run_process_new_music() -> None:
 
     Result: Categorizes as Duplicates, Reviewed, or New
     """
-    from src.library.new_music_processor import NewMusicProcessor
     from src.library.database import LibraryDatabase
+    from src.library.new_music_processor import NewMusicProcessor
 
     clear_screen()
 
@@ -94,7 +95,7 @@ def run_process_new_music() -> None:
             if Confirm.ask("Run interactive cleanup?", default=True):
                 dup_deleted, rev_deleted = processor.interactive_cleanup(result, folder_path)
 
-                console.print(f"\n[bold green]Cleanup Complete![/bold green]")
+                console.print("\n[bold green]Cleanup Complete![/bold green]")
                 console.print(f"  Duplicates deleted: {dup_deleted}")
                 console.print(f"  Reviewed deleted: {rev_deleted}")
                 console.print(f"  New songs remaining: {len(result.truly_new)}")
@@ -134,20 +135,20 @@ def run_library_index() -> None:
 
     rescan = Confirm.ask("\nPerform full rescan (vs incremental)?", default=False)
 
-    console.print(f"\n[bold cyan]Indexing library...[/bold cyan]")
+    console.print("\n[bold cyan]Indexing library...[/bold cyan]")
     console.print(f"Library: {library_path}")
     console.print(f"Database: {db_path}")
 
     try:
         indexer = LibraryIndexer(str(db_path), console=console)
-        stats = indexer.index_library(
+        indexer.index_library(
             str(library_path),
             rescan=rescan,
             incremental=not rescan,
             show_progress=True
         )
 
-        console.print(f"\n[bold green]✓ Indexing complete![/bold green]")
+        console.print("\n[bold green]✓ Indexing complete![/bold green]")
 
     except Exception as e:
         console.print(f"[bold red]Error during indexing:[/bold red] {str(e)}")
@@ -157,8 +158,8 @@ def run_library_index() -> None:
 
 def run_library_vet() -> None:
     """Run Library Vetter."""
-    from src.library.vetter import ImportVetter
     from src.library.database import LibraryDatabase
+    from src.library.vetter import ImportVetter
 
     console.print(Panel(
         "[bold green]Vet Import Folder Against Library[/bold green]\n\n"
@@ -195,7 +196,7 @@ def run_library_vet() -> None:
         console.print("[bold red]Invalid threshold. Using default 0.8[/bold red]")
         threshold_float = 0.8
 
-    console.print(f"\n[bold cyan]Vetting import folder...[/bold cyan]")
+    console.print("\n[bold cyan]Vetting import folder...[/bold cyan]")
     console.print(f"Import folder: {import_folder}")
     console.print(f"Database: {db_path}")
     console.print(f"Threshold: {threshold_float}")
@@ -218,7 +219,7 @@ def run_library_vet() -> None:
         new_songs_file = str(Path(import_folder) / 'new_songs.txt')
         vetter.export_new_songs(report, new_songs_file)
 
-        console.print(f"\n[bold green]✓ Vetting complete![/bold green]")
+        console.print("\n[bold green]✓ Vetting complete![/bold green]")
         console.print(f"\n[bold]New songs exported to:[/bold] {new_songs_file}")
 
         # Offer to delete duplicates
@@ -288,8 +289,8 @@ def run_smart_cleanup_menu() -> None:
     Provides an interactive 8-screen workflow for safely identifying
     and removing duplicate music files while preserving highest quality versions.
     """
-    from src.library.smart_cleanup import SmartCleanupWorkflow
     from src.library.database import LibraryDatabase
+    from src.library.smart_cleanup import SmartCleanupWorkflow
 
     clear_screen()
 
@@ -361,12 +362,12 @@ def run_smart_cleanup_menu() -> None:
     except KeyboardInterrupt:
         console.print("\n[yellow]Smart Cleanup cancelled by user.[/yellow]")
     except ImportError as e:
-        console.print(f"\n[bold red]Smart Cleanup not available:[/bold red]")
+        console.print("\n[bold red]Smart Cleanup not available:[/bold red]")
         console.print(f"[yellow]{str(e)}[/yellow]")
         console.print("\n[dim]This feature requires the library module to be properly configured.[/dim]")
     except Exception as e:
         logger.error(f"Error in Smart Cleanup: {e}", exc_info=True)
-        console.print(f"\n[bold red]Error running Smart Cleanup:[/bold red]")
+        console.print("\n[bold red]Error running Smart Cleanup:[/bold red]")
         console.print(f"[red]{str(e)}[/red]")
 
     pause()

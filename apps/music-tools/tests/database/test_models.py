@@ -2,22 +2,22 @@
 Tests for Database Models
 """
 
-import pytest
 from datetime import datetime
-from pydantic import ValidationError
 
+import pytest
 from music_tools_common.database import (
-    Playlist,
-    Track,
-    PlaylistTrack,
-    Setting,
     ArtistCountry,
+    Playlist,
+    PlaylistTrack,
     ProcessingLog,
-    ServiceType,
     ProcessingStatus,
+    ServiceType,
+    Setting,
+    Track,
+    get_all_indexes,
     get_all_schemas,
-    get_all_indexes
 )
+from pydantic import ValidationError
 
 
 class TestPlaylistModel:

@@ -4,6 +4,7 @@ Test batch research functionality
 """
 
 import sys
+
 sys.path.insert(0, '/Users/patrickoliver/Music Inxite/Office/Tech/Local Development/Music Tools/Tag Country Origin Editor/Codebase/music_tagger/src')
 
 from .claude_code_researcher import ClaudeCodeResearcher

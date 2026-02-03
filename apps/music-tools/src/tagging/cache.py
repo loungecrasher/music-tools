@@ -5,14 +5,13 @@ Provides intelligent caching for artist-country mappings using SQLite.
 Minimizes AI API calls by storing and reusing previous research results.
 """
 
-import sqlite3
 import logging
 import os
-import time
+import sqlite3
 import threading
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Tuple
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Import security utilities
 try:
@@ -27,14 +26,13 @@ logger = logging.getLogger(__name__)
 
 class CacheError(Exception):
     """Exception raised for cache operations."""
-    pass
 
 
 class CacheManager:
     """
     Manages SQLite-based caching for artist country mappings.
     """
-    
+
     def __init__(self, cache_dir: str, ttl_days: int = 30):
         """
         Initialize cache manager with optimized database configuration.
@@ -62,11 +60,11 @@ class CacheManager:
             'entries_added': 0,
             'entries_updated': 0
         }
-        
+
         # Initialize database with optimizations
         self._init_database()
         self._setup_prepared_statements()
-    
+
     def _init_database(self):
         """Initialize SQLite database with required tables."""
         try:
@@ -198,16 +196,16 @@ class CacheManager:
     def get_country(self, artist_name: str) -> Optional[str]:
         """
         Get cached country for artist.
-        
+
         Args:
             artist_name: Name of the artist to lookup
-            
+
         Returns:
             Country name if found in cache, None otherwise
         """
         if not artist_name or not artist_name.strip():
             return None
-        
+
         try:
             with self._connection_lock:
                 with self._get_optimized_connection() as conn:
@@ -218,19 +216,19 @@ class CacheManager:
 
                     # Case-insensitive search with TTL check using prepared statement
                     cursor.execute(self._prepared_statements['get_country'],
-                                 (artist_name.strip(), ttl_cutoff))
+                                   (artist_name.strip(), ttl_cutoff))
 
                     result = cursor.fetchone()
 
                     if result:
                         country, confidence, hit_count = result
-                        
+
                         # FIX: Add pipes if missing (for legacy cache entries)
                         country = self._ensure_pipes_in_grouping(country)
 
                         # Update hit count using prepared statement
                         cursor.execute(self._prepared_statements['update_hit_count'],
-                                     (datetime.now().isoformat(), artist_name.strip()))
+                                       (datetime.now().isoformat(), artist_name.strip()))
 
                         conn.commit()
 
@@ -241,33 +239,33 @@ class CacheManager:
                         self.statistics['cache_misses'] += 1
                         logger.debug(f"Cache miss for artist: {artist_name}")
                         return None
-                    
+
         except sqlite3.Error as e:
             logger.error(f"Error retrieving from cache: {e}")
             return None
-    
+
     def _ensure_pipes_in_grouping(self, grouping: str) -> str:
         """
         Ensure grouping value has pipe delimiters (fixes legacy cache entries).
-        
+
         Args:
             grouping: Grouping value from cache
-            
+
         Returns:
             Grouping with pipes enforced
         """
         if not grouping:
             return grouping
-        
+
         # If already has pipes, return as-is
         if '|' in grouping:
             return grouping
-        
+
         # Legacy format without pipes - try to add them
         # Expected format: "Region Region Country Language" -> "Region Region | Country | Language"
         # Common patterns: "Western Europe France Romance", "North America Canada Romance"
         parts = grouping.strip().split()
-        
+
         if len(parts) >= 4:
             # Format: [Region Region] [Country] [Language]
             # First 2 words = region, second-to-last = country, last = language
@@ -295,7 +293,7 @@ class CacheManager:
             fixed = f"Unknown | {grouping} | Unknown"
             logger.info(f"Fixed legacy cache entry: '{grouping}' -> '{fixed}'")
             return fixed
-    
+
     def store_country(self, artist_name: str, country: str, confidence: float = 1.0) -> bool:
         """
         Store artist-country mapping in cache with input sanitization.
@@ -320,7 +318,7 @@ class CacheManager:
         if not artist_name or not country:
             logger.warning("Artist name or country became empty after sanitization")
             return False
-        
+
         try:
             with self._connection_lock:
                 with self._get_optimized_connection() as conn:
@@ -330,7 +328,7 @@ class CacheManager:
 
                     # Get existing hit count using prepared statement
                     cursor.execute(self._prepared_statements['get_hit_count'],
-                                 (artist_name.strip(),))
+                                   (artist_name.strip(),))
 
                     existing_hit_count = 0
                     result = cursor.fetchone()
@@ -339,10 +337,10 @@ class CacheManager:
 
                     # Insert or replace using prepared statement
                     cursor.execute(self._prepared_statements['insert_country'],
-                                 (artist_name.strip(), country, confidence, now, now, existing_hit_count))
-                
+                                   (artist_name.strip(), country, confidence, now, now, existing_hit_count))
+
                 conn.commit()
-                
+
                 if cursor.rowcount > 0:
                     if cursor.lastrowid:
                         self.statistics['entries_added'] += 1
@@ -354,7 +352,7 @@ class CacheManager:
                 else:
                     logger.warning(f"No rows affected when storing {artist_name}")
                     return False
-                    
+
         except sqlite3.Error as e:
             logger.error(f"Error storing in cache: {e}")
             return False
@@ -402,11 +400,11 @@ class CacheManager:
         except sqlite3.Error as e:
             logger.error(f"Error optimizing database: {e}")
 
-    def log_processing(self, file_path: str, artist_name: str, country: Optional[str], 
-                      status: str, error_message: Optional[str] = None):
+    def log_processing(self, file_path: str, artist_name: str, country: Optional[str],
+                       status: str, error_message: Optional[str] = None):
         """
         Log file processing results.
-        
+
         Args:
             file_path: Path to the processed file
             artist_name: Artist name from metadata
@@ -417,68 +415,68 @@ class CacheManager:
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                
+
                 cursor.execute('''
-                    INSERT INTO processing_log 
+                    INSERT INTO processing_log
                     (file_path, artist_name, country, status, processed_at, error_message)
                     VALUES (?, ?, ?, ?, ?, ?)
-                ''', (file_path, artist_name, country, status, 
-                     datetime.now().isoformat(), error_message))
-                
+                ''', (file_path, artist_name, country, status,
+                      datetime.now().isoformat(), error_message))
+
                 conn.commit()
-                
+
         except sqlite3.Error as e:
             logger.error(f"Error logging processing: {e}")
-    
+
     def get_statistics(self) -> Dict[str, Any]:
         """
         Get cache statistics and analytics.
-        
+
         Returns:
             Dictionary containing cache statistics
         """
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                
+
                 # Total entries
                 cursor.execute('SELECT COUNT(*) FROM artist_country')
                 total_entries = cursor.fetchone()[0]
-                
+
                 # Cache hit rate calculation
                 total_requests = self.statistics['cache_hits'] + self.statistics['cache_misses']
                 hit_rate = (self.statistics['cache_hits'] / total_requests * 100) if total_requests > 0 else 0
-                
+
                 # Most recent update
                 cursor.execute('SELECT MAX(updated_at) FROM artist_country')
                 last_updated = cursor.fetchone()[0] or "Never"
-                
+
                 # Top countries
                 cursor.execute('''
-                    SELECT country, COUNT(*) as count 
-                    FROM artist_country 
-                    GROUP BY country 
-                    ORDER BY count DESC 
+                    SELECT country, COUNT(*) as count
+                    FROM artist_country
+                    GROUP BY country
+                    ORDER BY count DESC
                     LIMIT 10
                 ''')
                 top_countries = cursor.fetchall()
-                
+
                 # Recent entries
                 cursor.execute('''
-                    SELECT artist_name, country, created_at 
-                    FROM artist_country 
-                    ORDER BY created_at DESC 
+                    SELECT artist_name, country, created_at
+                    FROM artist_country
+                    ORDER BY created_at DESC
                     LIMIT 5
                 ''')
                 recent_entries = [
                     {"artist": row[0], "country": row[1], "timestamp": row[2]}
                     for row in cursor.fetchall()
                 ]
-                
+
                 # Database size
                 db_size = os.path.getsize(str(self.db_path)) if os.path.exists(self.db_path) else 0
                 cache_size_mb = db_size / (1024 * 1024)
-                
+
                 return {
                     'total_entries': total_entries,
                     'hit_rate': hit_rate,
@@ -489,7 +487,7 @@ class CacheManager:
                     'total_api_requests': self.statistics['cache_misses'],
                     **self.statistics
                 }
-                
+
         except sqlite3.Error as e:
             logger.error(f"Error getting statistics: {e}")
             return {
@@ -502,26 +500,26 @@ class CacheManager:
                 'total_api_requests': 0,
                 **self.statistics
             }
-    
+
     def clear_cache(self, confirm: bool = False) -> bool:
         """
         Clear all cached data.
-        
+
         Args:
             confirm: If True, skip confirmation check
-            
+
         Returns:
             True if cleared successfully
         """
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                
+
                 cursor.execute('DELETE FROM artist_country')
                 cursor.execute('DELETE FROM processing_log')
-                
+
                 conn.commit()
-                
+
                 # Reset statistics
                 self.statistics = {
                     'cache_hits': 0,
@@ -529,100 +527,100 @@ class CacheManager:
                     'entries_added': 0,
                     'entries_updated': 0
                 }
-                
+
                 logger.info("Cache cleared successfully")
                 return True
-                
+
         except sqlite3.Error as e:
             logger.error(f"Error clearing cache: {e}")
             return False
-    
+
     def cleanup_old_entries(self, days_old: int = 90) -> int:
         """
         Remove cache entries older than specified days.
-        
+
         Args:
             days_old: Remove entries older than this many days
-            
+
         Returns:
             Number of entries removed
         """
         try:
             cutoff_date = (datetime.now() - timedelta(days=days_old)).isoformat()
-            
+
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                
+
                 cursor.execute('''
-                    DELETE FROM artist_country 
+                    DELETE FROM artist_country
                     WHERE created_at < ?
                 ''', (cutoff_date,))
-                
+
                 removed_count = cursor.rowcount
-                
+
                 cursor.execute('''
-                    DELETE FROM processing_log 
+                    DELETE FROM processing_log
                     WHERE processed_at < ?
                 ''', (cutoff_date,))
-                
+
                 conn.commit()
-                
+
                 logger.info(f"Cleaned up {removed_count} old cache entries")
                 return removed_count
-                
+
         except sqlite3.Error as e:
             logger.error(f"Error cleaning up cache: {e}")
             return 0
-    
+
     def export_cache(self, export_path: str, format: str = "json") -> bool:
         """
         Export cache data to file.
-        
+
         Args:
             export_path: Path to export file
             format: Export format ("json" or "csv")
-            
+
         Returns:
             True if exported successfully
         """
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                
+
                 cursor.execute('''
                     SELECT artist_name, country, confidence, created_at, hit_count
-                    FROM artist_country 
+                    FROM artist_country
                     ORDER BY hit_count DESC
                 ''')
-                
+
                 data = cursor.fetchall()
-                
+
                 if format.lower() == "json":
                     import json
                     export_data = [
                         {
                             "artist": row[0],
-                            "country": row[1], 
+                            "country": row[1],
                             "confidence": row[2],
                             "created_at": row[3],
                             "hit_count": row[4]
                         }
                         for row in data
                     ]
-                    
+
                     with open(export_path, 'w') as f:
                         json.dump(export_data, f, indent=2)
-                        
+
                 elif format.lower() == "csv":
                     import csv
                     with open(export_path, 'w', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(['Artist', 'Country', 'Confidence', 'Created', 'Hit Count'])
                         writer.writerows(data)
-                
+
                 logger.info(f"Exported {len(data)} cache entries to {export_path}")
                 return True
-                
+
         except Exception as e:
             logger.error(f"Error exporting cache: {e}")
             return False

@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 
 # Add apps/music-tools to sys.path to allow importing from src

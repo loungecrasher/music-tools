@@ -17,10 +17,9 @@ Usage:
     success, message = rollback_migration('002', db_path, backup_path)
 """
 
-from pathlib import Path
-from typing import Tuple, Optional
 import importlib
 import logging
+from typing import Optional, Tuple
 
 logger = logging.getLogger('music_tools.migrations')
 

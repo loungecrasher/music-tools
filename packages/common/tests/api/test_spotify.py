@@ -1,15 +1,15 @@
 """Tests for Spotify API client module."""
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 import requests
+from music_tools_common.api.spotify import SpotifyClient
 from requests.exceptions import (
     ConnectionError,
-    Timeout,
     HTTPError,
+    Timeout,
 )
-
-from music_tools_common.api.spotify import SpotifyClient
 
 
 class TestSpotifyClientInitialization:

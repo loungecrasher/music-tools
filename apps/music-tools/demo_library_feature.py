@@ -12,23 +12,26 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from library.models import LibraryFile, DuplicateResult, VettingReport
-from library.database import LibraryDatabase
-from library.indexer import LibraryIndexer
-from library.duplicate_checker import DuplicateChecker
-from library.vetter import ImportVetter
 from datetime import datetime, timezone
+
+from library.database import LibraryDatabase
+from library.duplicate_checker import DuplicateChecker
+from library.indexer import LibraryIndexer
+from library.models import DuplicateResult, LibraryFile, VettingReport
+from library.vetter import ImportVetter
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 console = Console()
 
+
 def demo_header(title: str):
     """Print a demo section header."""
     console.print()
     console.print(Panel(f"[bold cyan]{title}[/bold cyan]", border_style="cyan"))
     console.print()
+
 
 def demo_1_create_sample_library():
     """Demo 1: Create a sample library."""
@@ -99,6 +102,7 @@ def demo_1_create_sample_library():
 
     return library_songs
 
+
 def demo_2_import_folder():
     """Demo 2: Show import folder to vet."""
     demo_header("DEMO 2: New Import Folder to Vet")
@@ -131,6 +135,7 @@ def demo_2_import_folder():
     console.print("[dim]Question: Which of these should you import?[/dim]")
 
     return import_songs
+
 
 def demo_3_duplicate_detection():
     """Demo 3: Show duplicate detection process."""
@@ -196,6 +201,7 @@ def demo_3_duplicate_detection():
     console.print("   Import: queen_bohemian_rhapsody.mp3")
     console.print("   → No similar files found in library")
     console.print("   → Action: [green]Import this file (new song)[/green]")
+
 
 def demo_4_vetting_results():
     """Demo 4: Show vetting results."""
@@ -263,6 +269,7 @@ def demo_4_vetting_results():
     console.print("   • pink_floyd_comfortably_numb_live.mp3(85% match)")
     console.print("   • the_beatles_yesterday_remaster.mp3 (87% match)")
 
+
 def demo_5_export_files():
     """Demo 5: Show export functionality."""
     demo_header("DEMO 5: Export for Automation")
@@ -314,6 +321,7 @@ def demo_5_export_files():
     console.print("  cp \"$file\" ~/Music/")
     console.print("done < new_songs.txt")
 
+
 def demo_6_time_savings():
     """Demo 6: Show time savings."""
     demo_header("DEMO 6: Time Savings")
@@ -357,6 +365,7 @@ def demo_6_time_savings():
     console.print("   • [green]Never accidentally delete unique files[/green]")
     console.print("   • [green]Professional music curation at scale[/green]")
 
+
 def main():
     """Run the complete demo."""
     console.print()
@@ -398,6 +407,7 @@ def main():
         border_style="green",
         padding=(1, 2)
     ))
+
 
 if __name__ == "__main__":
     main()

@@ -12,26 +12,38 @@ REFACTORING IMPROVEMENTS:
 - INTEGRATED with universal CLI utilities for consistent UI/UX theme
 """
 
+import os
+import sys
+import time
+from typing import Optional
+
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
+    TaskID,
+    TextColumn,
+    TimeRemainingColumn,
+)
+from rich.prompt import Confirm, IntPrompt, Prompt
 from rich.table import Table
-from rich.prompt import Prompt, Confirm, IntPrompt
-from rich.progress import Progress, TaskID, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn, TimeRemainingColumn
-from typing import Optional, List, Tuple, Dict, Any
-import sys
-import os
-import getpass
-import re
-import time
 
 # Import universal CLI utilities for consistent theme
 try:
     # Try importing from music_tools_common if installed as package
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'packages'))
     from music_tools_common.cli import (
-        print_error, print_success, print_warning, print_info,
-        show_panel, clear_screen, format_error_details
+        clear_screen,
+        format_error_details,
+        print_error,
+        print_info,
+        print_success,
+        print_warning,
+        show_panel,
     )
     from music_tools_common.cli.styles import Theme
     UNIVERSAL_CLI_AVAILABLE = True
@@ -42,11 +54,11 @@ except ImportError:
     theme = None
 
 try:
-    from .config import ConfigManager, AppConfig
+    from .config import AppConfig, ConfigManager
     CONFIG_AVAILABLE = True
 except ImportError:
     try:
-        from src.tagging.config import ConfigManager, AppConfig
+        from src.tagging.config import AppConfig, ConfigManager
         CONFIG_AVAILABLE = True
     except ImportError:
         CONFIG_AVAILABLE = False
@@ -110,12 +122,12 @@ except ImportError:
 
 # Import extracted classes
 try:
-    from .path_manager import LibraryPathManager
     from .library_processor import MusicLibraryProcessor
+    from .path_manager import LibraryPathManager
 except ImportError:
     try:
-        from src.tagging.path_manager import LibraryPathManager
         from src.tagging.library_processor import MusicLibraryProcessor
+        from src.tagging.path_manager import LibraryPathManager
     except ImportError:
         # Fallback if files are not found (should not happen after refactor)
         LibraryPathManager = None
@@ -125,6 +137,8 @@ except ImportError:
 console = Console()
 
 # Universal theme helper functions
+
+
 def theme_print_success(message: str, title: str = "Success") -> None:
     """Print success message using universal theme"""
     if UNIVERSAL_CLI_AVAILABLE:
@@ -136,6 +150,7 @@ def theme_print_success(message: str, title: str = "Success") -> None:
             title=f"✓ {title}",
             border_style="green"
         ))
+
 
 def theme_print_error(message: str, title: str = "Error") -> None:
     """Print error message using universal theme"""
@@ -149,6 +164,7 @@ def theme_print_error(message: str, title: str = "Error") -> None:
             border_style="red"
         ))
 
+
 def theme_print_warning(message: str, title: str = "Warning") -> None:
     """Print warning message using universal theme"""
     if UNIVERSAL_CLI_AVAILABLE:
@@ -161,6 +177,7 @@ def theme_print_warning(message: str, title: str = "Warning") -> None:
             border_style="yellow"
         ))
 
+
 def theme_print_info(message: str, title: str = "Info") -> None:
     """Print info message using universal theme"""
     if UNIVERSAL_CLI_AVAILABLE:
@@ -172,6 +189,7 @@ def theme_print_info(message: str, title: str = "Info") -> None:
             title=f"ℹ {title}",
             border_style="cyan"
         ))
+
 
 def get_theme_icon(icon_name: str) -> str:
     """Get icon from universal theme or fallback"""
@@ -241,7 +259,7 @@ class ConfigurationWizard:
 
     def _configure_claude_code_model(self) -> None:
         """Configure Claude Code model selection"""
-        console.print(f"\n[cyan]Model Configuration:[/cyan]")
+        console.print("\n[cyan]Model Configuration:[/cyan]")
 
         # Show current model with version info
         current_model = self.config.claude_code_model
@@ -286,7 +304,7 @@ class ConfigurationWizard:
 
     def configure_library_paths(self) -> None:
         """Configure music library paths"""
-        console.print(f"\n[cyan]Music Library Configuration:[/cyan]")
+        console.print("\n[cyan]Music Library Configuration:[/cyan]")
         current_paths = self.config.library_paths or []
 
         if current_paths:
@@ -303,7 +321,7 @@ class ConfigurationWizard:
 
     def configure_processing_settings(self) -> None:
         """Configure batch processing settings"""
-        console.print(f"\n[cyan]Processing Settings:[/cyan]")
+        console.print("\n[cyan]Processing Settings:[/cyan]")
 
         console.print(f"Current batch size: {self.config.batch_size}")
         new_batch_size = IntPrompt.ask(
@@ -352,7 +370,7 @@ class MusicTaggerCLI:
     def _print_header(self):
         """Print application header"""
         clear_screen()
-        
+
         # Use universal theme header if available
         if UNIVERSAL_CLI_AVAILABLE:
             show_panel(
@@ -371,11 +389,16 @@ class MusicTaggerCLI:
     def _check_dependencies(self) -> bool:
         """Check if all required dependencies are available"""
         missing = []
-        if not CONFIG_AVAILABLE: missing.append("Config Module")
-        if not CLAUDE_CODE_AVAILABLE and not AI_AVAILABLE: missing.append("AI Researcher Module")
-        if not SCANNER_AVAILABLE: missing.append("Scanner Module")
-        if not METADATA_AVAILABLE: missing.append("Metadata Module")
-        if not CACHE_AVAILABLE: missing.append("Cache Module")
+        if not CONFIG_AVAILABLE:
+            missing.append("Config Module")
+        if not CLAUDE_CODE_AVAILABLE and not AI_AVAILABLE:
+            missing.append("AI Researcher Module")
+        if not SCANNER_AVAILABLE:
+            missing.append("Scanner Module")
+        if not METADATA_AVAILABLE:
+            missing.append("Metadata Module")
+        if not CACHE_AVAILABLE:
+            missing.append("Cache Module")
 
         if missing:
             theme_print_error(f"Missing dependencies: {', '.join(missing)}", "Dependency Error")
@@ -385,7 +408,7 @@ class MusicTaggerCLI:
     def _show_main_menu(self):
         """Show main menu options"""
         console.print("\n[bold]Main Menu:[/bold]")
-        
+
         # Define menu options with icons
         options = [
             ("1", "Tag Music Library", "rocket"),
@@ -394,7 +417,7 @@ class MusicTaggerCLI:
             ("4", "Help & Information", "info"),
             ("5", "Exit", "error")
         ]
-        
+
         for key, label, icon_name in options:
             icon = get_theme_icon(icon_name)
             console.print(f"  [cyan]{key}.[/cyan] {icon} {label}")
@@ -425,21 +448,21 @@ class MusicTaggerCLI:
         # Initialize components
         scanner = MusicFileScanner(self.config.supported_extensions)
         metadata_handler = MetadataHandler()
-        
+
         # Get cache directory from config manager and create cache manager ONCE
         cache_dir = str(self.config_manager.config_dir / 'cache')
         cache_manager = CacheManager(cache_dir) if self.config.cache_enabled else None
-        
+
         # Initialize AI researcher (reuse the same cache_manager instance)
         if CLAUDE_CODE_AVAILABLE:
             # Load Brave API key from environment (optional fallback for web search)
             from dotenv import load_dotenv
             load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
             brave_api_key = os.getenv('BRAVE_API_KEY')
-            
+
             # Use config model or default to Sonnet 4.5 (faster with great accuracy)
             model = self.config.claude_code_model or "claude-sonnet-4-5-20250929"
-            
+
             ai_researcher = ClaudeCodeResearcher(
                 max_retries=self.config.claude_max_retries,
                 timeout=self.config.claude_timeout,
@@ -455,45 +478,45 @@ class MusicTaggerCLI:
                 theme_print_error("No Claude Code or API key found", "Authentication Error")
                 return
             ai_researcher = AIResearcher(api_key, cache_manager)
-        
+
         # Create processor instance
         processor = MusicLibraryProcessor(
             scanner, metadata_handler, ai_researcher, cache_manager, self.config, self.verbose
         )
-        
+
         # Select library path
         path = self._select_library_path()
         if not path:
             return
-            
+
         # Ask for missing tags only (Feature: Fill Missing Tags)
         missing_only = Confirm.ask("Scan for missing tags ONLY? (Skip files with existing Genre/Grouping)", default=False)
-        
+
         # Ask for dry run
         dry_run = Confirm.ask("Run in DRY RUN mode? (No files will be modified)", default=True)
-        
+
         # Run processing
         processor.process(path, self.config.batch_size, dry_run, resume=False, missing_only=missing_only)
-        
+
         Prompt.ask("\nPress Enter to return to menu")
 
     def _select_library_path(self) -> Optional[str]:
         """Select a library path to process"""
         if len(self.config.library_paths) == 1:
             return self.config.library_paths[0]
-            
+
         console.print("\n[cyan]Select Library to Process:[/cyan]")
         for i, path in enumerate(self.config.library_paths, 1):
             console.print(f"  {i}. {path}")
         console.print(f"  {len(self.config.library_paths) + 1}. All Libraries")
-        console.print(f"  0. Cancel")
-        
+        console.print("  0. Cancel")
+
         choice = IntPrompt.ask(
-            "Select option", 
+            "Select option",
             choices=[str(i) for i in range(len(self.config.library_paths) + 2)],
             default=1
         )
-        
+
         if choice == 0:
             return None
         elif choice <= len(self.config.library_paths):
@@ -506,11 +529,11 @@ class MusicTaggerCLI:
     def _handle_configure(self):
         """Handle configuration workflow"""
         wizard = ConfigurationWizard(self.config_manager, self.config, self.verbose)
-        
+
         while True:
             clear_screen()
             console.print(Panel("[bold]Configuration[/bold]", style="cyan"))
-            
+
             options = [
                 ("1", "Configure API / Model"),
                 ("2", "Configure Library Paths"),
@@ -518,12 +541,12 @@ class MusicTaggerCLI:
                 ("4", "View Current Config"),
                 ("5", "Save & Back")
             ]
-            
+
             for key, label in options:
                 console.print(f"  [cyan]{key}.[/cyan] {label}")
-                
+
             choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5"], default="5")
-            
+
             if choice == "1":
                 wizard.configure_api_key()
                 wizard.configure_model_selection()
@@ -543,21 +566,21 @@ class MusicTaggerCLI:
     def _show_current_config(self):
         """Show current configuration"""
         summary = self.config_manager.get_config_summary()
-        
+
         table = Table(title="Current Configuration", show_header=True)
         table.add_column("Setting", style="cyan")
         table.add_column("Value", style="green")
-        
+
         for key, value in summary.items():
             table.add_row(key, str(value))
-            
+
         console.print(table)
 
     def _handle_diagnostics(self):
         """Handle diagnostics workflow"""
         clear_screen()
         console.print(Panel("[bold]Diagnostics & Tools[/bold]", style="cyan"))
-        
+
         options = [
             ("1", "Check Dependencies"),
             ("2", "Test Claude Connection"),
@@ -565,12 +588,12 @@ class MusicTaggerCLI:
             ("4", "Clear Cache"),
             ("5", "Back")
         ]
-        
+
         for key, label in options:
             console.print(f"  [cyan]{key}.[/cyan] {label}")
-            
+
         choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5"], default="5")
-        
+
         if choice == "1":
             if self._check_dependencies():
                 theme_print_success("All dependencies installed", "Dependencies")
@@ -580,19 +603,19 @@ class MusicTaggerCLI:
             self._view_cache_stats()
         elif choice == "4":
             self._clear_cache()
-        
+
         if choice != "5":
             Prompt.ask("\nPress Enter to continue")
 
     def _test_claude_connection(self):
         """Test connection to Claude"""
         console.print("\n[cyan]Testing Claude Connection...[/cyan]")
-        
+
         if CLAUDE_CODE_AVAILABLE:
             try:
-                researcher = ClaudeCodeResearcher(max_retries=1, timeout=30)
+                ClaudeCodeResearcher(max_retries=1, timeout=30)
                 console.print("[green]✓ Claude Code module loaded[/green]")
-                
+
                 # Simple test query
                 with console.status("Sending test query to Claude...", spinner="dots"):
                     # We don't actually send a query to save costs/time, just check if we can init
@@ -610,14 +633,14 @@ class MusicTaggerCLI:
             cache_dir = str(self.config_manager.config_dir / 'cache')
             manager = CacheManager(cache_dir)
             stats = manager.get_statistics()
-            
+
             table = Table(title="Cache Statistics", show_header=True)
             table.add_column("Metric", style="cyan")
             table.add_column("Value", style="green")
-            
+
             for key, value in stats.items():
                 table.add_row(key, str(value))
-                
+
             console.print(table)
         else:
             console.print("[yellow]Cache is disabled or unavailable[/yellow]")
@@ -638,21 +661,21 @@ class MusicTaggerCLI:
         clear_screen()
         help_text = """
         [bold cyan]Music Library Country Tagger Help[/bold cyan]
-        
+
         This tool scans your music library and uses AI to identify the country of origin
         for each artist. It then updates the file tags with this information.
-        
+
         [bold]Features:[/bold]
         • [green]AI Research[/green]: Uses Claude to find accurate artist information
         • [green]Smart Caching[/green]: Remembers artists to save time and API costs
         • [green]Batch Processing[/green]: Processes files efficiently in groups
         • [green]Dry Run Mode[/green]: Preview changes before applying them
-        
+
         [bold]Tags Updated:[/bold]
         • [cyan]Genre[/cyan]: Cultural | Style | Regional | Era
         • [cyan]Grouping[/cyan]: Region | Country | Language
         • [cyan]Year[/cyan]: Original release year
-        
+
         [bold]Configuration:[/bold]
         Use the Configuration menu to set up your library paths and preferences.
         No API keys are needed if you have Claude Code installed!

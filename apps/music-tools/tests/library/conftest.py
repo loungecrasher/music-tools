@@ -8,14 +8,13 @@ Provides common fixtures for testing quality analysis modules including:
 - Mock database connections
 """
 
-import pytest
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List
-from unittest.mock import Mock, MagicMock
 import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, List
+from unittest.mock import Mock
+
+import pytest
 
 # Add apps/music-tools to sys.path to allow importing from src
 project_root = Path(__file__).parent.parent.parent
@@ -24,10 +23,10 @@ sys.path.insert(0, str(project_root))
 # Import modules after path setup
 from src.library.quality_analyzer import AudioMetadata, BitrateType
 from src.library.quality_models import AudioQuality, DuplicateGroup, UpgradeCandidate
-from src.library.safe_delete import DeletionGroup, ValidationResult, ValidationLevel
-
+from src.library.safe_delete import DeletionGroup, ValidationLevel, ValidationResult
 
 # ==================== Audio Metadata Fixtures ====================
+
 
 @pytest.fixture
 def sample_mp3_metadata() -> Dict[str, Any]:
@@ -488,7 +487,7 @@ pytest.create_audio_quality = create_audio_quality
 
 # ==================== Library Core Fixtures ====================
 
-from src.library.models import LibraryFile, DuplicateResult, VettingReport
+from src.library.models import DuplicateResult, LibraryFile, VettingReport
 
 
 def make_library_file(**overrides) -> LibraryFile:

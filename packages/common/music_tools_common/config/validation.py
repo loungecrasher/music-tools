@@ -1,10 +1,10 @@
 """
 Configuration validation utilities.
 """
+import logging
 import os
 import re
-from typing import List, Dict, Any
-import logging
+from typing import Any, Dict, List
 
 logger = logging.getLogger('music_tools_common.config.validation')
 

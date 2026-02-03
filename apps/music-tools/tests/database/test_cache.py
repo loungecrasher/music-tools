@@ -2,13 +2,12 @@
 Tests for CacheManager
 """
 
-import pytest
 import tempfile
-import time
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 
-from music_tools_common.database import CacheManager, CacheError
+import pytest
+from music_tools_common.database import CacheError, CacheManager
 
 
 @pytest.fixture

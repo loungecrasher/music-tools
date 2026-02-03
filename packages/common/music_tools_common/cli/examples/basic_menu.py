@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from music_tools_common.cli import InteractiveMenu
-from music_tools_common.cli.output import print_success, print_info
+from music_tools_common.cli.output import print_info, print_success
 
 
 def option1_handler():

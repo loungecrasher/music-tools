@@ -4,7 +4,8 @@ Provides reusable decorators for error handling, logging, and more.
 """
 import functools
 import logging
-from typing import Callable, Any, Optional, Type
+from typing import Any, Callable
+
 from rich.console import Console
 
 console = Console()

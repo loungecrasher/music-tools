@@ -33,17 +33,17 @@ try:
 
     # Import all menu handlers
     from src.menu_handlers import (
-        run_process_new_music,
+        run_edm_blog_scraper,
         run_library_index,
         run_library_stats,
-        run_edm_blog_scraper,
         run_music_country_tagger,
-        run_spotify_playlist_manager,
-        run_spotify_tracks_after_date,
+        run_process_new_music,
         run_recent_tracks_aggregator,
         run_serato_build_index,
         run_serato_csv_to_crate,
         run_serato_list_crates,
+        run_spotify_playlist_manager,
+        run_spotify_tracks_after_date,
     )
 except ImportError as e:
     print(f"Error: Core modules not found. Please ensure music_tools_common is installed: {e}")
@@ -145,30 +145,30 @@ def main() -> None:
     main_menu = Menu("Music Tools - Main Menu")
 
     main_menu.add_option("Process New Music Folder", run_process_new_music,
-                        "Check new folder against library + history")
+                         "Check new folder against library + history")
     main_menu.add_option("Index Library", run_library_index,
-                        "Scan your main music library (one-time setup)")
+                         "Scan your main music library (one-time setup)")
     main_menu.add_option("Library Statistics", run_library_stats,
-                        "View your library statistics")
+                         "View your library statistics")
     main_menu.add_option("EDM Blog Scraper", run_edm_blog_scraper,
-                        "Find new music from EDM blogs")
+                         "Find new music from EDM blogs")
     main_menu.add_option("Country Tagger (AI)", run_music_country_tagger,
-                        "Tag files with country metadata")
+                         "Tag files with country metadata")
     main_menu.add_option("Spotify Playlist Manager", run_spotify_playlist_manager,
-                        "View, create, copy, and deduplicate playlists")
+                         "View, create, copy, and deduplicate playlists")
     main_menu.add_option("Spotify Tracks by Date", run_spotify_tracks_after_date,
-                        "Filter playlist tracks by release date")
+                         "Filter playlist tracks by release date")
     main_menu.add_option("Recent Tracks Aggregator", run_recent_tracks_aggregator,
-                        "Aggregate recent adds from ALL playlists into one")
+                         "Aggregate recent adds from ALL playlists into one")
 
     # Serato Tools submenu
     serato_menu = main_menu.create_submenu("Serato Tools")
     serato_menu.add_option("Build Track Index", run_serato_build_index,
-                          "Index music library for fast CSV import")
+                           "Index music library for fast CSV import")
     serato_menu.add_option("CSV to Crate", run_serato_csv_to_crate,
-                          "Import CSV playlist to Serato crate")
+                           "Import CSV playlist to Serato crate")
     serato_menu.add_option("List Crates", run_serato_list_crates,
-                          "Browse your Serato crates")
+                           "Browse your Serato crates")
     serato_menu.set_exit_option("Back to Main Menu")
 
     # Set exit option for main menu

@@ -1,11 +1,10 @@
 """Manage Serato crate files -- read, create, and list crate families."""
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Callable
-
-from serato_tools.crate import Crate
+from typing import Callable, Dict, List, Optional
 
 from music_tools_common.metadata.reader import MetadataReader
+from serato_tools.crate import Crate
 
 from .models import CrateInfo, TrackMetadata
 

@@ -1,13 +1,14 @@
 """
 Tests for ConfigManager.
 """
-import os
 import json
+import os
+import sys
 import tempfile
-import pytest
 from pathlib import Path
 
-import sys
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from config.manager import ConfigManager

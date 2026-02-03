@@ -3,19 +3,20 @@
 Integration test for library duplicate detection system.
 Tests all critical components and bug fixes.
 """
-import sys
 import os
+import sys
 import tempfile
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from library.models import LibraryFile, DuplicateResult, VettingReport
 from library.database import LibraryDatabase
-from library.hash_utils import calculate_metadata_hash, calculate_file_hash
 from library.duplicate_checker import DuplicateChecker
+from library.hash_utils import calculate_file_hash, calculate_metadata_hash
+from library.models import DuplicateResult, LibraryFile, VettingReport
+
 
 def test_models():
     """Test models.py fixes."""
@@ -73,7 +74,7 @@ def test_models():
 
     # Test DuplicateResult validation
     try:
-        result = DuplicateResult(
+        DuplicateResult(
             is_duplicate=True,
             confidence=1.5,  # Invalid - should be 0-1
             match_type='exact_metadata',
@@ -86,6 +87,7 @@ def test_models():
         print("✅ DuplicateResult validation working")
 
     return True
+
 
 def test_hash_utils():
     """Test hash_utils.py."""
@@ -120,6 +122,7 @@ def test_hash_utils():
         os.unlink(temp_path)
 
     return True
+
 
 def test_database():
     """Test database.py fixes."""
@@ -178,6 +181,7 @@ def test_database():
         if os.path.exists(db_path):
             os.unlink(db_path)
 
+
 def test_duplicate_checker():
     """Test duplicate_checker.py fixes."""
     print("\n=== Testing duplicate_checker.py ===")
@@ -192,7 +196,7 @@ def test_duplicate_checker():
 
         # Test file path validation
         result = checker.check_file("/nonexistent/file.mp3")
-        assert result.is_duplicate == False, "Nonexistent file should not be duplicate"
+        assert result.is_duplicate is False, "Nonexistent file should not be duplicate"
         assert result.confidence == 0.0, "Confidence should be 0 for nonexistent file"
         print("✅ File path validation working")
 
@@ -209,6 +213,7 @@ def test_duplicate_checker():
         if os.path.exists(db_path):
             os.unlink(db_path)
 
+
 def test_vetter_categorization():
     """Test vetter.py categorization logic."""
     print("\n=== Testing vetter.py categorization ===")
@@ -217,7 +222,7 @@ def test_vetter_categorization():
     # The fix ensures: uncertain → duplicate → new
 
     # Simulate results
-    from library.models import LibraryFile, DuplicateResult
+    from library.models import DuplicateResult, LibraryFile
 
     # Create test results
     uncertain_result = DuplicateResult(
@@ -245,13 +250,14 @@ def test_vetter_categorization():
     )
 
     # Verify is_uncertain property
-    assert uncertain_result.is_uncertain == True, "Should be uncertain"
-    assert duplicate_result.is_uncertain == False, "Should not be uncertain"
-    assert new_result.is_uncertain == False, "Should not be uncertain"
+    assert uncertain_result.is_uncertain is True, "Should be uncertain"
+    assert duplicate_result.is_uncertain is False, "Should not be uncertain"
+    assert new_result.is_uncertain is False, "Should not be uncertain"
 
     print("✅ Categorization logic working correctly")
 
     return True
+
 
 def main():
     """Run all tests."""
@@ -302,6 +308,7 @@ def main():
         print("❌ SOME TESTS FAILED")
         print("="*60)
         return 1
+
 
 if __name__ == '__main__':
     sys.exit(main())

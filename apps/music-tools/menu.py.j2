@@ -4,6 +4,7 @@ import subprocess
 
 TOOLS_DIR = os.path.dirname(os.path.realpath(__file__))
 
+
 def run_tool(script):
     """Execute a tool script with Python 3"""
     try:
@@ -13,17 +14,18 @@ def run_tool(script):
     except FileNotFoundError:
         print(f"\nTool script not found: {script}")
 
+
 def main_menu():
     while True:
         print("\n=== Music Tools Unified Menu ===")
         print("1. Deezer Playlist Repair")
-        print("2. Soundiz File Processor") 
+        print("2. Soundiz File Processor")
         print("3. Spotify Tracks After Date")
         print("4. Spotify Playlist Manager")
         print("5. Exit")
-        
+
         choice = input("\nEnter choice (1-5): ").strip()
-        
+
         if choice == '1':
             run_tool("roles/deezer/main.py")
         elif choice == '2':
@@ -37,6 +39,7 @@ def main_menu():
             break
         else:
             print("\nInvalid choice. Please enter 1-5.")
+
 
 if __name__ == "__main__":
     main_menu()

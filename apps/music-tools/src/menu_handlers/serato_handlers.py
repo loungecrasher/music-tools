@@ -5,13 +5,12 @@ Includes: build track index, CSV to crate import, and crate listing.
 
 from pathlib import Path
 
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.prompt import Prompt
-
 from music_tools_common import setup_logger
 from music_tools_common.cli import clear_screen
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Prompt
+from rich.table import Table
 
 logger = setup_logger('music_tools.menu.serato')
 console = Console()
@@ -236,7 +235,7 @@ def _build_index_from_directory() -> None:
         count = index.build_from_directory(directory, ext_list)
         index.save()
 
-        console.print(f"\n[bold green]Index built successfully![/bold green]")
+        console.print("\n[bold green]Index built successfully![/bold green]")
         console.print(f"Indexed [bold]{count:,}[/bold] tracks")
         console.print(f"Saved to: {index.index_path}")
     except Exception as e:
@@ -267,7 +266,7 @@ def _build_index_from_crates() -> None:
         )
         index.save()
 
-        console.print(f"\n[bold green]Index built successfully![/bold green]")
+        console.print("\n[bold green]Index built successfully![/bold green]")
         console.print(f"Indexed [bold]{count:,}[/bold] tracks")
         console.print(f"Saved to: {index.index_path}")
     except Exception as e:

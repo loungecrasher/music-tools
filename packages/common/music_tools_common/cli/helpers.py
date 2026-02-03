@@ -2,11 +2,12 @@
 Common CLI helper functions for Music Tools.
 Provides reusable functions for console output, user input, and progress display.
 """
-from typing import Optional, Any
+from typing import Optional
+
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.prompt import Confirm, Prompt
 from rich.status import Status
 
 console = Console()
@@ -163,6 +164,7 @@ def clear_screen() -> None:
     Clear the terminal screen in a cross-platform way.
     """
     import os
+
     # SECURITY FIX: Use os.system instead of subprocess with shell=True
     # to avoid command injection vulnerabilities
     os.system('cls' if os.name == 'nt' else 'clear')

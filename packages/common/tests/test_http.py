@@ -1,21 +1,16 @@
 """Tests for HTTP utilities module."""
 
-import pytest
 import time
-from unittest.mock import Mock, patch, MagicMock
-import requests
-from requests.exceptions import (
-    ConnectionError,
-    Timeout,
-    HTTPError,
-    RequestException
-)
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
+import requests
 from music_tools_common.utils.http import (
-    safe_request,
     RateLimiter,
+    safe_request,
     setup_session,
 )
+from requests.exceptions import ConnectionError, HTTPError, RequestException, Timeout
 
 
 class TestSafeRequest:
@@ -244,7 +239,7 @@ class TestRateLimiter:
             if limiter.acquire():
                 successful_calls += 1
 
-        elapsed = time.time() - start_time
+        time.time() - start_time
 
         # Should allow at most max_calls within time window
         assert successful_calls <= 10
@@ -308,7 +303,7 @@ class TestSessionSetup:
         mock_session = MagicMock()
         mock_session_class.return_value = mock_session
 
-        session = setup_session(pool_connections=10, pool_maxsize=20)
+        setup_session(pool_connections=10, pool_maxsize=20)
 
         # Verify pooling configuration was applied
         assert mock_session is not None
@@ -325,7 +320,7 @@ class TestHTTPErrorHandling:
         mock_response.raise_for_status.side_effect = HTTPError("Server Error")
         mock_get.return_value = mock_response
 
-        response = safe_request(
+        safe_request(
             'https://api.example.com/error',
             max_retries=1
         )
@@ -439,7 +434,7 @@ class TestRetryStrategies:
             max_retries=3,
             backoff_factor=0.5
         )
-        elapsed = time.time() - start_time
+        time.time() - start_time
 
         # With exponential backoff: 0.5s, 1s (total ~1.5s minimum)
         # Actual implementation may vary
@@ -477,7 +472,7 @@ class TestRetryStrategies:
                 Mock(status_code=200)
             ]
 
-            response = safe_request(
+            safe_request(
                 'https://api.example.com/data',
                 max_retries=3
             )

@@ -5,16 +5,16 @@ This module defines the interface for cache data access, allowing for
 different implementations (SQLite, Redis, etc.).
 """
 
-import sqlite3
 import logging
+import sqlite3
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict, Any
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
 
+from ...core.error_handler import CacheError, with_error_handling
 from ..models.artist_cache import ArtistCacheEntry
 from ..models.processing_stats import ProcessingLogEntry, Statistics
-from ...core.error_handler import CacheError, with_error_handling
 
 logger = logging.getLogger(__name__)
 
@@ -25,47 +25,38 @@ class CacheRepositoryInterface(ABC):
     @abstractmethod
     def get_artist_country(self, artist_name: str) -> Optional[str]:
         """Get cached country for an artist."""
-        pass
 
     @abstractmethod
     def store_artist_country(self, entry: ArtistCacheEntry) -> bool:
         """Store an artist-country mapping."""
-        pass
 
     @abstractmethod
     def get_artist_entry(self, artist_name: str) -> Optional[ArtistCacheEntry]:
         """Get full cache entry for an artist."""
-        pass
 
     @abstractmethod
     def delete_artist(self, artist_name: str) -> bool:
         """Delete an artist from cache."""
-        pass
 
     @abstractmethod
     def get_all_artists(self) -> List[ArtistCacheEntry]:
         """Get all cached artists."""
-        pass
 
     @abstractmethod
     def clear_cache(self) -> bool:
         """Clear all cache entries."""
-        pass
 
     @abstractmethod
     def get_statistics(self) -> Statistics:
         """Get cache statistics."""
-        pass
 
     @abstractmethod
     def log_processing(self, entry: ProcessingLogEntry) -> bool:
         """Log a processing operation."""
-        pass
 
     @abstractmethod
     def cleanup_old_entries(self, max_age_days: int) -> int:
         """Remove old cache entries."""
-        pass
 
 
 class SQLiteCacheRepository(CacheRepositoryInterface):

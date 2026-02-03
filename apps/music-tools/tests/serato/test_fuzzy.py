@@ -1,8 +1,9 @@
 """Tests for the unified fuzzy matching utilities in music_tools_common."""
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add packages/common to sys.path
 common_root = Path(__file__).parent.parent.parent.parent.parent / "packages" / "common"

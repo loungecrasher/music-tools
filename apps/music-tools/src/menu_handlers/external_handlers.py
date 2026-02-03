@@ -1,16 +1,15 @@
 """Menu handlers for external tool launching (scraper, tagger, scripts)."""
 
-import os
-import sys
-import subprocess
 import logging
-
-from rich.console import Console
-from rich.panel import Panel
-from rich.prompt import Prompt
+import os
+import subprocess
+import sys
 
 from music_tools_common.cli import clear_screen
 from music_tools_common.config import config_manager
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Prompt
 
 logger = logging.getLogger(__name__)
 console = Console()

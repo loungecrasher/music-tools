@@ -4,18 +4,18 @@ Database layer for library management.
 Provides SQLite-based persistence for music library indexing and duplicate detection.
 """
 
-import sqlite3
-import json
-import time
 import functools
+import json
+import logging
+import sqlite3
+import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, List, Dict, Tuple, Any, Callable, TypeVar
-from contextlib import contextmanager
-import logging
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
-from .models import LibraryFile, LibraryStatistics
 from .batch_operations import BatchOperationsMixin
+from .models import LibraryFile, LibraryStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -48,12 +48,12 @@ def with_retry(
     backoff: float = DEFAULT_RETRY_BACKOFF
 ) -> Callable:
     """Decorator to retry database operations on transient errors.
-    
+
     Args:
         max_retries: Maximum number of retry attempts.
         delay: Initial delay between retries in seconds.
         backoff: Multiplier for delay on each retry.
-    
+
     Returns:
         Decorated function with retry logic.
     """
@@ -62,35 +62,35 @@ def with_retry(
         def wrapper(*args, **kwargs) -> T:
             last_error = None
             current_delay = delay
-            
+
             for attempt in range(max_retries + 1):
                 try:
                     return func(*args, **kwargs)
                 except sqlite3.OperationalError as e:
                     error_msg = str(e).lower()
-                    
+
                     # Check if error is retryable
                     is_retryable = any(
-                        retryable in error_msg 
+                        retryable in error_msg
                         for retryable in RETRYABLE_ERRORS
                     )
-                    
+
                     if not is_retryable or attempt >= max_retries:
                         raise
-                    
+
                     last_error = e
                     logger.warning(
                         f"Database operation failed (attempt {attempt + 1}/{max_retries + 1}): {e}. "
                         f"Retrying in {current_delay:.2f}s..."
                     )
-                    
+
                     time.sleep(current_delay)
                     current_delay *= backoff
-            
+
             # Should not reach here, but raise last error if we do
             if last_error:
                 raise last_error
-            
+
         return wrapper
     return decorator
 

@@ -47,7 +47,7 @@ def main():
         console.print(f"\n[bold blue]Setting up {service}...[/bold blue]")
 
         try:
-            config = manager.interactive_setup(service)
+            manager.interactive_setup(service)
             console.print(f"[green]✓ {service.title()} configuration complete[/green]")
         except KeyboardInterrupt:
             console.print(f"\n[yellow]Skipped {service} setup[/yellow]")

@@ -14,9 +14,9 @@ SECURITY IMPROVEMENTS:
 import json
 import logging
 import os
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -59,30 +59,30 @@ class AppConfig:
     claude_code_model: str = ""  # Empty means use default (sonnet)
     claude_timeout: int = 600  # Timeout for claude command execution
     claude_max_retries: int = 1  # Retries for failed lookups
-    
+
     # File Processing
     library_paths: List[str] = None
     batch_size: int = 25  # Reduced from 50 to avoid Claude output token limits
     supported_extensions: List[str] = None
     overwrite_existing_tags: bool = True
-    
+
     # Caching
     cache_enabled: bool = True
     cache_ttl_days: int = 30
     auto_cleanup_cache: bool = True
-    
+
     # Logging
     log_level: str = "INFO"
     log_to_file: bool = True
     max_log_file_size_mb: int = 10
     log_backup_count: int = 5
-    
+
     # UI Preferences
     show_progress_bars: bool = True
     show_file_names: bool = True
     show_estimated_time: bool = True
     color_output: bool = True
-    
+
     def __post_init__(self):
         """Initialize default values for mutable fields."""
         if self.library_paths is None:
@@ -94,11 +94,11 @@ class AppConfig:
 class ConfigManager:
     """
     Configuration manager for the music tagger application.
-    
+
     Handles loading, saving, and validating configuration settings.
     Provides interactive configuration wizard and environment variable support.
     """
-    
+
     def __init__(self, config_dir: Optional[str] = None):
         """
         Initialize the configuration manager.
@@ -145,20 +145,20 @@ class ConfigManager:
                 logger.warning(f"Could not set permissions on {subdir}: {e}")
 
         self._config: Optional[AppConfig] = None
-    
+
     def load_config(self) -> AppConfig:
         """
         Load configuration from file and environment variables.
-        
+
         Returns:
             AppConfig: Loaded configuration settings
         """
         if self._config is not None:
             return self._config
-        
+
         # Start with default configuration
         config_dict = {}
-        
+
         # Load from file if it exists
         if self.config_file.exists():
             try:
@@ -168,7 +168,7 @@ class ConfigManager:
             except Exception as e:
                 logger.warning(f"Could not load config file: {e}")
                 config_dict = {}
-        
+
         # Override with environment variables
         env_config = self._load_from_environment()
         config_dict.update(env_config)
@@ -189,9 +189,9 @@ class ConfigManager:
             self._config = AppConfig()
             # Save corrected default config
             self.save_config()
-        
+
         return self._config
-    
+
     def save_config(self, config: Optional[AppConfig] = None) -> bool:
         """
         Save configuration to file.
@@ -231,18 +231,18 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Could not save configuration: {e}")
             return False
-    
+
     def run_configuration_wizard(self) -> AppConfig:
         """
         Run interactive configuration wizard.
-        
+
         Returns:
             AppConfig: Updated configuration
         """
         from rich.console import Console
-        from rich.prompt import Prompt, Confirm
         from rich.panel import Panel
-        
+        from rich.prompt import Confirm, Prompt
+
         console = Console()
         console.print(Panel.fit(
             "[bold green]Music Tagger Configuration Wizard[/bold green]\n"
@@ -277,15 +277,15 @@ class ConfigManager:
             default="1"
         )
         config.claude_code_model = available_models[int(model_choice) - 1][0]
-        
+
         # Library Paths
         console.print("\n[bold blue]Music Library Paths[/bold blue]")
-        
+
         if config.library_paths:
             console.print("Current library paths:")
             for i, path in enumerate(config.library_paths, 1):
                 console.print(f"  {i}. {path}")
-        
+
         add_paths = Confirm.ask("Add or modify library paths?", default=True)
         if add_paths:
             new_paths = []
@@ -296,17 +296,17 @@ class ConfigManager:
                 )
                 if not path:
                     break
-                
+
                 path_obj = Path(path).expanduser()
                 if path_obj.exists() and path_obj.is_dir():
                     new_paths.append(str(path_obj))
                     console.print(f"✓ Added: {path_obj}")
                 else:
                     console.print(f"[red]✗ Directory not found: {path}[/red]")
-            
+
             if new_paths:
                 config.library_paths = new_paths
-        
+
         # Processing Options
         console.print("\n[bold blue]Processing Options[/bold blue]")
 
@@ -314,67 +314,67 @@ class ConfigManager:
             "Batch size (files per main batch, will be split into 15-artist sub-batches)",
             default=str(config.batch_size)
         ))
-        
+
         config.overwrite_existing_tags = Confirm.ask(
             "Always overwrite existing grouping tags?",
             default=config.overwrite_existing_tags
         )
-        
+
         # Caching Options
         console.print("\n[bold blue]Caching Options[/bold blue]")
-        
+
         config.cache_enabled = Confirm.ask(
             "Enable artist country caching?",
             default=config.cache_enabled
         )
-        
+
         if config.cache_enabled:
             config.cache_ttl_days = int(Prompt.ask(
                 "Cache TTL in days",
                 default=str(config.cache_ttl_days)
             ))
-        
+
         # UI Preferences
         console.print("\n[bold blue]User Interface[/bold blue]")
-        
+
         config.show_progress_bars = Confirm.ask(
             "Show progress bars during processing?",
             default=config.show_progress_bars
         )
-        
+
         config.show_file_names = Confirm.ask(
             "Display current file being processed?",
             default=config.show_file_names
         )
-        
+
         config.color_output = Confirm.ask(
             "Use colored output?",
             default=config.color_output
         )
-        
+
         # Save configuration
         console.print("\n[bold green]Saving Configuration[/bold green]")
         if self.save_config(config):
             console.print("✓ Configuration saved successfully")
         else:
             console.print("[red]✗ Failed to save configuration[/red]")
-        
+
         self._config = config
         return config
-    
+
     def validate_config(self, config: Optional[AppConfig] = None) -> List[str]:
         """
         Validate configuration settings.
-        
+
         Args:
             config: Configuration to validate. Uses current config if None.
-            
+
         Returns:
             List[str]: List of validation errors (empty if valid)
         """
         if config is None:
             config = self.load_config()
-        
+
         errors = []
 
         # Claude Code - no API key validation needed (uses local command with Max plan)
@@ -389,26 +389,26 @@ class ConfigManager:
                     errors.append(f"Library path does not exist: {path}")
                 elif not path_obj.is_dir():
                     errors.append(f"Library path is not a directory: {path}")
-        
+
         # Batch Size
         if config.batch_size < 1 or config.batch_size > 1000:
             errors.append("Batch size must be between 1 and 1000")
-        
+
         # Cache TTL
         if config.cache_enabled and (config.cache_ttl_days < 1 or config.cache_ttl_days > 365):
             errors.append("Cache TTL must be between 1 and 365 days")
-        
+
         # Log Level
         valid_log_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
         if config.log_level not in valid_log_levels:
             errors.append(f"Log level must be one of: {', '.join(valid_log_levels)}")
-        
+
         return errors
-    
+
     def get_config_summary(self) -> Dict[str, Any]:
         """
         Get a summary of current configuration for display.
-        
+
         Returns:
             Dict[str, Any]: Configuration summary
         """
@@ -427,11 +427,11 @@ class ConfigManager:
             'config_dir': str(self.config_dir),
             'note': 'Uses Claude Max plan - no API keys needed!'
         }
-    
+
     def _load_from_environment(self) -> Dict[str, Any]:
         """
         Load configuration values from environment variables.
-        
+
         Returns:
             Dict[str, Any]: Configuration values from environment
         """
@@ -445,7 +445,7 @@ class ConfigManager:
             'MUSIC_TAGGER_LOG_LEVEL': 'log_level',
             'MUSIC_TAGGER_CACHE_TTL': 'cache_ttl_days',
         }
-        
+
         for env_var, config_key in env_mappings.items():
             value = os.getenv(env_var)
             if value:
@@ -459,7 +459,7 @@ class ConfigManager:
                     env_config[config_key] = value.lower() in ('true', '1', 'yes', 'on')
                 else:
                     env_config[config_key] = value
-        
+
         # Handle library paths from environment
         library_paths_env = os.getenv('MUSIC_TAGGER_LIBRARY_PATHS')
         if library_paths_env:
@@ -467,7 +467,7 @@ class ConfigManager:
             separator = ';' if ';' in library_paths_env else ':'
             paths = [p.strip() for p in library_paths_env.split(separator) if p.strip()]
             env_config['library_paths'] = paths
-        
+
         return env_config
 
 
@@ -491,7 +491,7 @@ def get_config() -> AppConfig:
 # Example usage and testing
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) > 1 and sys.argv[1] == 'wizard':
         # Run configuration wizard
         manager = ConfigManager()
@@ -501,7 +501,7 @@ if __name__ == "__main__":
         # Show current configuration
         manager = ConfigManager()
         config = manager.load_config()
-        
+
         print("Current Configuration:")
         print(f"  Claude Model: {config.claude_code_model or 'sonnet (default)'}")
         print(f"  Claude Timeout: {config.claude_timeout}s")
@@ -509,16 +509,16 @@ if __name__ == "__main__":
         print(f"  Batch Size: {config.batch_size}")
         print(f"  Cache Enabled: {config.cache_enabled}")
         print(f"  Cache TTL: {config.cache_ttl_days} days")
-        print(f"\n  ℹ️  Uses Claude Max plan - NO API keys needed!")
-        
+        print("\n  ℹ️  Uses Claude Max plan - NO API keys needed!")
+
         # Validate configuration
         errors = manager.validate_config()
         if errors:
-            print(f"\nConfiguration Errors:")
+            print("\nConfiguration Errors:")
             for error in errors:
                 print(f"  ✗ {error}")
         else:
-            print(f"\n✓ Configuration is valid")
-        
+            print("\n✓ Configuration is valid")
+
         print(f"\nConfiguration file: {manager.config_file}")
         print(f"Configuration directory: {manager.config_dir}")

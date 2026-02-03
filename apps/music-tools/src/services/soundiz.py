@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
 from pathlib import Path
 from types import ModuleType
 
-import importlib
 from rich.console import Console
-from rich.prompt import Prompt
 from rich.panel import Panel
+from rich.prompt import Prompt
 
 _MODULE: ModuleType | None = None
 
@@ -64,7 +64,7 @@ def run_soundiz_processor():
     delimiter = Prompt.ask("Enter CSV delimiter", default=",")
     encoding = Prompt.ask("Enter CSV encoding", default="utf-8")
 
-    console.print(f"\n[bold cyan]Processing CSV file...[/bold cyan]")
+    console.print("\n[bold cyan]Processing CSV file...[/bold cyan]")
     console.print(f"Input: {input_path}")
     console.print(f"Title column: {title_field}")
     console.print(f"Artist column: {artist_field}")
@@ -79,7 +79,7 @@ def run_soundiz_processor():
             encoding=encoding
         )
 
-        console.print(f"\n[bold green]✓ Processing complete![/bold green]")
+        console.print("\n[bold green]✓ Processing complete![/bold green]")
         console.print(f"Rows processed: {result.total_rows}")
         console.print(f"Rows written: {result.written_rows}")
         console.print(f"Output file: {result.output_path}")

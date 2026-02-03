@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import subprocess
 import sys
@@ -9,7 +10,6 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional
 
-import importlib
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE_ROOT = PROJECT_ROOT.parent
 

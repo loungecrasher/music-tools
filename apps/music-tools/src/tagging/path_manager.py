@@ -5,13 +5,15 @@ Handles music library path management and auto-detection.
 Extracted from cli.py for better maintainability.
 """
 
-import os
 import glob
+import os
 from typing import List
+
 from rich.console import Console
-from rich.prompt import Prompt, Confirm, IntPrompt
+from rich.prompt import Confirm, IntPrompt, Prompt
 
 console = Console()
+
 
 class LibraryPathManager:
     """Manages music library paths."""

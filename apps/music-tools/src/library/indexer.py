@@ -4,28 +4,28 @@ Library indexer for scanning and indexing music collections.
 Provides efficient scanning with hash-based duplicate detection and incremental updates.
 """
 
-import hashlib
+import logging
 import os
 import time
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, List, Tuple, Set, Dict
+from typing import Dict, List, Optional, Set, Tuple
+
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 from rich.table import Table
 
 try:
     from mutagen import File as MutagenFile
-    from mutagen.id3 import ID3
     from mutagen.flac import FLAC
+    from mutagen.id3 import ID3
     from mutagen.mp4 import MP4
 except ImportError:
     MutagenFile = None
 
-from .models import LibraryFile, LibraryStatistics
 from .database import LibraryDatabase
-from .hash_utils import calculate_metadata_hash, calculate_file_hash
+from .hash_utils import calculate_file_hash, calculate_metadata_hash
+from .models import LibraryFile, LibraryStatistics
 
 logger = logging.getLogger(__name__)
 

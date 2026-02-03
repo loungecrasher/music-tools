@@ -1,10 +1,11 @@
 """
 Metadata reader for music files.
 """
-from pathlib import Path
-from mutagen import File
-from typing import Optional, Dict, Any
 import logging
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+from mutagen import File
 
 logger = logging.getLogger('music_tools_common.metadata')
 

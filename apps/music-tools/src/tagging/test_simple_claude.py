@@ -4,7 +4,6 @@ Simple test to see what's happening with Claude CLI calls.
 """
 
 import subprocess
-import sys
 
 # Test 1: Simple test without WebSearch
 print("Test 1: Simple claude --print command")

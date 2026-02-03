@@ -8,42 +8,42 @@ Author: Music Tools Dev Team
 Created: 2026-01-08
 """
 
-import logging
-import json
 import csv
-from pathlib import Path
-from typing import List, Dict, Optional, Tuple, Any
+import json
+import logging
+from dataclasses import dataclass
 from datetime import datetime
-from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
+from rich import box
 from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.progress import (
-    Progress, SpinnerColumn, TextColumn, BarColumn,
-    TaskProgressColumn, TimeRemainingColumn
-)
-from rich.prompt import Prompt, Confirm
-from rich.text import Text
 from rich.layout import Layout
 from rich.live import Live
-from rich import box
+from rich.panel import Panel
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
+from rich.text import Text
 
-from .duplicate_checker import DuplicateChecker
-from .quality_analyzer import (
-    extract_audio_metadata,
-    AudioMetadata,
-    rank_duplicate_group,
-    BitrateType,
-    get_quality_tier
-)
-from .safe_delete import (
-    SafeDeletionPlan,
-    DeletionGroup,
-    DeletionStats
-)
 from .database import LibraryDatabase
+from .duplicate_checker import DuplicateChecker
 from .models import LibraryFile
+from .quality_analyzer import (
+    AudioMetadata,
+    BitrateType,
+    extract_audio_metadata,
+    get_quality_tier,
+    rank_duplicate_group,
+)
+from .safe_delete import DeletionGroup, DeletionStats, SafeDeletionPlan
 
 logger = logging.getLogger(__name__)
 
@@ -481,7 +481,7 @@ class SmartCleanupWorkflow:
             # Add keep file
             keep_color = self._get_quality_color(group.recommended_keep.quality_score)
             table.add_row(
-                f"[green]KEEP[/green]",
+                "[green]KEEP[/green]",
                 self._truncate_path(group.recommended_keep.filepath, 40),
                 group.recommended_keep.format.upper(),
                 f"[{keep_color}]{group.recommended_keep.quality_score}/100[/{keep_color}]",
@@ -493,7 +493,7 @@ class SmartCleanupWorkflow:
             for file in group.recommended_delete:
                 file_color = self._get_quality_color(file.quality_score)
                 table.add_row(
-                    f"[red]DELETE[/red]",
+                    "[red]DELETE[/red]",
                     self._truncate_path(file.filepath, 40),
                     file.format.upper(),
                     f"[{file_color}]{file.quality_score}/100[/{file_color}]",
@@ -701,7 +701,7 @@ class SmartCleanupWorkflow:
         summary_text.append(f"  Files Deleted: {stats.files_deleted:,}\n", style="green")
         summary_text.append(f"  Space Freed: {stats.space_freed_mb:.2f} MB\n", style="green")
 
-        summary_text.append(f"\nPerformance:\n", style="bold")
+        summary_text.append("\nPerformance:\n", style="bold")
         summary_text.append(f"  Scan Time: {stats.scan_duration:.2f}s\n", style="cyan")
         summary_text.append(f"  Cleanup Time: {stats.cleanup_duration:.2f}s\n", style="cyan")
 
@@ -779,7 +779,7 @@ class SmartCleanupWorkflow:
             json.dump(report_data, f, indent=2)
 
         # Display export info
-        self.console.print(f"\n[green]Reports exported:[/green]")
+        self.console.print("\n[green]Reports exported:[/green]")
         self.console.print(f"  CSV: {csv_path}")
         self.console.print(f"  JSON: {json_path}")
 

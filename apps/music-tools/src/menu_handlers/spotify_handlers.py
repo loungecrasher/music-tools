@@ -2,10 +2,9 @@
 
 import logging
 
+from music_tools_common.cli import clear_screen
 from rich.console import Console
 from rich.prompt import Prompt
-
-from music_tools_common.cli import clear_screen
 
 logger = logging.getLogger(__name__)
 console = Console()

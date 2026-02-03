@@ -3,14 +3,14 @@
 Includes regression test for the tuple-unpacking bug at line 103.
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 from io import StringIO
+from pathlib import Path
+from unittest.mock import patch
 
+import pytest
+from conftest import make_duplicate_result, make_library_file, make_vetting_report
+from src.library.models import DuplicateResult, LibraryFile, VettingReport
 from src.library.new_music_processor import NewMusicProcessor, ProcessingResult
-from src.library.models import DuplicateResult, VettingReport, LibraryFile
-from conftest import make_library_file, make_duplicate_result, make_vetting_report
 
 
 class TestProcessingResult:

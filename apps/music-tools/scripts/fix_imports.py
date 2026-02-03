@@ -3,11 +3,10 @@
 Automatically fix missing imports in Python files.
 """
 import ast
-import os
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-from collections import defaultdict
 
 # Map of common undefined names to their import statements
 IMPORT_MAP = {
@@ -23,7 +22,7 @@ IMPORT_MAP = {
     'defaultdict': 'from collections import defaultdict',
     'Counter': 'from collections import Counter',
     'OrderedDict': 'from collections import OrderedDict',
-   'argparse': 'import argparse',
+    'argparse': 'import argparse',
     'subprocess': 'import subprocess',
     'shutil': 'import shutil',
     'glob': 'import glob',
@@ -64,6 +63,7 @@ IMPORT_MAP = {
     'UnicodeDecodeError': '',  # Built-in
     'UnicodeError': '',  # Built-in
 }
+
 
 class ImportFixer:
     """Fix missing imports in Python files."""
@@ -215,6 +215,7 @@ class ImportFixer:
 
         return False, []
 
+
 def fix_directory(directory: Path, pattern: str = "**/*.py") -> Dict[str, List[str]]:
     """Fix all Python files in a directory."""
     results = {}
@@ -230,6 +231,7 @@ def fix_directory(directory: Path, pattern: str = "**/*.py") -> Dict[str, List[s
                 print(f"Error fixing {py_file}: {e}")
 
     return results
+
 
 def main():
     """Main function."""
@@ -269,9 +271,10 @@ def main():
     print(f"Total files fixed: {len(all_results)}")
 
     if all_results:
-        print(f"\nFiles modified:")
+        print("\nFiles modified:")
         for file in sorted(all_results.keys()):
             print(f"  - {file}")
+
 
 if __name__ == "__main__":
     main()

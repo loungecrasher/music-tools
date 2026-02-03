@@ -2,12 +2,11 @@
 """
 Analyze all Python files for missing imports and other issues.
 """
-import os
 import ast
-import sys
-from pathlib import Path
-from typing import Dict, List, Set, Tuple
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict
+
 
 class ImportAnalyzer(ast.NodeVisitor):
     """Analyze Python code for imports and undefined names."""
@@ -62,6 +61,7 @@ class ImportAnalyzer(ast.NodeVisitor):
                 self.defined_names.add(target.id)
         self.generic_visit(node)
 
+
 def analyze_file(filepath: str) -> Dict:
     """Analyze a single Python file."""
     try:
@@ -106,6 +106,7 @@ def analyze_file(filepath: str) -> Dict:
             'filepath': filepath,
             'error': f'Error: {e}'
         }
+
 
 def main():
     """Main function."""
@@ -164,15 +165,16 @@ def main():
     print(f"Files with undefined names: {len(results['files_with_undefined'])}")
 
     if results['files_with_errors']:
-        print(f"\n\nFiles with errors:")
+        print("\n\nFiles with errors:")
         for item in results['files_with_errors']:
             print(f"  - {item['file']}: {item['error']}")
 
     if results['files_with_undefined']:
-        print(f"\n\nFiles with potentially undefined names:")
+        print("\n\nFiles with potentially undefined names:")
         for item in results['files_with_undefined'][:20]:  # Show first 20
             print(f"  - {item['file']}")
             print(f"    Missing: {', '.join(sorted(item['undefined']))}")
+
 
 if __name__ == "__main__":
     main()

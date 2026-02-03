@@ -3,9 +3,9 @@
 Quick validation script to verify Music Tools consolidation installation.
 """
 
-import os
 import sys
 from pathlib import Path
+
 
 def check_file(filepath, description):
     """Check if file exists and is readable."""
@@ -17,6 +17,7 @@ def check_file(filepath, description):
         print(f"❌ {description}: NOT FOUND - {filepath}")
         return False
 
+
 def test_import(module_path, module_name):
     """Test if a module can be imported."""
     try:
@@ -27,6 +28,7 @@ def test_import(module_path, module_name):
     except Exception as e:
         print(f"❌ Import {module_name}: FAILED - {e}")
         return False
+
 
 print("🧪 MUSIC TOOLS CONSOLIDATION - INSTALLATION VALIDATION")
 print("=" * 70)

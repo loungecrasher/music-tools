@@ -3,7 +3,8 @@ Configuration schemas for Music Tools.
 Uses Pydantic for validation and type safety.
 """
 from typing import Optional
-from pydantic import BaseModel, Field, EmailStr, HttpUrl
+
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
 
 class SpotifyConfig(BaseModel):

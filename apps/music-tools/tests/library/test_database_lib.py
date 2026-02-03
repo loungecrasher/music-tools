@@ -1,10 +1,11 @@
 """Tests for LibraryDatabase - SQLite persistence for music library indexing."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+from conftest import make_library_file
 from src.library.database import LibraryDatabase
 from src.library.models import LibraryFile, LibraryStatistics
-from conftest import make_library_file
 
 
 class TestLibraryDatabaseInit:
@@ -12,12 +13,12 @@ class TestLibraryDatabaseInit:
 
     def test_creates_database_file(self, tmp_path):
         db_path = str(tmp_path / "test.db")
-        db = LibraryDatabase(db_path)
+        LibraryDatabase(db_path)
         assert (tmp_path / "test.db").exists()
 
     def test_creates_parent_directories(self, tmp_path):
         db_path = str(tmp_path / "subdir" / "deep" / "test.db")
-        db = LibraryDatabase(db_path)
+        LibraryDatabase(db_path)
         assert Path(db_path).parent.exists()
 
     def test_empty_path_raises(self):

@@ -1,7 +1,7 @@
 """Tests for HistoryDatabase - candidate history tracking."""
 
+
 import pytest
-from datetime import datetime
 from src.library.history_db import HistoryDatabase
 
 
@@ -10,13 +10,13 @@ class TestHistoryDatabaseInit:
 
     def test_creates_database_file(self, tmp_path):
         db_path = str(tmp_path / "test_history.db")
-        db = HistoryDatabase(db_path=db_path)
+        HistoryDatabase(db_path=db_path)
         assert (tmp_path / "test_history.db").exists()
 
     def test_creates_table(self, tmp_path):
         import sqlite3
         db_path = str(tmp_path / "test_history.db")
-        db = HistoryDatabase(db_path=db_path)
+        HistoryDatabase(db_path=db_path)
 
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()

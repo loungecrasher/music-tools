@@ -3,10 +3,10 @@ Configuration management for the EDM Music Blog Scraper.
 Handles settings, validation, defaults, and scraping constants.
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, date, timedelta
-from typing import List, Dict, Optional, Tuple
 import re
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
+from typing import Dict, List, Optional, Tuple
 
 # ==========================================
 # Scraping Constants (Reconstructed)
@@ -30,9 +30,9 @@ USER_AGENTS = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 ]
 VALID_HOSTS = [
-    'sharing-db.club', 'edmblog.com', 'nfile.cc', 'novafile.org', 
-    'mediafire.com', 'mega.nz', 'dropbox.com', 'google.com', 
-    'drive.google.com', 'zippyshare.com', 'rapidshare.com', 
+    'sharing-db.club', 'edmblog.com', 'nfile.cc', 'novafile.org',
+    'mediafire.com', 'mega.nz', 'dropbox.com', 'google.com',
+    'drive.google.com', 'zippyshare.com', 'rapidshare.com',
     'depositfiles.com', 'soundcloud.com'
 ]
 
@@ -72,7 +72,7 @@ BLOG_POST_SELECTORS = [
     'a[href*="/blog"]',
     '.title a',
     '.headline a',
-    'div.post h2 a', # Specific for sharing-db.club
+    'div.post h2 a',  # Specific for sharing-db.club
 ]
 
 # CSS selectors for finding genre information
@@ -89,7 +89,7 @@ TITLE_SELECTORS = [
     '.post-title', '.entry-title', '.title',
     '[class*="title"]', '.headline',
     'h2.title', 'h2.entry-title', 'h3.post-title',
-    'div.post h2', # Specific for sharing-db.club
+    'div.post h2',  # Specific for sharing-db.club
     'h2', 'h1', 'title'
 ]
 
@@ -140,7 +140,7 @@ DATE_FORMATS = [
     '%d %B %Y',           # 15 January 2024
     '%d %b %Y',           # 15 Jan 2024
     '%Y-%m-%dT%H:%M:%S',  # 2024-01-15T14:30:25
-    '%Y-%m-%dT%H:%M:%SZ', # 2024-01-15T14:30:25Z
+    '%Y-%m-%dT%H:%M:%SZ',  # 2024-01-15T14:30:25Z
 ]
 
 # URL Patterns
@@ -197,6 +197,7 @@ RELEASE_IDENTIFIER_PATTERNS = [
 # New Configuration Classes
 # ==========================================
 
+
 @dataclass
 class ScraperSettings:
     """Data class to hold scraper settings."""
@@ -208,7 +209,7 @@ class ScraperSettings:
     output_filename: str = ""
     save_json: bool = False
     max_pages: int = 10
-    
+
     @property
     def is_valid(self) -> bool:
         """Check if essential settings are populated."""
@@ -217,9 +218,9 @@ class ScraperSettings:
 
 class ScraperConfig:
     """Manages configuration options and validation."""
-    
+
     DEFAULT_GENRES = DEFAULT_GENRES
-    
+
     @staticmethod
     def get_quick_date_ranges() -> Dict[str, Optional[date]]:
         """Get common date range presets."""
@@ -233,7 +234,7 @@ class ScraperConfig:
             'Last year': date(today.year - 1, 1, 1),
             'Custom range': None
         }
-    
+
     @staticmethod
     def validate_url(url: str) -> bool:
         """Validate blog URL."""
@@ -260,13 +261,13 @@ class ScraperConfig:
         """Calculate recommended pages based on date range."""
         if not start_date:
             return 10  # Default if no start date
-            
+
         # Calculate days difference
         if not end_date:
             end_date = datetime.now().date()
-            
+
         days_diff = (end_date - start_date).days
-        
+
         # Estimate: ~10 posts per page, maybe 1-2 days per page depending on blog volume
         # This is a rough heuristic
         if days_diff <= 7:

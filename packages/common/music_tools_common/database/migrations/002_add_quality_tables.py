@@ -23,12 +23,12 @@ Version: 002
 Created: 2026-01-08
 """
 
-import sqlite3
-import shutil
 import logging
-from typing import Tuple, Optional
+import shutil
+import sqlite3
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, Tuple
 
 # Configure logging
 logging.basicConfig(
@@ -45,7 +45,6 @@ MIGRATION_DESCRIPTION = 'Add file quality, deduplication history, and upgrade ca
 
 class MigrationError(Exception):
     """Custom exception for migration errors."""
-    pass
 
 
 def create_backup(db_path: str) -> str:
@@ -392,7 +391,7 @@ def migrate(db_path: str) -> Tuple[bool, str]:
 
         logger.info(f"Migration {MIGRATION_VERSION} completed successfully")
         logger.info(f"Tables created: {', '.join(created_tables)}")
-        logger.info(f"Indexes created: 20 performance indexes")
+        logger.info("Indexes created: 20 performance indexes")
         logger.info(f"Backup location: {backup_path}")
 
         return (True, f"Migration {MIGRATION_VERSION} applied successfully. Backup: {backup_path}")

@@ -1,12 +1,12 @@
 """Tests for retry utilities module."""
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 from music_tools_common.utils.retry import (
-    retry,
-    exponential_backoff,
     RetryError,
+    exponential_backoff,
+    retry,
 )
 
 

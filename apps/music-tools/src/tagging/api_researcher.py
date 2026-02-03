@@ -7,8 +7,8 @@ Direct API integration for artist country research using Anthropic's API.
 import logging
 import os
 import re
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ except ImportError:
 
 # Import core services
 from core.country_service import country_service
-from core.error_handler import with_error_handling, APIError
+from core.error_handler import APIError, with_error_handling
 
 
 @dataclass
@@ -184,7 +184,7 @@ Better to say "Unknown" than to provide incorrect information."""
                     current_artist_idx = int(numbered_match.group(1)) - 1
                     genre_content = numbered_match.group(2)
                     genre_content = re.sub(r'^\*\*|\*\*$', '', genre_content).strip()
-                    
+
                     # ENFORCE pipe format for genre
                     if '|' not in genre_content:
                         logger.warning(f"No pipes in genre, adding structure: {genre_content}")
@@ -203,7 +203,7 @@ Better to say "Unknown" than to provide incorrect information."""
                 elif line.startswith('GENRE:') or '**GENRE**:' in line:
                     genre_content = re.sub(r'.*(?:\*\*)?GENRE(?:\*\*)?\s*:\s*', '', line).strip()
                     genre_content = re.sub(r'^\*\*|\*\*$', '', genre_content).strip()
-                    
+
                     # ENFORCE pipe format for genre
                     if '|' not in genre_content:
                         logger.warning(f"No pipes in genre, adding structure: {genre_content}")

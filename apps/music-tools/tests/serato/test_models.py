@@ -1,14 +1,15 @@
 """Tests for Serato data models: TrackMetadata and CrateInfo."""
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add apps/music-tools to sys.path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.services.serato.models import TrackMetadata, CrateInfo
+from src.services.serato.models import CrateInfo, TrackMetadata
 
 
 class TestTrackMetadata:
