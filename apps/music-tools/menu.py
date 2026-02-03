@@ -41,6 +41,9 @@ try:
         run_spotify_playlist_manager,
         run_spotify_tracks_after_date,
         run_recent_tracks_aggregator,
+        run_serato_build_index,
+        run_serato_csv_to_crate,
+        run_serato_list_crates,
     )
 except ImportError as e:
     print(f"Error: Core modules not found. Please ensure music_tools_common is installed: {e}")
@@ -99,6 +102,7 @@ def display_enhanced_welcome() -> None:
     welcome_text.append("  EDM Blog Scraper - Find new music from EDM blogs\n", style="white")
     welcome_text.append("  AI Country Tagger - Tag files with country metadata\n", style="white")
     welcome_text.append("  Spotify Tools - Playlist management, date filters, aggregation\n", style="white")
+    welcome_text.append("  Serato Tools - Track indexing, CSV to crate, crate browser\n", style="white")
 
     welcome_text.append("\nUse the menu below to navigate through the available tools.\n", style="dim")
 
@@ -156,6 +160,16 @@ def main() -> None:
                         "Filter playlist tracks by release date")
     main_menu.add_option("Recent Tracks Aggregator", run_recent_tracks_aggregator,
                         "Aggregate recent adds from ALL playlists into one")
+
+    # Serato Tools submenu
+    serato_menu = main_menu.create_submenu("Serato Tools")
+    serato_menu.add_option("Build Track Index", run_serato_build_index,
+                          "Index music library for fast CSV import")
+    serato_menu.add_option("CSV to Crate", run_serato_csv_to_crate,
+                          "Import CSV playlist to Serato crate")
+    serato_menu.add_option("List Crates", run_serato_list_crates,
+                          "Browse your Serato crates")
+    serato_menu.set_exit_option("Back to Main Menu")
 
     # Set exit option for main menu
     main_menu.set_exit_option("Exit")

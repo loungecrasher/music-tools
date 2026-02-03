@@ -76,7 +76,17 @@ from .security import (
     SecureFileHandler
 )
 
+# Fuzzy matching
+from .fuzzy import (
+    find_best_match,
+    similarity_score,
+)
+
 __all__ = [
+    # Fuzzy matching
+    'find_best_match',
+    'similarity_score',
+
     # Decorators
     'handle_errors',
     'retry_decorator',

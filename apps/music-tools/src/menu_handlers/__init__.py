@@ -23,8 +23,14 @@ from .external_handlers import (
     run_edm_blog_scraper,
     run_music_country_tagger,
 )
+from .serato_handlers import (
+    run_serato_build_index,
+    run_serato_csv_to_crate,
+    run_serato_list_crates,
+)
 
 __all__ = [
+    # Library
     'run_process_new_music',
     'run_library_index',
     'run_library_vet',
@@ -32,11 +38,17 @@ __all__ = [
     'run_smart_cleanup_menu',
     'run_candidate_history_add',
     'run_candidate_history_check',
+    # Spotify
     'run_spotify_playlist_manager',
     'run_spotify_tracks_after_date',
     'run_spotify_collect_from_folder',
     'run_recent_tracks_aggregator',
+    # External
     'run_tool',
     'run_edm_blog_scraper',
     'run_music_country_tagger',
+    # Serato
+    'run_serato_build_index',
+    'run_serato_csv_to_crate',
+    'run_serato_list_crates',
 ]
