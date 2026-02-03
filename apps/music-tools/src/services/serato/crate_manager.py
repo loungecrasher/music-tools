@@ -1,5 +1,4 @@
 """Manage Serato crate files -- read, create, and list crate families."""
-import glob
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Callable
@@ -70,8 +69,7 @@ class CrateManager:
             logger.error("Subcrates directory not found: %s", self.subcrates_dir)
             return []
 
-        pattern = str(self.subcrates_dir / f"{source_crate}*.crate")
-        return [Path(p) for p in sorted(glob.glob(pattern))]
+        return sorted(self.subcrates_dir.glob(f"{source_crate}*.crate"))
 
     def get_crate_tracks(self, crate_path: Path) -> List[str]:
         """Load a single crate and return track paths with leading ``/``."""

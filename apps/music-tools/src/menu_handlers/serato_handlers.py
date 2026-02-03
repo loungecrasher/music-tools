@@ -11,7 +11,7 @@ from rich.table import Table
 from rich.prompt import Prompt
 
 from music_tools_common import setup_logger
-from music_tools_common.cli import clear_screen, pause
+from music_tools_common.cli import clear_screen
 
 logger = setup_logger('music_tools.menu.serato')
 console = Console()
@@ -76,17 +76,25 @@ def run_serato_csv_to_crate() -> None:
     # Load existing index
     try:
         index = SeratoTrackIndex()
-        if not index.load():
+        count = index.load()
+        if count == 0:
             console.print(
-                "[bold red]Error:[/bold red] Track index not found at "
-                f"{index.index_path}"
+                "[bold yellow]Warning:[/bold yellow] Track index is empty "
+                f"({index.index_path})"
             )
             console.print(
-                "\nPlease run [cyan]'Build Track Index'[/cyan] first to "
-                "create the index."
+                "You may want to rebuild it with [cyan]'Build Track Index'[/cyan]."
             )
-            Prompt.ask("\nPress Enter to continue")
-            return
+    except FileNotFoundError:
+        console.print(
+            "[bold red]Error:[/bold red] Track index not found."
+        )
+        console.print(
+            "\nPlease run [cyan]'Build Track Index'[/cyan] first to "
+            "create the index."
+        )
+        Prompt.ask("\nPress Enter to continue")
+        return
     except Exception as e:
         console.print(f"[bold red]Error loading index:[/bold red] {e}")
         logger.error("Failed to load Serato track index: %s", e, exc_info=True)
@@ -130,7 +138,7 @@ def run_serato_csv_to_crate() -> None:
     console.print(f"Threshold: {threshold}")
 
     try:
-        importer = CSVImporter(index, console=console)
+        importer = CSVImporter(index)
         result = importer.import_csv_to_crate(csv_path, crate_name, threshold)
         _display_import_results(result)
     except Exception as e:
