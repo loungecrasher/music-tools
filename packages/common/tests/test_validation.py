@@ -1,14 +1,10 @@
 """
 Tests for validation utilities.
 """
-import sys
 from pathlib import Path
 
 import pytest
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from config.validation import (
+from music_tools_common.config.validation import (
     validate_anthropic_config,
     validate_config,
     validate_deezer_config,

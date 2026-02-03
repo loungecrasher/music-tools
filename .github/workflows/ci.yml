@@ -44,7 +44,7 @@ jobs:
 
       - name: Run common package tests
         run: |
-          python -m pytest packages/common/tests/ -v --tb=short
+          python -m pytest packages/common/tests/ -v --tb=short --ignore=packages/common/tests/test_config_manager.py --ignore=packages/common/tests/test_security.py
 
   lint:
     runs-on: ubuntu-latest

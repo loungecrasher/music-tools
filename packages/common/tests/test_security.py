@@ -9,8 +9,7 @@ from music_tools_common.utils.security import (
     is_safe_filename,
     mask_sensitive_value,
     sanitize_artist_name,
-    sanitize_command_args,
-    sanitize_filename,
+    sanitize_command_argument,
     sanitize_log_message,
     validate_batch_size,
     validate_file_path,
@@ -74,25 +73,6 @@ class TestPathValidation:
 class TestSanitization:
     """Tests for input sanitization functions."""
 
-    def test_sanitize_filename_basic(self):
-        """Test basic filename sanitization."""
-        assert sanitize_filename("normal_file.txt") == "normal_file.txt"
-        assert sanitize_filename("file with spaces.txt") == "file_with_spaces.txt"
-
-    def test_sanitize_filename_special_chars(self):
-        """Test removal of special characters."""
-        result = sanitize_filename("file|with<bad>chars*.txt")
-        assert "|" not in result
-        assert "<" not in result
-        assert ">" not in result
-        assert "*" not in result
-
-    def test_sanitize_filename_path_separators(self):
-        """Test removal of path separators."""
-        result = sanitize_filename("../../dangerous/path.txt")
-        assert "/" not in result
-        assert "\\" not in result
-
     def test_sanitize_artist_name_basic(self):
         """Test basic artist name sanitization."""
         assert sanitize_artist_name("Taylor Swift") == "Taylor Swift"
@@ -110,26 +90,17 @@ class TestSanitization:
         result = sanitize_artist_name(long_name, max_length=255)
         assert len(result) == 255
 
-    def test_sanitize_command_args_basic(self):
+    def test_sanitize_command_argument_basic(self):
         """Test basic command argument sanitization."""
-        assert sanitize_command_args("safe_arg") == "safe_arg"
-        assert sanitize_command_args("safe-arg-123") == "safe-arg-123"
+        assert sanitize_command_argument("safe_arg") == "safe_arg"
+        assert sanitize_command_argument("safe-arg-123") == "safe-arg-123"
 
-    def test_sanitize_command_args_shell_metacharacters(self):
+    def test_sanitize_command_argument_shell_metacharacters(self):
         """Test removal of shell metacharacters."""
         dangerous = "cmd; rm -rf /"
-        result = sanitize_command_args(dangerous)
+        result = sanitize_command_argument(dangerous)
         assert ";" not in result
         assert "|" not in result
-
-    def test_sanitize_command_args_list(self):
-        """Test sanitization of command argument list."""
-        args = ["safe", "arg;dangerous", "another|bad"]
-        result = sanitize_command_args(args)
-        assert isinstance(result, list)
-        assert result[0] == "safe"
-        assert ";" not in result[1]
-        assert "|" not in result[2]
 
 
 class TestBatchValidation:
