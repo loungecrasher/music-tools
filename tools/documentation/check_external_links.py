@@ -4,9 +4,9 @@ Check external links (sample basis)
 """
 
 import json
-import urllib.request
-import urllib.error
 import ssl
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 # Get the directory where this script is located
@@ -14,7 +14,7 @@ SCRIPT_DIR = Path(__file__).parent.resolve()
 BASE_DIR = SCRIPT_DIR
 
 # Load validation results
-with open(BASE_DIR / "validation_results.json", 'r') as f:
+with open(BASE_DIR / "validation_results.json", "r") as f:
     results = json.load(f)
 
 # Create SSL context that doesn't verify certificates (for testing)
@@ -22,10 +22,11 @@ ssl_context = ssl.create_default_context()
 ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
+
 def check_url(url, timeout=10):
     """Check if URL is accessible"""
     try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=timeout, context=ssl_context) as response:
             return True, response.getcode()
     except urllib.error.HTTPError as e:
@@ -35,6 +36,7 @@ def check_url(url, timeout=10):
     except Exception as e:
         return False, f"Error: {str(e)}"
 
+
 print("=" * 80)
 print("CHECKING EXTERNAL LINKS (Sample)")
 print("=" * 80)
@@ -42,11 +44,11 @@ print()
 
 # Get unique external URLs
 external_urls = {}
-for link in results['external_links']['urls']:
-    url = link['url']
+for link in results["external_links"]["urls"]:
+    url = link["url"]
     if url not in external_urls:
         external_urls[url] = []
-    external_urls[url].append(link['file'])
+    external_urls[url].append(link["file"])
 
 print(f"Found {len(external_urls)} unique external URLs")
 print()
@@ -85,10 +87,10 @@ summary = {
     "checked": checked,
     "working": working,
     "failed": broken,
-    "all_urls": list(external_urls.keys())
+    "all_urls": list(external_urls.keys()),
 }
 
-with open(BASE_DIR / "external_links_check.json", 'w') as f:
+with open(BASE_DIR / "external_links_check.json", "w") as f:
     json.dump(summary, f, indent=2)
 
 print(f"Results saved to: {BASE_DIR / 'external_links_check.json'}")

@@ -11,22 +11,22 @@ Simulates a complete real-world usage scenario:
 6. Check report generation
 """
 
-import sys
-import os
-import tempfile
-import shutil
-import json
-from pathlib import Path
-from datetime import datetime
 import hashlib
+import json
+import os
+import shutil
+import sys
+import tempfile
+from datetime import datetime
+from pathlib import Path
 
 # Color codes
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-CYAN = '\033[96m'
-RESET = '\033[0m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+CYAN = "\033[96m"
+RESET = "\033[0m"
 
 
 class E2ETestRunner:
@@ -46,12 +46,12 @@ class E2ETestRunner:
     def log_success(self, message: str):
         """Log success"""
         print(f"{GREEN}  ✓{RESET} {message}")
-        self.results.append(('success', message))
+        self.results.append(("success", message))
 
     def log_error(self, message: str):
         """Log error"""
         print(f"{RED}  ✗{RESET} {message}")
-        self.results.append(('error', message))
+        self.results.append(("error", message))
 
     def log_info(self, message: str):
         """Log info"""
@@ -140,8 +140,9 @@ class E2ETestRunner:
             self.log_success("Created nested duplicates across albums")
 
             # Count total files
-            total_files = sum(1 for _ in self.library_path.rglob("*.mp3")) + \
-                         sum(1 for _ in self.library_path.rglob("*.flac"))
+            total_files = sum(1 for _ in self.library_path.rglob("*.mp3")) + sum(
+                1 for _ in self.library_path.rglob("*.flac")
+            )
 
             self.log_info(f"Total files created: {total_files}")
 
@@ -160,8 +161,8 @@ class E2ETestRunner:
             project_root = Path(__file__).parent.parent
             sys.path.insert(0, str(project_root))
 
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             # Initialize workflow
             db_manager = DatabaseManager(str(self.db_path))
@@ -179,14 +180,14 @@ class E2ETestRunner:
             # Validate results
             self.log_success("Scan completed successfully")
 
-            if 'total_files' in scan_results:
+            if "total_files" in scan_results:
                 self.log_info(f"Total files scanned: {scan_results['total_files']}")
 
-            if 'total_duplicates' in scan_results:
+            if "total_duplicates" in scan_results:
                 self.log_info(f"Duplicates found: {scan_results['total_duplicates']}")
 
-            if 'duplicate_groups' in scan_results:
-                groups = scan_results['duplicate_groups']
+            if "duplicate_groups" in scan_results:
+                groups = scan_results["duplicate_groups"]
                 self.log_info(f"Duplicate groups: {len(groups)}")
 
                 for i, group in enumerate(groups[:3], 1):
@@ -203,6 +204,7 @@ class E2ETestRunner:
         except Exception as e:
             self.log_error(f"Scan failed: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -211,24 +213,24 @@ class E2ETestRunner:
         self.log_step(4, 7, "Verifying duplicate detection")
 
         try:
-            if not hasattr(self, 'scan_results'):
+            if not hasattr(self, "scan_results"):
                 self.log_error("No scan results available")
                 return False
 
             results = self.scan_results
 
             # Check that exact duplicates were found
-            if 'duplicate_groups' in results and len(results['duplicate_groups']) > 0:
+            if "duplicate_groups" in results and len(results["duplicate_groups"]) > 0:
                 self.log_success("Duplicate groups detected")
 
                 # Verify exact duplicate group
                 found_exact_duplicates = False
-                for group in results['duplicate_groups']:
-                    files = group.get('files', [])
+                for group in results["duplicate_groups"]:
+                    files = group.get("files", [])
                     if len(files) >= 3:
                         # Check if these are our exact duplicates
                         filenames = [Path(f).name for f in files]
-                        if any('track1' in name for name in filenames):
+                        if any("track1" in name for name in filenames):
                             found_exact_duplicates = True
                             self.log_success(f"Found exact duplicate group: {len(files)} files")
                             break
@@ -253,8 +255,8 @@ class E2ETestRunner:
         self.log_step(5, 7, "Executing safe deletion (dry-run)")
 
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             db_manager = DatabaseManager(str(self.db_path))
             workflow = SmartCleanupWorkflow(str(self.library_path), db_manager)
@@ -270,22 +272,22 @@ class E2ETestRunner:
 
             self.log_success("Dry-run deletion completed")
 
-            if 'files_to_delete' in deletion_results:
-                count = len(deletion_results['files_to_delete'])
+            if "files_to_delete" in deletion_results:
+                count = len(deletion_results["files_to_delete"])
                 self.log_info(f"Files that would be deleted: {count}")
 
                 # Show first few files
-                for file_path in deletion_results['files_to_delete'][:3]:
+                for file_path in deletion_results["files_to_delete"][:3]:
                     self.log_info(f"  - {Path(file_path).name}")
 
-            if 'space_to_free' in deletion_results:
-                space_mb = deletion_results['space_to_free'] / (1024 * 1024)
+            if "space_to_free" in deletion_results:
+                space_mb = deletion_results["space_to_free"] / (1024 * 1024)
                 self.log_info(f"Space that would be freed: {space_mb:.2f} MB")
 
             # Verify files still exist (dry run should not delete)
             all_files_exist = True
-            if 'files_to_delete' in deletion_results:
-                for file_path in deletion_results['files_to_delete']:
+            if "files_to_delete" in deletion_results:
+                for file_path in deletion_results["files_to_delete"]:
                     if not Path(file_path).exists():
                         self.log_error(f"File was deleted in dry-run: {file_path}")
                         all_files_exist = False
@@ -301,6 +303,7 @@ class E2ETestRunner:
         except Exception as e:
             self.log_error(f"Deletion dry-run failed: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -320,7 +323,7 @@ class E2ETestRunner:
 
             result = safe_delete.delete_with_backup(str(test_file), dry_run=True)
 
-            if result and (result.get('success') or 'would_delete' in result):
+            if result and (result.get("success") or "would_delete" in result):
                 self.log_success("Backup functionality validated")
             else:
                 self.log_info("Backup test completed (result format may vary)")
@@ -344,14 +347,14 @@ class E2ETestRunner:
         self.log_step(7, 7, "Checking report generation")
 
         try:
-            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
             from apps.music_tools.core.database_manager import DatabaseManager
+            from apps.music_tools.core.smart_cleanup import SmartCleanupWorkflow
 
             db_manager = DatabaseManager(str(self.db_path))
             workflow = SmartCleanupWorkflow(str(self.library_path), db_manager)
 
             # Generate report
-            if hasattr(workflow, 'generate_report'):
+            if hasattr(workflow, "generate_report"):
                 report = workflow.generate_report()
 
                 if report:
@@ -359,7 +362,7 @@ class E2ETestRunner:
 
                     # Save report to file
                     report_path = self.test_dir / "scan_report.json"
-                    with open(report_path, 'w') as f:
+                    with open(report_path, "w") as f:
                         json.dump(report, f, indent=2)
 
                     self.log_info(f"Report saved to: {report_path}")
@@ -395,7 +398,7 @@ class E2ETestRunner:
         print(f"{BLUE}END-TO-END TEST REPORT{RESET}")
         print(f"{BLUE}{'='*70}{RESET}\n")
 
-        success_count = sum(1 for r in self.results if r[0] == 'success')
+        success_count = sum(1 for r in self.results if r[0] == "success")
         total_count = len(self.results)
 
         print(f"Total Checks: {total_count}")
@@ -439,6 +442,7 @@ class E2ETestRunner:
         except Exception as e:
             print(f"\n{RED}Unexpected error: {e}{RESET}")
             import traceback
+
             traceback.print_exc()
             return False
         finally:

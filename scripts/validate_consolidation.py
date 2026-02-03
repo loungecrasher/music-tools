@@ -11,19 +11,19 @@ Validates that all Smart Cleanup components are properly integrated:
 - Documentation
 """
 
-import sys
-import os
 import importlib
+import os
 import sqlite3
+import sys
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 # Color codes for terminal output
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-RESET = '\033[0m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
 
 
 class ConsolidationValidator:
@@ -38,19 +38,19 @@ class ConsolidationValidator:
     def log_success(self, message: str):
         """Log successful validation"""
         print(f"{GREEN}✓{RESET} {message}")
-        self.results.append(('success', message))
+        self.results.append(("success", message))
 
     def log_error(self, message: str):
         """Log validation error"""
         print(f"{RED}✗{RESET} {message}")
         self.errors.append(message)
-        self.results.append(('error', message))
+        self.results.append(("error", message))
 
     def log_warning(self, message: str):
         """Log validation warning"""
         print(f"{YELLOW}⚠{RESET} {message}")
         self.warnings.append(message)
-        self.results.append(('warning', message))
+        self.results.append(("warning", message))
 
     def log_info(self, message: str):
         """Log informational message"""
@@ -61,11 +61,11 @@ class ConsolidationValidator:
         self.log_info("\n[1/7] Validating Module Structure...")
 
         required_modules = [
-            'apps/music-tools/core/smart_cleanup.py',
-            'apps/music-tools/core/duplicate_scanner.py',
-            'apps/music-tools/core/quality_analyzer.py',
-            'apps/music-tools/core/safe_delete.py',
-            'apps/music-tools/core/database_manager.py',
+            "apps/music-tools/core/smart_cleanup.py",
+            "apps/music-tools/core/duplicate_scanner.py",
+            "apps/music-tools/core/quality_analyzer.py",
+            "apps/music-tools/core/safe_delete.py",
+            "apps/music-tools/core/database_manager.py",
         ]
 
         all_exist = True
@@ -87,11 +87,11 @@ class ConsolidationValidator:
         sys.path.insert(0, str(self.project_root))
 
         modules_to_test = [
-            'apps.music_tools.core.smart_cleanup',
-            'apps.music_tools.core.duplicate_scanner',
-            'apps.music_tools.core.quality_analyzer',
-            'apps.music_tools.core.safe_delete',
-            'apps.music_tools.core.database_manager',
+            "apps.music_tools.core.smart_cleanup",
+            "apps.music_tools.core.duplicate_scanner",
+            "apps.music_tools.core.quality_analyzer",
+            "apps.music_tools.core.safe_delete",
+            "apps.music_tools.core.database_manager",
         ]
 
         all_imported = True
@@ -101,32 +101,32 @@ class ConsolidationValidator:
                 self.log_success(f"Imported: {module_name}")
 
                 # Validate key classes exist
-                if 'smart_cleanup' in module_name:
-                    if hasattr(module, 'SmartCleanupWorkflow'):
+                if "smart_cleanup" in module_name:
+                    if hasattr(module, "SmartCleanupWorkflow"):
                         self.log_success(f"  - SmartCleanupWorkflow class found")
                     else:
                         self.log_warning(f"  - SmartCleanupWorkflow class missing")
 
-                if 'duplicate_scanner' in module_name:
-                    if hasattr(module, 'DuplicateScanner'):
+                if "duplicate_scanner" in module_name:
+                    if hasattr(module, "DuplicateScanner"):
                         self.log_success(f"  - DuplicateScanner class found")
                     else:
                         self.log_warning(f"  - DuplicateScanner class missing")
 
-                if 'quality_analyzer' in module_name:
-                    if hasattr(module, 'QualityAnalyzer'):
+                if "quality_analyzer" in module_name:
+                    if hasattr(module, "QualityAnalyzer"):
                         self.log_success(f"  - QualityAnalyzer class found")
                     else:
                         self.log_warning(f"  - QualityAnalyzer class missing")
 
-                if 'safe_delete' in module_name:
-                    if hasattr(module, 'SafeDelete'):
+                if "safe_delete" in module_name:
+                    if hasattr(module, "SafeDelete"):
                         self.log_success(f"  - SafeDelete class found")
                     else:
                         self.log_warning(f"  - SafeDelete class missing")
 
-                if 'database_manager' in module_name:
-                    if hasattr(module, 'DatabaseManager'):
+                if "database_manager" in module_name:
+                    if hasattr(module, "DatabaseManager"):
                         self.log_success(f"  - DatabaseManager class found")
                     else:
                         self.log_warning(f"  - DatabaseManager class missing")
@@ -157,10 +157,12 @@ class ConsolidationValidator:
             conn = sqlite3.connect(str(test_db))
             cursor = conn.cursor()
 
-            required_tables = ['duplicate_scans', 'duplicate_files', 'deletion_history']
+            required_tables = ["duplicate_scans", "duplicate_files", "deletion_history"]
 
             for table in required_tables:
-                cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
+                cursor.execute(
+                    f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,)
+                )
                 if cursor.fetchone():
                     self.log_success(f"Table exists: {table}")
                 else:
@@ -194,11 +196,11 @@ class ConsolidationValidator:
 
         try:
             # Read menu file
-            with open(menu_path, 'r') as f:
+            with open(menu_path, "r") as f:
                 menu_content = f.read()
 
             # Check for Smart Cleanup references
-            if 'smart_cleanup' in menu_content.lower() or 'Smart Cleanup' in menu_content:
+            if "smart_cleanup" in menu_content.lower() or "Smart Cleanup" in menu_content:
                 self.log_success("Smart Cleanup referenced in Menu.py")
             else:
                 self.log_warning("Smart Cleanup not found in Menu.py")
@@ -206,9 +208,10 @@ class ConsolidationValidator:
             # Try to import and check methods
             try:
                 from apps.music_tools.menu import Menu
+
                 menu = Menu()
 
-                if hasattr(menu, 'smart_cleanup') or hasattr(menu, 'run_smart_cleanup'):
+                if hasattr(menu, "smart_cleanup") or hasattr(menu, "run_smart_cleanup"):
                     self.log_success("Smart Cleanup method exists in Menu class")
                 else:
                     self.log_warning("Smart Cleanup method not found in Menu class")
@@ -233,10 +236,10 @@ class ConsolidationValidator:
             return True
 
         try:
-            with open(cli_path, 'r') as f:
+            with open(cli_path, "r") as f:
                 cli_content = f.read()
 
-            expected_commands = ['scan', 'deduplicate', 'upgrades']
+            expected_commands = ["scan", "deduplicate", "upgrades"]
 
             for cmd in expected_commands:
                 if cmd in cli_content:
@@ -255,10 +258,10 @@ class ConsolidationValidator:
         self.log_info("\n[6/7] Validating Test Suite...")
 
         test_files = [
-            'apps/music-tools/tests/integration/test_smart_cleanup_integration.py',
-            'apps/music-tools/tests/unit/test_duplicate_scanner.py',
-            'apps/music-tools/tests/unit/test_quality_analyzer.py',
-            'apps/music-tools/tests/unit/test_safe_delete.py',
+            "apps/music-tools/tests/integration/test_smart_cleanup_integration.py",
+            "apps/music-tools/tests/unit/test_duplicate_scanner.py",
+            "apps/music-tools/tests/unit/test_quality_analyzer.py",
+            "apps/music-tools/tests/unit/test_safe_delete.py",
         ]
 
         tests_exist = True
@@ -273,16 +276,17 @@ class ConsolidationValidator:
         # Try to run tests
         try:
             import subprocess
+
             test_dir = self.project_root / "apps/music-tools/tests"
 
             if test_dir.exists():
                 self.log_info("Attempting to run tests...")
                 result = subprocess.run(
-                    ['python', '-m', 'pytest', str(test_dir), '-v', '--tb=short'],
+                    ["python", "-m", "pytest", str(test_dir), "-v", "--tb=short"],
                     cwd=str(self.project_root),
                     capture_output=True,
                     text=True,
-                    timeout=60
+                    timeout=60,
                 )
 
                 if result.returncode == 0:
@@ -302,9 +306,9 @@ class ConsolidationValidator:
         self.log_info("\n[7/7] Validating Documentation...")
 
         doc_files = [
-            'Music Tools Dev/docs/CONSOLIDATION_PLAN.md',
-            'Music Tools Dev/docs/IMPLEMENTATION_CHECKLIST.md',
-            'Music Tools Dev/docs/TESTING_STRATEGY.md',
+            "Music Tools Dev/docs/CONSOLIDATION_PLAN.md",
+            "Music Tools Dev/docs/IMPLEMENTATION_CHECKLIST.md",
+            "Music Tools Dev/docs/TESTING_STRATEGY.md",
         ]
 
         docs_exist = True
@@ -324,7 +328,7 @@ class ConsolidationValidator:
         print(f"{BLUE}CONSOLIDATION VALIDATION REPORT{RESET}")
         print(f"{BLUE}{'='*60}{RESET}\n")
 
-        success_count = sum(1 for r in self.results if r[0] == 'success')
+        success_count = sum(1 for r in self.results if r[0] == "success")
         error_count = len(self.errors)
         warning_count = len(self.warnings)
 

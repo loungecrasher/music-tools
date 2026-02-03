@@ -4,12 +4,12 @@ Documentation Validation Script
 Validates all markdown links, cross-references, and technical accuracy
 """
 
+import json
 import os
 import re
-from pathlib import Path
-from urllib.parse import urlparse, unquote
 from collections import defaultdict
-import json
+from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 # Base directory - use relative path from script location
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -27,51 +27,53 @@ results = {
     "todos_found": [],
     "coming_soon": [],
     "formatting_issues": [],
-    "files_processed": []
+    "files_processed": [],
 }
+
 
 def extract_links_from_file(file_path):
     """Extract all markdown links from a file"""
     links = []
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Find markdown links: [text](url)
-        link_pattern = r'\[([^\]]+)\]\(([^\)]+)\)'
+        link_pattern = r"\[([^\]]+)\]\(([^\)]+)\)"
         matches = re.findall(link_pattern, content)
 
         for text, url in matches:
-            links.append({
-                "text": text,
-                "url": url,
-                "line": None  # Could enhance to track line numbers
-            })
+            links.append(
+                {"text": text, "url": url, "line": None}  # Could enhance to track line numbers
+            )
 
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
 
     return links
 
+
 def is_external_url(url):
     """Check if URL is external (http/https)"""
-    return url.startswith('http://') or url.startswith('https://')
+    return url.startswith("http://") or url.startswith("https://")
+
 
 def is_anchor_link(url):
     """Check if URL is just an anchor (#section)"""
-    return url.startswith('#')
+    return url.startswith("#")
+
 
 def resolve_relative_path(current_file, link_url):
     """Resolve relative path from current file to linked file"""
     # Remove anchor if present
-    link_url = link_url.split('#')[0]
+    link_url = link_url.split("#")[0]
     if not link_url:
         return None
 
     current_dir = Path(current_file).parent
 
     # Handle absolute paths from docs root
-    if link_url.startswith('/'):
+    if link_url.startswith("/"):
         target_path = DOCS_DIR / link_url[1:]
     else:
         # Relative path
@@ -85,6 +87,7 @@ def resolve_relative_path(current_file, link_url):
 
     return target_path
 
+
 def validate_internal_link(current_file, link_url):
     """Validate an internal link points to existing file"""
     target_path = resolve_relative_path(current_file, link_url)
@@ -97,51 +100,45 @@ def validate_internal_link(current_file, link_url):
     else:
         return False, f"File not found: {target_path}"
 
+
 def find_todos_and_coming_soon(file_path):
     """Find TODO markers and 'coming soon' sections"""
     todos = []
     coming_soon = []
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         for i, line in enumerate(lines, 1):
             # Look for TODO markers
-            if re.search(r'\bTODO\b|\bFIXME\b|\bXXX\b', line, re.IGNORECASE):
-                todos.append({
-                    "file": str(file_path),
-                    "line": i,
-                    "content": line.strip()
-                })
+            if re.search(r"\bTODO\b|\bFIXME\b|\bXXX\b", line, re.IGNORECASE):
+                todos.append({"file": str(file_path), "line": i, "content": line.strip()})
 
             # Look for "coming soon"
-            if re.search(r'coming soon', line, re.IGNORECASE):
-                coming_soon.append({
-                    "file": str(file_path),
-                    "line": i,
-                    "content": line.strip()
-                })
+            if re.search(r"coming soon", line, re.IGNORECASE):
+                coming_soon.append({"file": str(file_path), "line": i, "content": line.strip()})
 
     except Exception as e:
         print(f"Error scanning {file_path}: {e}")
 
     return todos, coming_soon
 
+
 def check_code_references(file_path):
     """Check for references to code files"""
     code_refs = []
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Look for patterns like "in file.py" or "file.py line 45"
         patterns = [
-            r'`([a-zA-Z0-9_\-/]+\.py)`',
-            r'`([a-zA-Z0-9_\-/]+\.js)`',
-            r'`([a-zA-Z0-9_\-/]+\.ts)`',
-            r'\b([a-zA-Z0-9_\-/]+\.py)\s+line\s+\d+',
+            r"`([a-zA-Z0-9_\-/]+\.py)`",
+            r"`([a-zA-Z0-9_\-/]+\.js)`",
+            r"`([a-zA-Z0-9_\-/]+\.ts)`",
+            r"\b([a-zA-Z0-9_\-/]+\.py)\s+line\s+\d+",
         ]
 
         for pattern in patterns:
@@ -153,6 +150,7 @@ def check_code_references(file_path):
         print(f"Error checking code refs in {file_path}: {e}")
 
     return code_refs
+
 
 def validate_code_file(code_path):
     """Check if a referenced code file exists"""
@@ -168,6 +166,7 @@ def validate_code_file(code_path):
             return True, str(path)
 
     return False, None
+
 
 def main():
     """Main validation process"""
@@ -200,11 +199,9 @@ def main():
             if is_external_url(url):
                 # External link
                 results["external_links"]["total"] += 1
-                results["external_links"]["urls"].append({
-                    "file": str(rel_path),
-                    "url": url,
-                    "text": link["text"]
-                })
+                results["external_links"]["urls"].append(
+                    {"file": str(rel_path), "url": url, "text": link["text"]}
+                )
 
             elif is_anchor_link(url):
                 # Anchor link - skip for now
@@ -216,17 +213,13 @@ def main():
                 is_valid, message = validate_internal_link(md_file, url)
 
                 if is_valid:
-                    results["internal_links"]["working"].append({
-                        "file": str(rel_path),
-                        "url": url,
-                        "target": message
-                    })
+                    results["internal_links"]["working"].append(
+                        {"file": str(rel_path), "url": url, "target": message}
+                    )
                 else:
-                    results["internal_links"]["broken"].append({
-                        "file": str(rel_path),
-                        "url": url,
-                        "error": message
-                    })
+                    results["internal_links"]["broken"].append(
+                        {"file": str(rel_path), "url": url, "error": message}
+                    )
 
         # Find TODOs and coming soon
         todos, coming_soon = find_todos_and_coming_soon(md_file)
@@ -240,20 +233,17 @@ def main():
             is_valid, path = validate_code_file(code_ref)
 
             if is_valid:
-                results["code_references"]["valid"].append({
-                    "file": str(rel_path),
-                    "reference": code_ref,
-                    "resolved": path
-                })
+                results["code_references"]["valid"].append(
+                    {"file": str(rel_path), "reference": code_ref, "resolved": path}
+                )
             else:
-                results["code_references"]["invalid"].append({
-                    "file": str(rel_path),
-                    "reference": code_ref
-                })
+                results["code_references"]["invalid"].append(
+                    {"file": str(rel_path), "reference": code_ref}
+                )
 
     # Save results
     output_file = BASE_DIR / "validation_results.json"
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 
     print()
@@ -276,6 +266,7 @@ def main():
     print(f"Results saved to: {output_file}")
 
     return results
+
 
 if __name__ == "__main__":
     main()

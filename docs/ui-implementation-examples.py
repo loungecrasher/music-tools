@@ -7,23 +7,28 @@ This file contains ready-to-use code snippets that implement the UI/UX design
 specified in ui-design-smart-cleanup.md
 """
 
-from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
+from rich import box
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.progress import (
-    Progress, SpinnerColumn, TextColumn, BarColumn,
-    TaskProgressColumn, TimeElapsedColumn, TimeRemainingColumn
-)
-from rich.prompt import Prompt, Confirm
-from rich.text import Text
 from rich.layout import Layout
 from rich.live import Live
-from rich import box
+from rich.panel import Panel
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
+from rich.text import Text
 
 # Initialize console
 console = Console()
@@ -34,41 +39,41 @@ console = Console()
 # ============================================================================
 
 QUALITY_COLORS = {
-    'excellent': 'bright_green',    # FLAC, high-bitrate lossless
-    'good': 'green',                # 320kbps MP3, AAC
-    'acceptable': 'yellow',         # 192-256kbps MP3
-    'poor': 'orange',               # 128-192kbps MP3
-    'very_poor': 'red',             # <128kbps MP3
-    'unknown': 'dim'                # Unable to determine
+    "excellent": "bright_green",  # FLAC, high-bitrate lossless
+    "good": "green",  # 320kbps MP3, AAC
+    "acceptable": "yellow",  # 192-256kbps MP3
+    "poor": "orange",  # 128-192kbps MP3
+    "very_poor": "red",  # <128kbps MP3
+    "unknown": "dim",  # Unable to determine
 }
 
 FORMAT_COLORS = {
-    'FLAC': 'bright_green',
-    'ALAC': 'bright_green',
-    'WAV': 'green',
-    'MP3': 'yellow',
-    'AAC': 'yellow',
-    'M4A': 'yellow',
-    'OGG': 'cyan',
+    "FLAC": "bright_green",
+    "ALAC": "bright_green",
+    "WAV": "green",
+    "MP3": "yellow",
+    "AAC": "yellow",
+    "M4A": "yellow",
+    "OGG": "cyan",
 }
 
 STATUS_COLORS = {
-    'scanning': 'cyan',
-    'analyzing': 'blue',
-    'comparing': 'magenta',
-    'ready': 'green',
-    'processing': 'yellow',
-    'complete': 'bright_green',
-    'error': 'red',
+    "scanning": "cyan",
+    "analyzing": "blue",
+    "comparing": "magenta",
+    "ready": "green",
+    "processing": "yellow",
+    "complete": "bright_green",
+    "error": "red",
 }
 
 # Pattern indicators for accessibility (color-blind support)
 PATTERN_INDICATORS = {
-    'excellent': '▓▓▓▓▓',
-    'good': '▓▓▓▓░',
-    'acceptable': '▓▓▓░░',
-    'poor': '▓▓░░░',
-    'very_poor': '▓░░░░',
+    "excellent": "▓▓▓▓▓",
+    "good": "▓▓▓▓░",
+    "acceptable": "▓▓▓░░",
+    "poor": "▓▓░░░",
+    "very_poor": "▓░░░░",
 }
 
 
@@ -76,9 +81,11 @@ PATTERN_INDICATORS = {
 # DATA MODELS
 # ============================================================================
 
+
 @dataclass
 class FileMetadata:
     """Metadata for an audio file."""
+
     path: str
     filename: str
     format: str
@@ -101,17 +108,13 @@ class FileMetadata:
     @property
     def metadata_complete(self) -> bool:
         """Check if all essential metadata is present."""
-        return all([
-            self.title,
-            self.artist,
-            self.album,
-            self.year
-        ])
+        return all([self.title, self.artist, self.album, self.year])
 
 
 @dataclass
 class DuplicateGroup:
     """A group of duplicate files."""
+
     files: List[FileMetadata]
     similarity: float  # 0.0 to 1.0
     duplicate_type: str  # "exact", "re-encode", "similar"
@@ -122,6 +125,7 @@ class DuplicateGroup:
 @dataclass
 class ScanStats:
     """Statistics from scanning operation."""
+
     total_files: int = 0
     scanned_files: int = 0
     duplicate_groups: int = 0
@@ -140,9 +144,10 @@ class ScanStats:
 # UTILITY FUNCTIONS
 # ============================================================================
 
+
 def format_file_size(bytes: int) -> str:
     """Format file size in human-readable format."""
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes < 1024.0:
             return f"{bytes:.1f} {unit}"
         bytes /= 1024.0
@@ -165,21 +170,22 @@ def determine_quality_level(file_info: FileMetadata) -> str:
     """Determine quality level from file metadata."""
     format_upper = file_info.format.upper()
 
-    if format_upper in ['FLAC', 'ALAC', 'WAV']:
-        return 'excellent'
-    elif format_upper == 'MP3' and file_info.bitrate >= 320:
-        return 'good'
-    elif format_upper == 'MP3' and file_info.bitrate >= 256:
-        return 'acceptable'
-    elif format_upper == 'MP3' and file_info.bitrate >= 192:
-        return 'poor'
+    if format_upper in ["FLAC", "ALAC", "WAV"]:
+        return "excellent"
+    elif format_upper == "MP3" and file_info.bitrate >= 320:
+        return "good"
+    elif format_upper == "MP3" and file_info.bitrate >= 256:
+        return "acceptable"
+    elif format_upper == "MP3" and file_info.bitrate >= 192:
+        return "poor"
     else:
-        return 'very_poor'
+        return "very_poor"
 
 
 # ============================================================================
 # QUALITY BADGE COMPONENTS
 # ============================================================================
+
 
 def get_quality_badge(file_info: FileMetadata) -> Text:
     """
@@ -194,29 +200,29 @@ def get_quality_badge(file_info: FileMetadata) -> Text:
     format_upper = file_info.format.upper()
     bitrate = file_info.bitrate
 
-    if format_upper in ['FLAC', 'ALAC', 'WAV']:
-        stars = '★' * 5
-        color = 'bright_green'
-        label = 'LOSSLESS'
-    elif format_upper == 'MP3' and bitrate >= 320:
-        stars = '★' * 4 + '☆'
-        color = 'green'
-        label = f'{bitrate}kbps'
-    elif format_upper == 'MP3' and bitrate >= 256:
-        stars = '★' * 3 + '☆' * 2
-        color = 'yellow'
-        label = f'{bitrate}kbps'
-    elif format_upper == 'MP3' and bitrate >= 192:
-        stars = '★' * 2 + '☆' * 3
-        color = 'orange'
-        label = f'{bitrate}kbps'
+    if format_upper in ["FLAC", "ALAC", "WAV"]:
+        stars = "★" * 5
+        color = "bright_green"
+        label = "LOSSLESS"
+    elif format_upper == "MP3" and bitrate >= 320:
+        stars = "★" * 4 + "☆"
+        color = "green"
+        label = f"{bitrate}kbps"
+    elif format_upper == "MP3" and bitrate >= 256:
+        stars = "★" * 3 + "☆" * 2
+        color = "yellow"
+        label = f"{bitrate}kbps"
+    elif format_upper == "MP3" and bitrate >= 192:
+        stars = "★" * 2 + "☆" * 3
+        color = "orange"
+        label = f"{bitrate}kbps"
     else:
-        stars = '★' + '☆' * 4
-        color = 'red'
-        label = f'{bitrate}kbps'
+        stars = "★" + "☆" * 4
+        color = "red"
+        label = f"{bitrate}kbps"
 
     badge = Text()
-    badge.append(f'{stars} ', style=f'bold {color}')
+    badge.append(f"{stars} ", style=f"bold {color}")
     badge.append(label, style=color)
 
     return badge
@@ -224,14 +230,15 @@ def get_quality_badge(file_info: FileMetadata) -> Text:
 
 def get_format_badge(format: str) -> Text:
     """Create a colored format badge."""
-    color = FORMAT_COLORS.get(format.upper(), 'white')
-    badge = Text(format.upper(), style=f'bold {color}')
+    color = FORMAT_COLORS.get(format.upper(), "white")
+    badge = Text(format.upper(), style=f"bold {color}")
     return badge
 
 
 # ============================================================================
 # SCAN MODE SELECTION SCREEN
 # ============================================================================
+
 
 def display_scan_mode_selection() -> str:
     """
@@ -246,12 +253,7 @@ def display_scan_mode_selection() -> str:
     title = Text("🧹 Smart Cleanup › Select Scan Mode", style="bold cyan")
 
     # Create table for modes
-    table = Table(
-        show_header=True,
-        header_style="bold cyan",
-        box=box.ROUNDED,
-        padding=(0, 2)
-    )
+    table = Table(show_header=True, header_style="bold cyan", box=box.ROUNDED, padding=(0, 2))
 
     table.add_column("#", style="cyan", justify="right", width=4)
     table.add_column("Mode", style="bold", width=18)
@@ -268,7 +270,7 @@ def display_scan_mode_selection() -> str:
         "Hash-based duplicate detection\n"
         "• Checks file size & MD5\n"
         "• ~100-200 files/sec\n"
-        "• Best for exact duplicates"
+        "• Best for exact duplicates",
     )
 
     table.add_row(
@@ -280,7 +282,7 @@ def display_scan_mode_selection() -> str:
         "• Acoustic similarity matching\n"
         "• Metadata comparison\n"
         "• ~10-20 files/sec\n"
-        "• Finds re-encodes & variants"
+        "• Finds re-encodes & variants",
     )
 
     table.add_row(
@@ -291,7 +293,7 @@ def display_scan_mode_selection() -> str:
         "Configure your own settings\n"
         "• Set similarity threshold\n"
         "• Choose detection methods\n"
-        "• Advanced users only"
+        "• Advanced users only",
     )
 
     # Add separator and exit
@@ -299,31 +301,27 @@ def display_scan_mode_selection() -> str:
     table.add_row("0", "← Back", "", "", "", style="dim")
 
     # Display in panel
-    console.print(Panel(
-        table,
-        title=title,
-        border_style="blue",
-        padding=(1, 2)
-    ))
+    console.print(Panel(table, title=title, border_style="blue", padding=(1, 2)))
 
     # Get user choice
     choice = Prompt.ask("\n[bold]Enter choice[/bold]", default="1")
 
     mode_map = {
-        '1': 'quick',
-        '2': 'deep',
-        '3': 'custom',
-        '0': 'cancel',
-        'q': 'quick',
-        'd': 'deep',
+        "1": "quick",
+        "2": "deep",
+        "3": "custom",
+        "0": "cancel",
+        "q": "quick",
+        "d": "deep",
     }
 
-    return mode_map.get(choice.lower(), 'cancel')
+    return mode_map.get(choice.lower(), "cancel")
 
 
 # ============================================================================
 # SCANNING PROGRESS SCREEN
 # ============================================================================
+
 
 def create_scan_progress_display() -> Progress:
     """Create a progress tracker for scanning."""
@@ -337,12 +335,11 @@ def create_scan_progress_display() -> Progress:
         "•",
         TimeRemainingColumn(),
         console=console,
-        expand=True
+        expand=True,
     )
 
 
-def display_scanning_screen(stats: ScanStats, current_file: str,
-                           mode: str = "Quick Scan"):
+def display_scanning_screen(stats: ScanStats, current_file: str, mode: str = "Quick Scan"):
     """
     Display scanning progress with live updates.
 
@@ -358,24 +355,21 @@ def display_scanning_screen(stats: ScanStats, current_file: str,
         Layout(name="progress", size=3),
         Layout(name="current", size=3),
         Layout(name="stats", size=8),
-        Layout(name="feed", size=10)
+        Layout(name="feed", size=10),
     )
 
     # Header
     header_text = Text()
     header_text.append("🧹 Smart Cleanup › Scanning Library\n\n", style="bold cyan")
     header_text.append(f"Scan Mode: ⚡ {mode}\n", style="cyan")
-    header_text.append(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                      style="dim")
+    header_text.append(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", style="dim")
 
     layout["header"].update(Panel(header_text, border_style="cyan"))
 
     # Progress bar
     progress = create_scan_progress_display()
     task = progress.add_task(
-        "Scanning files...",
-        total=stats.total_files,
-        completed=stats.scanned_files
+        "Scanning files...", total=stats.total_files, completed=stats.scanned_files
     )
     layout["progress"].update(progress)
 
@@ -399,12 +393,11 @@ def display_scanning_screen(stats: ScanStats, current_file: str,
         eta_seconds = remaining / stats.speed if stats.speed > 0 else 0
         stats_table.add_row("Estimated Time:", format_duration(eta_seconds))
 
-    stats_table.add_row("Potential Space to Recover:",
-                       f"~{format_file_size(stats.space_to_recover)}")
-
-    layout["stats"].update(
-        Panel(stats_table, title="Statistics", border_style="blue")
+    stats_table.add_row(
+        "Potential Space to Recover:", f"~{format_file_size(stats.space_to_recover)}"
     )
+
+    layout["stats"].update(Panel(stats_table, title="Statistics", border_style="blue"))
 
     # Live feed
     feed_lines = []
@@ -420,13 +413,9 @@ def display_scanning_screen(stats: ScanStats, current_file: str,
 
         feed_lines.append(Text(action, style=style))
 
-    feed_text = Text("\n").join(feed_lines) if feed_lines else Text(
-        "Scanning...", style="dim"
-    )
+    feed_text = Text("\n").join(feed_lines) if feed_lines else Text("Scanning...", style="dim")
 
-    layout["feed"].update(
-        Panel(feed_text, title="Live Feed", border_style="dim")
-    )
+    layout["feed"].update(Panel(feed_text, title="Live Feed", border_style="dim"))
 
     # Display
     console.print(layout)
@@ -436,8 +425,10 @@ def display_scanning_screen(stats: ScanStats, current_file: str,
 # DUPLICATE COMPARISON TABLE
 # ============================================================================
 
-def create_comparison_table(file_a: FileMetadata, file_b: FileMetadata,
-                           recommendation: str, reason: str) -> Table:
+
+def create_comparison_table(
+    file_a: FileMetadata, file_b: FileMetadata, recommendation: str, reason: str
+) -> Table:
     """
     Create a side-by-side comparison table for duplicate files.
 
@@ -456,7 +447,7 @@ def create_comparison_table(file_a: FileMetadata, file_b: FileMetadata,
         header_style="bold cyan",
         box=box.DOUBLE,
         padding=(0, 1),
-        expand=True
+        expand=True,
     )
 
     # Highlight the recommended file
@@ -475,10 +466,7 @@ def create_comparison_table(file_a: FileMetadata, file_b: FileMetadata,
     table.add_column(header_b, style=style_b, width=40)
 
     # File paths
-    table.add_row(
-        f"📁 {file_a.path}",
-        f"📁 {file_b.path}"
-    )
+    table.add_row(f"📁 {file_a.path}", f"📁 {file_b.path}")
 
     # Add section separator
     table.add_section()
@@ -487,25 +475,17 @@ def create_comparison_table(file_a: FileMetadata, file_b: FileMetadata,
     quality_a = get_quality_badge(file_a)
     quality_b = get_quality_badge(file_b)
 
-    table.add_row(
-        f"Quality: {quality_a}",
-        f"Quality: {quality_b}"
-    )
+    table.add_row(f"Quality: {quality_a}", f"Quality: {quality_b}")
 
     # Technical details
     table.add_row(
-        f"Format:  {get_format_badge(file_a.format)}",
-        f"Format:  {get_format_badge(file_b.format)}"
+        f"Format:  {get_format_badge(file_a.format)}", f"Format:  {get_format_badge(file_b.format)}"
     )
 
-    table.add_row(
-        f"Bitrate: {file_a.bitrate} kbps",
-        f"Bitrate: {file_b.bitrate} kbps"
-    )
+    table.add_row(f"Bitrate: {file_a.bitrate} kbps", f"Bitrate: {file_b.bitrate} kbps")
 
     table.add_row(
-        f"Size:    {format_file_size(file_a.size)}",
-        f"Size:    {format_file_size(file_b.size)}"
+        f"Size:    {format_file_size(file_a.size)}", f"Size:    {format_file_size(file_b.size)}"
     )
 
     # Sample rate
@@ -521,32 +501,34 @@ def create_comparison_table(file_a: FileMetadata, file_b: FileMetadata,
 
     # Metadata comparison
     table.add_section()
-    table.add_row("[bold blue]Metadata[/bold blue]",
-                 "[bold blue]Metadata[/bold blue]")
+    table.add_row("[bold blue]Metadata[/bold blue]", "[bold blue]Metadata[/bold blue]")
 
     metadata_fields = [
-        ('title', 'Title'),
-        ('artist', 'Artist'),
-        ('album', 'Album'),
-        ('year', 'Year'),
-        ('track', 'Track'),
-        ('genre', 'Genre')
+        ("title", "Title"),
+        ("artist", "Artist"),
+        ("album", "Album"),
+        ("year", "Year"),
+        ("track", "Track"),
+        ("genre", "Genre"),
     ]
 
     for field, label in metadata_fields:
-        val_a = getattr(file_a, field, None) or '[yellow](missing)[/yellow]'
-        val_b = getattr(file_b, field, None) or '[yellow](missing)[/yellow]'
+        val_a = getattr(file_a, field, None) or "[yellow](missing)[/yellow]"
+        val_b = getattr(file_b, field, None) or "[yellow](missing)[/yellow]"
 
-        table.add_row(
-            f"• {label}: {val_a}",
-            f"• {label}: {val_b}"
-        )
+        table.add_row(f"• {label}: {val_a}", f"• {label}: {val_b}")
 
     # Completeness check
-    complete_a = "✓ Complete metadata" if file_a.metadata_complete \
-                 else "[yellow]⚠️ Incomplete metadata[/yellow]"
-    complete_b = "✓ Complete metadata" if file_b.metadata_complete \
-                 else "[yellow]⚠️ Incomplete metadata[/yellow]"
+    complete_a = (
+        "✓ Complete metadata"
+        if file_a.metadata_complete
+        else "[yellow]⚠️ Incomplete metadata[/yellow]"
+    )
+    complete_b = (
+        "✓ Complete metadata"
+        if file_b.metadata_complete
+        else "[yellow]⚠️ Incomplete metadata[/yellow]"
+    )
 
     table.add_row(complete_a, complete_b, style="dim")
 
@@ -555,23 +537,18 @@ def create_comparison_table(file_a: FileMetadata, file_b: FileMetadata,
 
     table.add_row(
         f"Created:  {file_a.created.strftime('%Y-%m-%d')}",
-        f"Created:  {file_b.created.strftime('%Y-%m-%d')}"
+        f"Created:  {file_b.created.strftime('%Y-%m-%d')}",
     )
 
     table.add_row(
         f"Modified: {file_a.modified.strftime('%Y-%m-%d')}",
-        f"Modified: {file_b.modified.strftime('%Y-%m-%d')}"
+        f"Modified: {file_b.modified.strftime('%Y-%m-%d')}",
     )
 
-    last_played_a = file_a.last_played.strftime('%Y-%m-%d') \
-                    if file_a.last_played else "Never"
-    last_played_b = file_b.last_played.strftime('%Y-%m-%d') \
-                    if file_b.last_played else "Never"
+    last_played_a = file_a.last_played.strftime("%Y-%m-%d") if file_a.last_played else "Never"
+    last_played_b = file_b.last_played.strftime("%Y-%m-%d") if file_b.last_played else "Never"
 
-    table.add_row(
-        f"Last Played: {last_played_a}",
-        f"Last Played: {last_played_b}"
-    )
+    table.add_row(f"Last Played: {last_played_a}", f"Last Played: {last_played_b}")
 
     return table
 
@@ -593,9 +570,7 @@ def display_duplicate_review(group: DuplicateGroup, current: int, total: int):
 
     # Song info
     file_a = group.files[0]
-    console.print(
-        f"\n  Song: [bold]\"{file_a.artist} - {file_a.title}\"[/bold]"
-    )
+    console.print(f'\n  Song: [bold]"{file_a.artist} - {file_a.title}"[/bold]')
     console.print(
         f"  Duplicate Type: [cyan]{group.duplicate_type.title()}[/cyan] "
         f"({group.similarity*100:.1f}% similarity)\n"
@@ -603,10 +578,7 @@ def display_duplicate_review(group: DuplicateGroup, current: int, total: int):
 
     # Comparison table
     table = create_comparison_table(
-        file_a,
-        group.files[1],
-        "A" if group.recommended_keep == 0 else "B",
-        group.reason
+        file_a, group.files[1], "A" if group.recommended_keep == 0 else "B", group.reason
     )
     console.print(table)
 
@@ -633,19 +605,17 @@ def display_duplicate_review(group: DuplicateGroup, current: int, total: int):
     actions_table.add_row("N/→", "Next duplicate group")
     actions_table.add_row("Q", "Finish review and process")
 
-    console.print(Panel(
-        actions_table,
-        title="[bold]Actions[/bold]",
-        border_style="blue"
-    ))
+    console.print(Panel(actions_table, title="[bold]Actions[/bold]", border_style="blue"))
 
 
 # ============================================================================
 # REVIEW SUMMARY SCREEN
 # ============================================================================
 
-def display_review_summary(total_groups: int, files_to_delete: int,
-                          space_to_recover: int, quality_distribution: Dict):
+
+def display_review_summary(
+    total_groups: int, files_to_delete: int, space_to_recover: int, quality_distribution: Dict
+):
     """
     Display review summary before cleanup.
 
@@ -667,10 +637,7 @@ def display_review_summary(total_groups: int, files_to_delete: int,
 
     # Recommended actions table
     actions_table = Table(
-        title="Recommended Actions",
-        show_header=True,
-        header_style="bold cyan",
-        box=box.ROUNDED
+        title="Recommended Actions", show_header=True, header_style="bold cyan", box=box.ROUNDED
     )
 
     actions_table.add_column("Action", style="cyan", width=25)
@@ -678,22 +645,14 @@ def display_review_summary(total_groups: int, files_to_delete: int,
     actions_table.add_column("Space to Recover", justify="right", width=20)
 
     actions_table.add_row(
-        "🗑️  Delete duplicates",
-        str(files_to_delete),
-        f"{format_file_size(space_to_recover)} (100%)"
+        "🗑️  Delete duplicates", str(files_to_delete), f"{format_file_size(space_to_recover)} (100%)"
     )
 
     actions_table.add_row(
-        "✓  Keep originals",
-        str(files_to_delete),
-        f"{format_file_size(space_to_recover * 2)}"
+        "✓  Keep originals", str(files_to_delete), f"{format_file_size(space_to_recover * 2)}"
     )
 
-    actions_table.add_row(
-        "⏭️  Skipped/both kept",
-        "0",
-        "0 GB"
-    )
+    actions_table.add_row("⏭️  Skipped/both kept", "0", "0 GB")
 
     console.print(actions_table)
 
@@ -707,7 +666,7 @@ def display_review_summary(total_groups: int, files_to_delete: int,
         bar_length = int(percentage / 5)  # Scale to 20 chars max
         bar = "█" * bar_length + "░" * (20 - bar_length)
 
-        color = QUALITY_COLORS.get(quality_level, 'white')
+        color = QUALITY_COLORS.get(quality_level, "white")
         console.print(
             f"  • {quality_level.replace('_', ' ').title():20} "
             f"{count:3} files   {format_file_size(size):>8}  "
@@ -734,6 +693,7 @@ def display_review_summary(total_groups: int, files_to_delete: int,
 # CONFIRMATION DIALOG
 # ============================================================================
 
+
 def get_cleanup_confirmation(file_count: int, total_size: int) -> Tuple[bool, str]:
     """
     Get user confirmation for cleanup with backup option.
@@ -754,7 +714,7 @@ def get_cleanup_confirmation(file_count: int, total_size: int) -> Tuple[bool, st
         f"({format_file_size(total_size)})",
         title="Confirmation Required",
         border_style="red",
-        padding=(1, 2)
+        padding=(1, 2),
     )
     console.print(warning_panel)
 
@@ -764,7 +724,7 @@ def get_cleanup_confirmation(file_count: int, total_size: int) -> Tuple[bool, st
         show_header=True,
         header_style="bold cyan",
         box=box.ROUNDED,
-        padding=(1, 2)
+        padding=(1, 2),
     )
 
     backup_table.add_column("#", style="cyan", width=5)
@@ -777,7 +737,7 @@ def get_cleanup_confirmation(file_count: int, total_size: int) -> Tuple[bool, st
         "Move files to backup folder before deletion\n"
         f"Location: ~/.music-tools/backups/{datetime.now().strftime('%Y-%m-%d')}/\n"
         f"Disk space required: {format_file_size(total_size)}\n"
-        "[green]Can restore anytime[/green]"
+        "[green]Can restore anytime[/green]",
     )
 
     backup_table.add_row(
@@ -786,39 +746,28 @@ def get_cleanup_confirmation(file_count: int, total_size: int) -> Tuple[bool, st
         "Just save a list of deleted files\n"
         "Location: ~/.music-tools/logs/cleanup.log\n"
         "Disk space: <1 MB\n"
-        "[yellow]Cannot restore files[/yellow]"
+        "[yellow]Cannot restore files[/yellow]",
     )
 
     backup_table.add_row(
-        "3",
-        "⚠️  No Backup",
-        "Permanently delete files\n"
-        "[red]⚠️ THIS CANNOT BE UNDONE[/red]"
+        "3", "⚠️  No Backup", "Permanently delete files\n" "[red]⚠️ THIS CANNOT BE UNDONE[/red]"
     )
 
     console.print(backup_table)
 
     # Get backup choice
     backup_choice = Prompt.ask(
-        "\n[bold yellow]Backup Strategy[/bold yellow]",
-        choices=["1", "2", "3"],
-        default="1"
+        "\n[bold yellow]Backup Strategy[/bold yellow]", choices=["1", "2", "3"], default="1"
     )
 
-    backup_mode_map = {
-        "1": "full",
-        "2": "log",
-        "3": "none"
-    }
+    backup_mode_map = {"1": "full", "2": "log", "3": "none"}
     backup_mode = backup_mode_map[backup_choice]
 
     # Confirmation phrase
     console.print("\n" + "─" * 75)
     console.print("\n[bold yellow]Final Confirmation:[/bold yellow]\n")
 
-    console.print(
-        f"  Type [bold white]\"DELETE {file_count} FILES\"[/bold white] to proceed:\n"
-    )
+    console.print(f'  Type [bold white]"DELETE {file_count} FILES"[/bold white] to proceed:\n')
 
     confirmation_phrase = f"DELETE {file_count} FILES"
     user_input = Prompt.ask("  [dim]Type here[/dim]").strip()
@@ -838,8 +787,10 @@ def get_cleanup_confirmation(file_count: int, total_size: int) -> Tuple[bool, st
 # PROCESSING PROGRESS
 # ============================================================================
 
-def display_processing_progress(phase: str, current: int, total: int,
-                               current_file: str, stats: Dict):
+
+def display_processing_progress(
+    phase: str, current: int, total: int, current_file: str, stats: Dict
+):
     """
     Display processing progress with multi-phase support.
 
@@ -859,13 +810,11 @@ def display_processing_progress(phase: str, current: int, total: int,
         Layout(name="phase", size=5),
         Layout(name="current", size=3),
         Layout(name="details", size=8),
-        Layout(name="feed", size=8)
+        Layout(name="feed", size=8),
     )
 
     # Title
-    layout["title"].update(
-        Panel("🧹 Smart Cleanup › Processing Cleanup", style="bold cyan")
-    )
+    layout["title"].update(Panel("🧹 Smart Cleanup › Processing Cleanup", style="bold cyan"))
 
     # Phase progress
     if phase == "backup":
@@ -890,26 +839,20 @@ def display_processing_progress(phase: str, current: int, total: int,
 
     if phase == "backup":
         details_table.add_row("Backed up:", f"{current} files")
-        details_table.add_row("Size copied:",
-                             format_file_size(stats.get('bytes_copied', 0)))
+        details_table.add_row("Size copied:", format_file_size(stats.get("bytes_copied", 0)))
     else:
         details_table.add_row("Deleted:", f"{current} files")
         details_table.add_row("Remaining:", f"{total - current} files")
-        details_table.add_row("Space freed:",
-                             format_file_size(stats.get('space_freed', 0)))
+        details_table.add_row("Space freed:", format_file_size(stats.get("space_freed", 0)))
 
     details_table.add_row("Speed:", f"{stats.get('speed', 0):.1f} files/sec")
-    details_table.add_row("Errors:", str(stats.get('errors', 0)))
+    details_table.add_row("Errors:", str(stats.get("errors", 0)))
 
-    layout["details"].update(
-        Panel(details_table, title="Progress Details", border_style="blue")
-    )
+    layout["details"].update(Panel(details_table, title="Progress Details", border_style="blue"))
 
     # Recent actions feed
-    feed_text = "\n".join(stats.get('recent_actions', [])[-6:])
-    layout["feed"].update(
-        Panel(feed_text, title="Recent Actions", border_style="dim")
-    )
+    feed_text = "\n".join(stats.get("recent_actions", [])[-6:])
+    layout["feed"].update(Panel(feed_text, title="Recent Actions", border_style="dim"))
 
     console.print(layout)
 
@@ -918,9 +861,15 @@ def display_processing_progress(phase: str, current: int, total: int,
 # COMPLETION SUMMARY
 # ============================================================================
 
-def display_completion_summary(deleted_count: int, space_recovered: int,
-                              backup_path: str, processing_time: float,
-                              library_size_before: int, library_size_after: int):
+
+def display_completion_summary(
+    deleted_count: int,
+    space_recovered: int,
+    backup_path: str,
+    processing_time: float,
+    library_size_before: int,
+    library_size_after: int,
+):
     """
     Display cleanup completion summary.
 
@@ -935,19 +884,18 @@ def display_completion_summary(deleted_count: int, space_recovered: int,
     console.clear()
 
     # Success header
-    console.print(Panel(
-        "[bold bright_green]✨ Success! Your library has been cleaned up.[/bold bright_green]",
-        title="🧹 Smart Cleanup › Cleanup Complete!",
-        border_style="bright_green",
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            "[bold bright_green]✨ Success! Your library has been cleaned up.[/bold bright_green]",
+            title="🧹 Smart Cleanup › Cleanup Complete!",
+            border_style="bright_green",
+            padding=(1, 2),
+        )
+    )
 
     # Summary table
     summary_table = Table(
-        title="Cleanup Summary",
-        show_header=True,
-        header_style="bold cyan",
-        box=box.DOUBLE
+        title="Cleanup Summary", show_header=True, header_style="bold cyan", box=box.DOUBLE
     )
 
     summary_table.add_column("Metric", style="cyan", width=30)
@@ -959,8 +907,7 @@ def display_completion_summary(deleted_count: int, space_recovered: int,
     summary_table.add_row("Processing Time", format_duration(processing_time))
     summary_table.add_row(
         "Library Size After",
-        f"{format_file_size(library_size_after)} "
-        f"(was {format_file_size(library_size_before)})"
+        f"{format_file_size(library_size_after)} " f"(was {format_file_size(library_size_before)})",
     )
 
     console.print(summary_table)
@@ -972,12 +919,11 @@ def display_completion_summary(deleted_count: int, space_recovered: int,
     console.print(f"  ⏰ Created: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     console.print(
-        f"\n  To restore files: Run [cyan]\"restore-backup "
-        f"{Path(backup_path).name}\"[/cyan]"
+        f'\n  To restore files: Run [cyan]"restore-backup ' f'{Path(backup_path).name}"[/cyan]'
     )
     console.print(
-        f"  To delete backup:  Run [dim]\"delete-backup "
-        f"{Path(backup_path).name}\"[/dim] (after 30 days)"
+        f'  To delete backup:  Run [dim]"delete-backup '
+        f'{Path(backup_path).name}"[/dim] (after 30 days)'
     )
 
     # Reports
@@ -998,16 +944,13 @@ def display_completion_summary(deleted_count: int, space_recovered: int,
     next_steps.add_row("3.", "🔄 Run another cleanup")
     next_steps.add_row("4.", "← Return to main menu")
 
-    console.print(Panel(
-        next_steps,
-        title="[bold]What's next?[/bold]",
-        border_style="blue"
-    ))
+    console.print(Panel(next_steps, title="[bold]What's next?[/bold]", border_style="blue"))
 
 
 # ============================================================================
 # DEMO / EXAMPLE USAGE
 # ============================================================================
+
 
 def demo():
     """Demonstrate the UI components."""
@@ -1029,22 +972,18 @@ def demo():
         recent_actions=[
             '✓ Found duplicate: "Artist - Track.mp3" vs "Artist - Track.flac"',
             '✓ Duplicate group: 3 versions of "Song Title.mp3"',
-            'ℹ Skipped: corrupted file "damaged.mp3"'
-        ]
+            'ℹ Skipped: corrupted file "damaged.mp3"',
+        ],
     )
 
-    display_scanning_screen(
-        stats,
-        "/Users/music/Albums/Artist Name/Album/track.flac",
-        "Quick Scan"
-    )
+    display_scanning_screen(stats, "/Users/music/Albums/Artist Name/Album/track.flac", "Quick Scan")
     time.sleep(3)
 
     # 3. Review summary
     quality_dist = {
-        'poor': (89, 5_800_000_000),
-        'acceptable': (45, 4_200_000_000),
-        'good': (22, 2_300_000_000)
+        "poor": (89, 5_800_000_000),
+        "acceptable": (45, 4_200_000_000),
+        "good": (22, 2_300_000_000),
     }
 
     display_review_summary(156, 156, 12_300_000_000, quality_dist)

@@ -66,15 +66,15 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 apps/ packages/ --max-line-length=100 --extend-ignore=E501,W503,E402,F401,E203 --exclude=__pycache__,build,dist,.eggs
+          flake8 . --max-line-length=100 --extend-ignore=E501,W503,E402,F401,E203 --exclude=__pycache__,build,dist,.eggs,.venv,node_modules
 
       - name: Check code formatting
         run: |
-          black --check apps/ packages/
+          black --check .
 
       - name: Check import sorting
         run: |
-          isort --check-only --diff apps/ packages/
+          isort --check-only --diff .
 
       - name: Type check with mypy
         run: |
