@@ -173,9 +173,7 @@ def demo_3_duplicate_detection():
 
     table.add_row("1️⃣ Exact Metadata", "MD5 hash of 'artist|title'", "<1ms per file", "100%")
     table.add_row("2️⃣ File Content", "MD5 hash of audio (64KB samples)", "~10ms per file", "100%")
-    table.add_row(
-        "3️⃣ Fuzzy Match", "Similarity algorithm on metadata", "~100ms per file", "70-95%"
-    )
+    table.add_row("3️⃣ Fuzzy Match", "Similarity algorithm on metadata", "~100ms per file", "70-95%")
 
     console.print(table)
     console.print()

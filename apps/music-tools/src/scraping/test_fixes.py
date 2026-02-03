@@ -130,12 +130,14 @@ def test_link_extractor():
 
         # Create test file with more specific content
         with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            f.write("""
+            f.write(
+                """
             Download links:
             - https://nfile.cc/test1.flac
             - https://mediafire.com/test2_320.mp3
             - https://mega.nz/test3.zip
-            """)
+            """
+            )
             test_file = f.name
 
         try:

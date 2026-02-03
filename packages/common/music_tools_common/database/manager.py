@@ -80,7 +80,8 @@ class Database:
     def _create_tables(self) -> None:
         """Create database tables if they don't exist."""
         # Playlists table
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS playlists (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -92,10 +93,12 @@ class Database:
             added_on TEXT NOT NULL,
             last_updated TEXT NOT NULL
         )
-        """)
+        """
+        )
 
         # Tracks table
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS tracks (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -108,10 +111,12 @@ class Database:
             added_on TEXT NOT NULL,
             last_updated TEXT NOT NULL
         )
-        """)
+        """
+        )
 
         # Playlist tracks table (many-to-many relationship)
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS playlist_tracks (
             playlist_id TEXT,
             track_id TEXT,
@@ -121,71 +126,94 @@ class Database:
             FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
             FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
         )
-        """)
+        """
+        )
 
         # Settings table
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS settings (
             key TEXT PRIMARY KEY,
             value TEXT,
             updated_at TEXT NOT NULL
         )
-        """)
+        """
+        )
 
         # Create high-impact composite indexes for performance optimization
 
         # Playlist indexes - optimize filtered queries by service and type
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_playlists_service_algorithmic
         ON playlists(service, is_algorithmic)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_playlists_service_name
         ON playlists(service, name)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_playlists_last_updated
         ON playlists(last_updated DESC)
-        """)
+        """
+        )
 
         # Track indexes - optimize searches by artist, service, and release date
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_tracks_artist_name
         ON tracks(artist, name)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_tracks_service_release
         ON tracks(service, release_date)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_tracks_isrc
         ON tracks(isrc)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_tracks_artist
         ON tracks(artist)
-        """)
+        """
+        )
 
         # Playlist tracks indexes - optimize ordered retrieval and lookups
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_playlist_tracks_position
         ON playlist_tracks(playlist_id, position)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_playlist_tracks_track
         ON playlist_tracks(track_id)
-        """)
+        """
+        )
 
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         CREATE INDEX IF NOT EXISTS idx_playlist_tracks_added
         ON playlist_tracks(added_at DESC)
-        """)
+        """
+        )
 
         # Commit changes
         self.conn.commit()

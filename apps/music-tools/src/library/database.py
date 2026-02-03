@@ -205,7 +205,8 @@ class LibraryDatabase(BatchOperationsMixin):
             cursor.execute("PRAGMA temp_store=MEMORY")
 
             # Main library index table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS library_index (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -234,72 +235,96 @@ class LibraryDatabase(BatchOperationsMixin):
                     -- Status
                     is_active INTEGER DEFAULT 1
                 )
-            """)
+            """
+            )
 
             # Create indexes for fast lookups
             # Single-column indexes
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_metadata_hash
                 ON library_index(metadata_hash)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_content_hash
                 ON library_index(file_content_hash)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_is_active
                 ON library_index(is_active)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_file_format
                 ON library_index(file_format)
-            """)
+            """
+            )
 
             # Composite indexes for optimized query performance
             # High-impact composite indexes for duplicate detection
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_active_metadata_hash
                 ON library_index(is_active, metadata_hash)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_active_content_hash
                 ON library_index(is_active, file_content_hash)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_active_format
                 ON library_index(is_active, file_format)
-            """)
+            """
+            )
 
             # Artist/Title searches (case-insensitive queries)
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_artist_title
                 ON library_index(artist, title)
-            """)
+            """
+            )
 
             # Album grouping queries
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_artist_album
                 ON library_index(artist, album)
-            """)
+            """
+            )
 
             # Statistics queries for active files by format
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_active_artist
                 ON library_index(is_active, artist)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_active_album
                 ON library_index(is_active, album)
-            """)
+            """
+            )
 
             # Statistics table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS library_stats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     total_files INTEGER,
@@ -311,10 +336,12 @@ class LibraryDatabase(BatchOperationsMixin):
                     index_duration REAL,
                     created_at TEXT
                 )
-            """)
+            """
+            )
 
             # Vetting history table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS vetting_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     import_folder TEXT NOT NULL,
@@ -325,13 +352,16 @@ class LibraryDatabase(BatchOperationsMixin):
                     threshold_used REAL,
                     vetted_at TEXT NOT NULL
                 )
-            """)
+            """
+            )
 
             # Vetting history index for recent queries
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_vetting_history_date
                 ON vetting_history(vetted_at DESC)
-            """)
+            """
+            )
 
     def add_file(self, file: LibraryFile) -> int:
         """Add a file to the library index.
@@ -574,48 +604,58 @@ class LibraryDatabase(BatchOperationsMixin):
             cursor = conn.cursor()
 
             # Get total files and size
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     COUNT(*) as total_files,
                     SUM(file_size) as total_size
                 FROM library_index
                 WHERE is_active = 1
-            """)
+            """
+            )
             row = cursor.fetchone()
             total_files = row["total_files"] or 0
             total_size = row["total_size"] or 0
 
             # Get format breakdown
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT file_format, COUNT(*) as count
                 FROM library_index
                 WHERE is_active = 1
                 GROUP BY file_format
-            """)
+            """
+            )
             formats_breakdown = {row["file_format"]: row["count"] for row in cursor.fetchall()}
 
             # Get unique artists and albums
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(DISTINCT artist) as artists_count
                 FROM library_index
                 WHERE is_active = 1 AND artist IS NOT NULL
-            """)
+            """
+            )
             artists_count = cursor.fetchone()["artists_count"] or 0
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(DISTINCT album) as albums_count
                 FROM library_index
                 WHERE is_active = 1 AND album IS NOT NULL
-            """)
+            """
+            )
             albums_count = cursor.fetchone()["albums_count"] or 0
 
             # Get last index time from stats table
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT last_index_time, index_duration
                 FROM library_stats
                 ORDER BY created_at DESC
                 LIMIT 1
-            """)
+            """
+            )
             stats_row = cursor.fetchone()
 
             last_index_time = None

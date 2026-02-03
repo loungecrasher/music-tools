@@ -79,7 +79,8 @@ class CacheManager:
                 cursor.execute("PRAGMA temp_store=MEMORY")
 
                 # Create artist_country table
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS artist_country (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         artist_name TEXT NOT NULL UNIQUE,
@@ -89,10 +90,12 @@ class CacheManager:
                         updated_at TEXT NOT NULL,
                         hit_count INTEGER DEFAULT 0
                     )
-                """)
+                """
+                )
 
                 # Create processing_log table
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS processing_log (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         file_path TEXT NOT NULL,
@@ -102,58 +105,77 @@ class CacheManager:
                         processed_at TEXT NOT NULL,
                         error_message TEXT
                     )
-                """)
+                """
+                )
 
                 # Create single-column indexes
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_artist_name
                     ON artist_country(artist_name)
-                """)
+                """
+                )
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_processing_log_artist
                     ON processing_log(artist_name)
-                """)
+                """
+                )
 
                 # Create high-impact composite indexes for performance optimization
 
                 # CRITICAL: Composite index for TTL-aware lookups (most common query pattern)
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_artist_updated
                     ON artist_country(artist_name, updated_at DESC)
-                """)
+                """
+                )
 
                 # Analytics and reporting indexes
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_confidence
                     ON artist_country(confidence DESC)
-                """)
+                """
+                )
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_hit_count
                     ON artist_country(hit_count DESC)
-                """)
+                """
+                )
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_country
                     ON artist_country(country)
-                """)
+                """
+                )
 
                 # Processing log indexes for file history and status tracking
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_processing_log_file
                     ON processing_log(file_path, processed_at DESC)
-                """)
+                """
+                )
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_processing_log_status
                     ON processing_log(status, processed_at DESC)
-                """)
+                """
+                )
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE INDEX IF NOT EXISTS idx_processing_log_date
                     ON processing_log(processed_at DESC)
-                """)
+                """
+                )
 
                 conn.commit()
                 logger.info(f"Cache database initialized at {self.db_path}")
@@ -480,22 +502,26 @@ class CacheManager:
                 last_updated = cursor.fetchone()[0] or "Never"
 
                 # Top countries
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT country, COUNT(*) as count
                     FROM artist_country
                     GROUP BY country
                     ORDER BY count DESC
                     LIMIT 10
-                """)
+                """
+                )
                 top_countries = cursor.fetchall()
 
                 # Recent entries
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT artist_name, country, created_at
                     FROM artist_country
                     ORDER BY created_at DESC
                     LIMIT 5
-                """)
+                """
+                )
                 recent_entries = [
                     {"artist": row[0], "country": row[1], "timestamp": row[2]}
                     for row in cursor.fetchall()
@@ -621,11 +647,13 @@ class CacheManager:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT artist_name, country, confidence, created_at, hit_count
                     FROM artist_country
                     ORDER BY hit_count DESC
-                """)
+                """
+                )
 
                 data = cursor.fetchall()
 

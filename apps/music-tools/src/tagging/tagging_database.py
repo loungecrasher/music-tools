@@ -91,7 +91,8 @@ class GlobalTaggingDatabase:
         """Initialize the global tagging database."""
         with sqlite3.connect(self.db_path) as conn:
             # Main file tracking table - keyed by HASH
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS tagged_files (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     file_hash TEXT UNIQUE NOT NULL,
@@ -109,10 +110,12 @@ class GlobalTaggingDatabase:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Path history table - track where files have been
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS path_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     file_hash TEXT NOT NULL,
@@ -120,10 +123,12 @@ class GlobalTaggingDatabase:
                     seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (file_hash) REFERENCES tagged_files(file_hash)
                 )
-            """)
+            """
+            )
 
             # Session tracking table
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS sessions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     scan_directory TEXT,
@@ -134,7 +139,8 @@ class GlobalTaggingDatabase:
                     files_failed INTEGER DEFAULT 0,
                     status TEXT DEFAULT 'running'
                 )
-            """)
+            """
+            )
 
             # Indexes for performance
             conn.execute("CREATE INDEX IF NOT EXISTS idx_hash ON tagged_files(file_hash)")
@@ -434,11 +440,13 @@ class GlobalTaggingDatabase:
             stats = {}
 
             # Count by status
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT status, COUNT(*) as count
                 FROM tagged_files
                 GROUP BY status
-            """)
+            """
+            )
             status_counts = {row[0]: row[1] for row in cursor.fetchall()}
 
             stats["total_files"] = sum(status_counts.values())
@@ -448,16 +456,20 @@ class GlobalTaggingDatabase:
             stats["skipped"] = status_counts.get("skipped", 0)
 
             # Unique artists
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT COUNT(DISTINCT artist) FROM tagged_files
                 WHERE artist IS NOT NULL
-            """)
+            """
+            )
             stats["unique_artists"] = cursor.fetchone()[0]
 
             # Last processed
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT MAX(processed_at) FROM tagged_files
-            """)
+            """
+            )
             stats["last_processed"] = cursor.fetchone()[0]
 
             return stats
@@ -465,30 +477,36 @@ class GlobalTaggingDatabase:
     def reset_processing_status(self):
         """Reset any files stuck in 'processing' status to 'pending'."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files
                 SET status = 'pending'
                 WHERE status = 'processing'
-            """)
+            """
+            )
             conn.commit()
 
     def clear_failed_for_retry(self):
         """Reset all failed files to pending for retry."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files
                 SET status = 'pending', retry_count = 0, error_message = NULL
                 WHERE status = 'failed'
-            """)
+            """
+            )
             conn.commit()
 
     def force_retag_all(self):
         """Mark all files as pending for re-tagging."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE tagged_files
                 SET status = 'pending', retry_count = 0, error_message = NULL
-            """)
+            """
+            )
             conn.commit()
 
     def force_retag_artist(self, artist: str):
@@ -558,9 +576,11 @@ class GlobalTaggingDatabase:
         """Get information about the last session."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT * FROM sessions ORDER BY id DESC LIMIT 1
-            """)
+            """
+            )
             row = cursor.fetchone()
             return dict(row) if row else None
 

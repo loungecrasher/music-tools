@@ -1091,7 +1091,8 @@ def main():
     st.sidebar.info(f"**Database:** {Path(st.session_state.db_path).name}")
 
     st.sidebar.markdown("---")
-    st.sidebar.markdown("""
+    st.sidebar.markdown(
+        """
     ### About
     **Music Tools** v1.0.0
 
@@ -1102,7 +1103,8 @@ def main():
     - Smart duplicate cleanup
     - Quality analysis
     - Spotify/Deezer integration
-    """)
+    """
+    )
 
     # Render selected page
     if page == "Dashboard":

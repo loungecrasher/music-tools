@@ -54,19 +54,23 @@ class HistoryDatabase:
 
                 # Create history table
                 # We use filename as the unique identifier as requested
-                cursor.execute("""
+                cursor.execute(
+                    """
                 CREATE TABLE IF NOT EXISTS history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     filename TEXT NOT NULL UNIQUE,
                     added_at TIMESTAMP NOT NULL,
                     source_path TEXT
                 )
-                """)
+                """
+                )
 
                 # Create index on filename for fast lookups
-                cursor.execute("""
+                cursor.execute(
+                    """
                 CREATE INDEX IF NOT EXISTS idx_filename ON history(filename)
-                """)
+                """
+                )
 
                 conn.commit()
         except Exception as e:

@@ -93,10 +93,12 @@ def validate_database(conn: sqlite3.Connection) -> bool:
     cursor = conn.cursor()
 
     # Check that required tables exist
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT name FROM sqlite_master
         WHERE type='table' AND name IN ('playlists', 'tracks', 'settings')
-    """)
+    """
+    )
     existing_tables = {row[0] for row in cursor.fetchall()}
     required_tables = {"playlists", "tracks", "settings"}
 
@@ -160,7 +162,8 @@ def migrate(db_path: str) -> Tuple[bool, str]:
         logger.info("Creating file_quality table...")
 
         # Create file_quality table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS file_quality (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 file_path TEXT NOT NULL UNIQUE,
@@ -183,12 +186,14 @@ def migrate(db_path: str) -> Tuple[bool, str]:
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE SET NULL
             )
-        """)
+        """
+        )
 
         logger.info("Creating dedup_history table...")
 
         # Create dedup_history table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS dedup_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 original_path TEXT NOT NULL,
@@ -209,12 +214,14 @@ def migrate(db_path: str) -> Tuple[bool, str]:
                 notes TEXT DEFAULT NULL,
                 FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE SET NULL
             )
-        """)
+        """
+        )
 
         logger.info("Creating upgrade_candidates table...")
 
         # Create upgrade_candidates table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS upgrade_candidates (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 file_path TEXT NOT NULL,
@@ -238,116 +245,157 @@ def migrate(db_path: str) -> Tuple[bool, str]:
                 notes TEXT DEFAULT NULL,
                 FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
             )
-        """)
+        """
+        )
 
         logger.info("Creating indexes for file_quality table...")
 
         # Create indexes for file_quality table (7 indexes)
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_path
             ON file_quality(file_path)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_hash
             ON file_quality(file_hash)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_track_id
             ON file_quality(track_id)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_format_bitrate
             ON file_quality(format, bitrate DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_score
             ON file_quality(quality_score DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_scan_date
             ON file_quality(scan_date DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_file_quality_format_lossy
             ON file_quality(format, is_lossy)
-        """)
+        """
+        )
 
         logger.info("Creating indexes for dedup_history table...")
 
         # Create indexes for dedup_history table (6 indexes)
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_dedup_history_original_hash
             ON dedup_history(original_hash)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_dedup_history_kept_hash
             ON dedup_history(kept_hash)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_dedup_history_track_id
             ON dedup_history(track_id)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_dedup_history_deleted_at
             ON dedup_history(deleted_at DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_dedup_history_can_restore
             ON dedup_history(can_restore, deleted_at DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_dedup_history_reason
             ON dedup_history(deletion_reason, deleted_at DESC)
-        """)
+        """
+        )
 
         logger.info("Creating indexes for upgrade_candidates table...")
 
         # Create indexes for upgrade_candidates table (7 indexes)
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_track_id
             ON upgrade_candidates(track_id)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_priority
             ON upgrade_candidates(priority_score DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_status
             ON upgrade_candidates(upgrade_status, priority_score DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_quality_improvement
             ON upgrade_candidates(potential_improvement DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_format
             ON upgrade_candidates(current_format, current_quality_score)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_artist
             ON upgrade_candidates(artist_name, priority_score DESC)
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_upgrade_candidates_identified
             ON upgrade_candidates(identified_at DESC)
-        """)
+        """
+        )
 
         logger.info("Updating schema version...")
 
@@ -383,10 +431,12 @@ def migrate(db_path: str) -> Tuple[bool, str]:
         logger.info("Migration committed successfully")
 
         # Verify tables were created
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name FROM sqlite_master
             WHERE type='table' AND name IN ('file_quality', 'dedup_history', 'upgrade_candidates')
-        """)
+        """
+        )
         created_tables = [row[0] for row in cursor.fetchall()]
 
         if len(created_tables) != 3:
@@ -531,10 +581,12 @@ def get_migration_status(db_path: str) -> dict:
         applied_date = result[0] if result else None
 
         # Check if tables exist
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name FROM sqlite_master
             WHERE type='table' AND name IN ('file_quality', 'dedup_history', 'upgrade_candidates')
-        """)
+        """
+        )
         existing_tables = [row[0] for row in cursor.fetchall()]
 
         conn.close()

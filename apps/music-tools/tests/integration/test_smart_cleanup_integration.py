@@ -266,18 +266,22 @@ class TestDatabaseMigrationIntegration:
                 cursor = conn.cursor()
 
                 # Check for duplicate_scans table
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT name FROM sqlite_master
                     WHERE type='table' AND name='duplicate_scans'
-                """)
+                """
+                )
                 result = cursor.fetchone()
                 assert result is not None, "duplicate_scans table not created"
 
                 # Check for duplicate_files table
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT name FROM sqlite_master
                     WHERE type='table' AND name='duplicate_files'
-                """)
+                """
+                )
                 result = cursor.fetchone()
                 assert result is not None, "duplicate_files table not created"
 
@@ -299,10 +303,12 @@ class TestDatabaseMigrationIntegration:
                 cursor = conn.cursor()
 
                 # Check for indexes
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT name FROM sqlite_master
                     WHERE type='index'
-                """)
+                """
+                )
                 indexes = [row[0] for row in cursor.fetchall()]
 
                 # Should have indexes for performance

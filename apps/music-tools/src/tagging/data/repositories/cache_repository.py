@@ -74,7 +74,8 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
             cursor = conn.cursor()
 
             # Create artist_country table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS artist_country (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     artist_name TEXT NOT NULL UNIQUE,
@@ -84,10 +85,12 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                     updated_at TEXT NOT NULL,
                     hit_count INTEGER DEFAULT 0
                 )
-            """)
+            """
+            )
 
             # Create processing_log table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS processing_log (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     file_path TEXT NOT NULL,
@@ -97,23 +100,30 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                     processed_at TEXT NOT NULL,
                     error_message TEXT
                 )
-            """)
+            """
+            )
 
             # Create indexes for better performance
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_artist_name
                 ON artist_country(artist_name)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_processing_log_artist
                 ON processing_log(artist_name)
-            """)
+            """
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_processing_log_status
                 ON processing_log(status)
-            """)
+            """
+            )
 
             conn.commit()
             logger.info(f"Cache database initialized at {self.db_path}")
@@ -282,11 +292,13 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
         try:
             with sqlite3.connect(str(self.db_path)) as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT artist_name, country, confidence, created_at, updated_at, hit_count
                     FROM artist_country
                     ORDER BY updated_at DESC
-                """)
+                """
+                )
 
                 results = []
                 for row in cursor.fetchall():
@@ -339,10 +351,12 @@ class SQLiteCacheRepository(CacheRepositoryInterface):
                 cache_count = cursor.fetchone()[0]
 
                 # Get processing log statistics
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT status, COUNT(*) FROM processing_log
                     GROUP BY status
-                """)
+                """
+                )
 
                 status_counts = dict(cursor.fetchall())
 
